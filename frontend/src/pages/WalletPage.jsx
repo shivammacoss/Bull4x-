@@ -55,7 +55,13 @@ const WalletPage = () => {
   const [paymentMethods, setPaymentMethods] = useState([])
   const [loading, setLoading] = useState(true)
   const [showDepositModal, setShowDepositModal] = useState(false)
+  const [showWithdrawPreviewModal, setShowWithdrawPreviewModal] = useState(false)
+  const [showWithdrawOtpModal, setShowWithdrawOtpModal] = useState(false)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
+  const [withdrawPreviewAccepted, setWithdrawPreviewAccepted] = useState(false)
+  const [withdrawOtpCode, setWithdrawOtpCode] = useState('')
+  const [sendingWithdrawOtp, setSendingWithdrawOtp] = useState(false)
+  const [verifyingWithdrawOtp, setVerifyingWithdrawOtp] = useState(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
   const [tradingAccounts, setTradingAccounts] = useState([])
   const [selectedTradingAccount, setSelectedTradingAccount] = useState(null)
@@ -429,64 +435,143 @@ const WalletPage = () => {
     }
   }
 
-  const handleWithdraw = async () => {
+  const resetWithdrawFlow = () => {
+    setShowWithdrawPreviewModal(false)
+    setShowWithdrawOtpModal(false)
+    setShowWithdrawModal(false)
+    setWithdrawPreviewAccepted(false)
+    setWithdrawOtpCode('')
+    setAmount('')
+    setWithdrawWalletAddress('')
+    setWithdrawCurrency('USDT')
+    setWithdrawNetwork('TRC20')
+    setError('')
+  }
+
+  const validateWithdrawForm = () => {
     if (!amount || parseFloat(amount) <= 0) {
       setError('Please enter a valid amount')
-      return
+      return false
     }
-    if (!withdrawWalletAddress) {
+    if (!withdrawWalletAddress?.trim()) {
       setError('Please enter your crypto wallet address')
-      return
+      return false
     }
     if (wallet && parseFloat(amount) > wallet.balance) {
       setError('Insufficient balance')
-      return
+      return false
     }
     if (parseFloat(amount) < 10) {
       setError('Minimum withdrawal is $10')
+      return false
+    }
+    return true
+  }
+
+  const handleContinueToWithdrawPreview = () => {
+    setError('')
+    if (!validateWithdrawForm()) return
+    setWithdrawPreviewAccepted(false)
+    setShowWithdrawModal(false)
+    setShowWithdrawPreviewModal(true)
+  }
+
+  const handleSendWithdrawOtp = async () => {
+    if (!withdrawPreviewAccepted) {
+      setError('Please confirm that the previewed details are correct')
       return
     }
+    if (!user._id) {
+      setError('Please login to continue')
+      return
+    }
+    setSendingWithdrawOtp(true)
+    setError('')
+    try {
+      const res = await fetch(`${API_URL}/wallet/send-withdrawal-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user._id })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setShowWithdrawPreviewModal(false)
+        setShowWithdrawOtpModal(true)
+        setWithdrawOtpCode('')
+      } else {
+        setError(data.message || 'Could not send OTP')
+      }
+    } catch (e) {
+      console.error(e)
+      setError('Failed to send OTP. Please try again.')
+    } finally {
+      setSendingWithdrawOtp(false)
+    }
+  }
 
+  const submitWithdrawalWithToken = async (token) => {
+    if (!validateWithdrawForm()) return false
     setSubmittingWithdraw(true)
     setError('')
-
     try {
-      console.log('Submitting withdrawal:', { userId: user._id, amount, walletAddress: withdrawWalletAddress, currency: withdrawCurrency, network: withdrawNetwork })
-      
       const res = await fetch(`${API_URL}/oxapay/create-withdrawal`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: user._id,
           amount: parseFloat(amount),
-          walletAddress: withdrawWalletAddress,
+          walletAddress: withdrawWalletAddress.trim(),
           currency: withdrawCurrency,
-          network: withdrawNetwork
+          network: withdrawNetwork,
+          withdrawalToken: token
         })
       })
-      
-      console.log('Withdrawal response status:', res.status)
       const data = await res.json()
-      console.log('Withdrawal response data:', data)
-      
       if (data.success) {
         setSuccess('Withdrawal request submitted successfully! It will be processed within 24 hours.')
-        setShowWithdrawModal(false)
-        setAmount('')
-        setWithdrawWalletAddress('')
-        setWithdrawCurrency('USDT')
-        setWithdrawNetwork('TRC20')
+        resetWithdrawFlow()
         fetchWallet()
         fetchTransactions()
         setTimeout(() => setSuccess(''), 5000)
-      } else {
-        setError(data.message || 'Failed to submit withdrawal')
+        return true
       }
+      setError(data.message || 'Failed to submit withdrawal')
+      return false
     } catch (error) {
       console.error('Withdrawal error:', error)
       setError('Error submitting withdrawal: ' + error.message)
+      return false
     } finally {
       setSubmittingWithdraw(false)
+    }
+  }
+
+  const handleVerifyWithdrawOtp = async () => {
+    if (!withdrawOtpCode || withdrawOtpCode.trim().length < 4) {
+      setError('Please enter the OTP from your email')
+      return
+    }
+    if (!user._id) return
+    setVerifyingWithdrawOtp(true)
+    setError('')
+    try {
+      const res = await fetch(`${API_URL}/wallet/verify-withdrawal-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user._id, otp: withdrawOtpCode.trim() })
+      })
+      const data = await res.json()
+      if (data.success && data.withdrawalToken) {
+        setWithdrawOtpCode('')
+        await submitWithdrawalWithToken(data.withdrawalToken)
+      } else {
+        setError(data.message || 'Invalid OTP')
+      }
+    } catch (e) {
+      console.error(e)
+      setError('Could not verify OTP')
+    } finally {
+      setVerifyingWithdrawOtp(false)
     }
   }
 
@@ -732,6 +817,10 @@ const WalletPage = () => {
                 </button>
                 <button
                   onClick={() => {
+                    setWithdrawPreviewAccepted(false)
+                    setWithdrawOtpCode('')
+                    setShowWithdrawPreviewModal(false)
+                    setShowWithdrawOtpModal(false)
                     setShowWithdrawModal(true)
                     setError('')
                   }}
@@ -1165,26 +1254,21 @@ const WalletPage = () => {
         </div>
       )}
 
-      {/* Withdraw Modal - Crypto Only */}
+      {/* Withdraw — Step 1: enter amount, asset, network, address */}
       {showWithdrawModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className={`rounded-xl p-4 sm:p-6 w-full max-w-lg border max-h-[90vh] overflow-y-auto ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-300'}`}>
             <div className="flex items-center justify-between mb-4">
               <h3 className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Withdraw Funds</h3>
-              <button 
-                onClick={() => {
-                  setShowWithdrawModal(false)
-                  setAmount('')
-                  setWithdrawWalletAddress('')
-                  setError('')
-                }}
+              <button
+                type="button"
+                onClick={() => resetWithdrawFlow()}
                 className={isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}
               >
                 <X size={20} />
               </button>
             </div>
 
-            {/* Crypto Logo */}
             <div className="mb-4">
               <img src={cryptoLogo} alt="Crypto Withdrawal" className="w-full h-32 object-cover rounded-lg" />
             </div>
@@ -1260,22 +1344,168 @@ const WalletPage = () => {
 
             <div className="flex gap-3">
               <button
-                onClick={() => {
-                  setShowWithdrawModal(false)
-                  setAmount('')
-                  setWithdrawWalletAddress('')
-                  setError('')
-                }}
+                type="button"
+                onClick={() => resetWithdrawFlow()}
                 className={`flex-1 py-3 rounded-lg transition-colors ${isDarkMode ? 'bg-dark-700 text-white hover:bg-dark-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'}`}
               >
                 Cancel
               </button>
               <button
-                onClick={handleWithdraw}
-                disabled={submittingWithdraw || !amount || !withdrawWalletAddress}
+                type="button"
+                onClick={handleContinueToWithdrawPreview}
+                disabled={!amount || !withdrawWalletAddress?.trim()}
                 className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {submittingWithdraw ? 'Processing...' : 'Submit Withdrawal'}
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw — Step 2: preview → send OTP to logged-in user email */}
+      {showWithdrawPreviewModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className={`rounded-xl p-4 sm:p-6 w-full max-w-lg border max-h-[90vh] overflow-y-auto ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-300'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Review withdrawal</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowWithdrawPreviewModal(false)
+                  setWithdrawPreviewAccepted(false)
+                  setShowWithdrawModal(true)
+                  setError('')
+                }}
+                className={isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Please confirm everything below. After you continue, a one-time code will be sent to the email on your account.
+            </p>
+
+            <div className={`space-y-3 mb-4 p-4 rounded-lg border ${isDarkMode ? 'bg-dark-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-gray-500">Amount</span>
+                <span className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>${parseFloat(amount || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-gray-500">Asset</span>
+                <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>{withdrawCurrency}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-gray-500">Network</span>
+                <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>{withdrawNetwork}</span>
+              </div>
+              <div className="text-sm">
+                <span className="text-gray-500 block mb-1">Destination address</span>
+                <span className={`font-mono text-xs break-all ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>{withdrawWalletAddress}</span>
+              </div>
+              {user.email && (
+                <div className="flex justify-between gap-4 text-sm pt-2 border-t border-gray-600/30">
+                  <span className="text-gray-500">OTP will be sent to</span>
+                  <span className={`text-right break-all ${isDarkMode ? 'text-cyan-400' : 'text-blue-600'}`}>{user.email}</span>
+                </div>
+              )}
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer mb-4">
+              <input
+                type="checkbox"
+                checked={withdrawPreviewAccepted}
+                onChange={(e) => setWithdrawPreviewAccepted(e.target.checked)}
+                className="mt-1 w-4 h-4 rounded border-gray-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
+              />
+              <span className={`text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                I confirm the amount, network, and wallet address are correct. I understand that wrong details may result in loss of funds.
+              </span>
+            </label>
+
+            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowWithdrawPreviewModal(false)
+                  setWithdrawPreviewAccepted(false)
+                  setShowWithdrawModal(true)
+                  setError('')
+                }}
+                className={`flex-1 py-3 rounded-lg transition-colors ${isDarkMode ? 'bg-dark-700 text-white hover:bg-dark-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'}`}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={handleSendWithdrawOtp}
+                disabled={sendingWithdrawOtp || !withdrawPreviewAccepted}
+                className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {sendingWithdrawOtp ? 'Sending…' : 'Send OTP to email'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw — Step 3: email OTP → auto-submit withdrawal */}
+      {showWithdrawOtpModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className={`rounded-xl p-4 sm:p-6 w-full max-w-md border ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-300'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Verify your email</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowWithdrawOtpModal(false)
+                  setWithdrawPreviewAccepted(false)
+                  setShowWithdrawPreviewModal(true)
+                  setWithdrawOtpCode('')
+                  setError('')
+                }}
+                className={isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              Enter the one-time code sent to <span className="font-medium">{user.email || 'your registered email'}</span>. Your withdrawal will be submitted automatically after verification.
+            </p>
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={withdrawOtpCode}
+              onChange={(e) => setWithdrawOtpCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+              placeholder="6-digit code"
+              className={`w-full rounded-lg px-4 py-3 mb-4 border text-center text-lg tracking-widest ${isDarkMode ? 'bg-dark-700 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
+            />
+            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={handleVerifyWithdrawOtp}
+                disabled={verifyingWithdrawOtp || submittingWithdraw || withdrawOtpCode.length < 4}
+                className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+              >
+                {verifyingWithdrawOtp || submittingWithdraw ? 'Processing…' : 'Verify & submit withdrawal'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowWithdrawOtpModal(false)
+                  setWithdrawPreviewAccepted(false)
+                  setShowWithdrawPreviewModal(true)
+                  setWithdrawOtpCode('')
+                  setError('')
+                }}
+                className={`text-sm py-2 ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+              >
+                ← Back to preview
               </button>
             </div>
           </div>

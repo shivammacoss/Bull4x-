@@ -1,4 +1,5 @@
 import express from 'express'
+import jwt from 'jsonwebtoken'
 import Wallet from '../models/Wallet.js'
 import Transaction from '../models/Transaction.js'
 import TradingAccount from '../models/TradingAccount.js'
@@ -7,10 +8,114 @@ import AdminWallet from '../models/AdminWallet.js'
 import AdminWalletTransaction from '../models/AdminWalletTransaction.js'
 import Bonus from '../models/Bonus.js'
 import UserBonus from '../models/UserBonus.js'
-import { sendTemplateEmail } from '../services/emailService.js'
+import OTP from '../models/OTP.js'
+import { sendTemplateEmail, generateOTP, getOTPExpiry } from '../services/emailService.js'
 import EmailSettings from '../models/EmailSettings.js'
 
 const router = express.Router()
+
+// POST /api/wallet/send-withdrawal-otp — email OTP before crypto withdrawal (must be registered before /:userId)
+router.post('/send-withdrawal-otp', async (req, res) => {
+  try {
+    const { userId } = req.body
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'User ID is required' })
+    }
+
+    const user = await User.findById(userId)
+    if (!user || !user.email) {
+      return res.status(404).json({ success: false, message: 'User not found or no email on file' })
+    }
+
+    const settings = await EmailSettings.findOne()
+    if (!settings?.smtpEnabled || !settings?.smtpHost) {
+      return res.status(503).json({
+        success: false,
+        message: 'Email is not configured. Withdrawal verification cannot send OTP.'
+      })
+    }
+
+    const otp = generateOTP()
+    const expiryMinutes = getOTPExpiry()
+    const expiresAt = new Date(Date.now() + expiryMinutes * 60 * 1000)
+
+    await OTP.deleteMany({ email: user.email, purpose: 'withdrawal' })
+    await OTP.create({
+      email: user.email,
+      otp,
+      purpose: 'withdrawal',
+      expiresAt
+    })
+
+    const platformName = settings?.fromName || 'BlueStone Exchange'
+    const supportEmail = settings?.fromEmail || 'support@bluestoneexchange.com'
+    const emailResult = await sendTemplateEmail('email_verification', user.email, {
+      otp,
+      firstName: user.firstName || user.email.split('@')[0],
+      email: user.email,
+      expiryMinutes: String(expiryMinutes),
+      platformName,
+      supportEmail,
+      year: new Date().getFullYear().toString()
+    })
+
+    if (!emailResult.success) {
+      await OTP.deleteMany({ email: user.email, purpose: 'withdrawal' })
+      return res.status(500).json({
+        success: false,
+        message: emailResult.message || 'Failed to send OTP email'
+      })
+    }
+
+    res.json({ success: true, message: 'OTP sent to your email' })
+  } catch (error) {
+    console.error('send-withdrawal-otp error:', error)
+    res.status(500).json({ success: false, message: 'Error sending OTP', error: error.message })
+  }
+})
+
+// POST /api/wallet/verify-withdrawal-otp — returns short-lived token for /oxapay/create-withdrawal
+router.post('/verify-withdrawal-otp', async (req, res) => {
+  try {
+    const { userId, otp } = req.body
+    if (!userId || !otp) {
+      return res.status(400).json({ success: false, message: 'User ID and OTP are required' })
+    }
+
+    const user = await User.findById(userId)
+    if (!user || !user.email) {
+      return res.status(404).json({ success: false, message: 'User not found' })
+    }
+
+    const otpRecord = await OTP.findOne({
+      email: user.email,
+      otp: String(otp).trim(),
+      purpose: 'withdrawal'
+    })
+
+    if (!otpRecord) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP' })
+    }
+
+    if (otpRecord.expiresAt < new Date()) {
+      await OTP.deleteOne({ _id: otpRecord._id })
+      return res.status(400).json({ success: false, message: 'OTP has expired' })
+    }
+
+    await OTP.deleteOne({ _id: otpRecord._id })
+
+    const withdrawalToken = jwt.sign(
+      { sub: userId, scope: 'withdrawal' },
+      process.env.JWT_SECRET,
+      { expiresIn: '15m' }
+    )
+
+    res.json({ success: true, message: 'OTP verified', withdrawalToken })
+  } catch (error) {
+    console.error('verify-withdrawal-otp error:', error)
+    res.status(500).json({ success: false, message: 'Error verifying OTP', error: error.message })
+  }
+})
 
 // GET /api/wallet/:userId - Get user wallet
 router.get('/:userId', async (req, res) => {

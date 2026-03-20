@@ -1,4 +1,5 @@
 import express from 'express'
+import jwt from 'jsonwebtoken'
 import oxapayService from '../services/oxapayService.js'
 import Transaction from '../models/Transaction.js'
 import Wallet from '../models/Wallet.js'
@@ -286,9 +287,25 @@ router.post('/webhook', async (req, res) => {
 // POST /api/oxapay/create-withdrawal - Create crypto withdrawal (payout)
 router.post('/create-withdrawal', async (req, res) => {
   try {
-    const { userId, amount, walletAddress, currency, network } = req.body
+    const { userId, amount, walletAddress, currency, network, withdrawalToken } = req.body
 
     console.log('Withdrawal request received:', { userId, amount, walletAddress, currency, network })
+
+    if (!withdrawalToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Withdrawal verification required. Complete email OTP first.'
+      })
+    }
+
+    try {
+      const payload = jwt.verify(withdrawalToken, process.env.JWT_SECRET)
+      if (payload.scope !== 'withdrawal' || String(payload.sub) !== String(userId)) {
+        return res.status(401).json({ success: false, message: 'Invalid or expired withdrawal session' })
+      }
+    } catch {
+      return res.status(401).json({ success: false, message: 'Invalid or expired withdrawal session' })
+    }
 
     if (!userId || !amount || amount <= 0) {
       console.log('Invalid parameters:', { userId, amount })
