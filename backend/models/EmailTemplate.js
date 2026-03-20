@@ -32,7 +32,7 @@ const emailTemplateSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['verification', 'transaction', 'account', 'notification', 'challenge', 'support', 'security'],
+    enum: ['verification', 'transaction', 'account', 'notification', 'challenge', 'support', 'security', 'ib', 'partner'],
     default: 'notification'
   }
 }, { timestamps: true })

@@ -112,8 +112,10 @@ router.post('/verify-otp', async (req, res) => {
     sendTemplateEmail('welcome', email, {
       firstName: firstName || email.split('@')[0],
       email: email,
+      accountId: '—',
+      accountType: 'Client',
       platformName: 'Bluestone Exchange',
-      loginUrl: `${baseUrl}/dashboard`,
+      loginUrl: `${baseUrl}/user/login`,
       supportEmail: emailSettings?.fromEmail || 'support@bluestoneexchange.com',
       year: new Date().getFullYear().toString()
     })
@@ -215,8 +217,10 @@ router.post('/signup', async (req, res) => {
       sendTemplateEmail('welcome', email, {
         firstName: user.firstName,
         email: user.email,
+        accountId: '—',
+        accountType: 'Client',
         platformName: 'Bluestone Exchange',
-        loginUrl: `${baseUrl}/dashboard`,
+        loginUrl: `${baseUrl}/user/login`,
         supportEmail: emailSettings?.fromEmail || 'support@bluestoneexchange.com',
         year: new Date().getFullYear().toString()
       })

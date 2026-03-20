@@ -242,13 +242,16 @@ router.post('/webhook', async (req, res) => {
           const user = await User.findById(transaction.userId)
           if (user && user.email) {
             const settings = await EmailSettings.findOne()
+            const appOrigin = process.env.CORS_ORIGIN || 'https://bluestoneexchange.com'
             await sendTemplateEmail('deposit_success', user.email, {
               firstName: user.firstName || user.email.split('@')[0],
               amount: transaction.amount.toFixed(2),
               transactionId: transaction._id.toString(),
+              accountId: 'Main wallet',
               paymentMethod: transaction.paymentMethod,
               date: new Date().toLocaleString(),
               newBalance: wallet.balance.toFixed(2),
+              dashboardUrl: `${appOrigin}/dashboard`,
               platformName: settings?.platformName || 'BlueStone',
               supportEmail: settings?.supportEmail || 'support@BlueStone.com',
               year: new Date().getFullYear().toString()

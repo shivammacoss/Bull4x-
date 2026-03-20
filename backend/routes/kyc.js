@@ -113,11 +113,13 @@ router.post('/submit-files', kycUpload.fields([
       const user = await User.findById(userId)
       if (user && user.email) {
         const settings = await EmailSettings.findOne()
+        const appOrigin = process.env.CORS_ORIGIN || 'https://bluestoneexchange.com'
         await sendTemplateEmail('kyc_submitted', user.email, {
           firstName: user.firstName || user.email.split('@')[0],
           email: user.email,
           documentType: documentType,
           submittedAt: new Date().toLocaleString(),
+          kycLink: `${appOrigin}/profile`,
           platformName: settings?.platformName || 'BlueStone',
           supportEmail: settings?.supportEmail || 'support@BlueStone.com',
           year: new Date().getFullYear().toString()
@@ -195,11 +197,13 @@ router.post('/submit', async (req, res) => {
       const user = await User.findById(userId)
       if (user && user.email) {
         const settings = await EmailSettings.findOne()
+        const appOrigin = process.env.CORS_ORIGIN || 'https://bluestoneexchange.com'
         await sendTemplateEmail('kyc_submitted', user.email, {
           firstName: user.firstName || user.email.split('@')[0],
           email: user.email,
           documentType: documentType,
           submittedAt: new Date().toLocaleString(),
+          kycLink: `${appOrigin}/profile`,
           platformName: settings?.platformName || 'BlueStone',
           supportEmail: settings?.supportEmail || 'support@BlueStone.com',
           year: new Date().getFullYear().toString()
@@ -355,6 +359,7 @@ router.put('/approve/:kycId', async (req, res) => {
         const emailResult = await sendTemplateEmail('kyc_approved', user.email, {
           firstName: user.firstName || user.email.split('@')[0],
           email: user.email,
+          accountId: user.email,
           documentType: kyc.documentType,
           approvedAt: new Date().toLocaleString(),
           platformName: settings?.platformName || 'BlueStone',

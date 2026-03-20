@@ -300,6 +300,9 @@ router.post('/withdraw', async (req, res) => {
           amount: amount.toFixed(2),
           transactionId: transaction._id.toString(),
           paymentMethod: paymentMethod || 'Bank Transfer',
+          walletAddress: bankAccountDetails
+            ? (typeof bankAccountDetails === 'string' ? bankAccountDetails : JSON.stringify(bankAccountDetails))
+            : '—',
           date: new Date().toLocaleString(),
           platformName: settings?.platformName || 'BlueStone',
           supportEmail: settings?.supportEmail || 'support@BlueStone.com',
@@ -504,13 +507,16 @@ router.put('/admin/approve/:id', async (req, res) => {
       if (user && user.email) {
         const settings = await EmailSettings.findOne()
         const templateSlug = transaction.type === 'Deposit' ? 'deposit_success' : 'withdrawal_success'
+        const appOrigin = process.env.CORS_ORIGIN || 'https://bluestoneexchange.com'
         await sendTemplateEmail(templateSlug, user.email, {
           firstName: user.firstName || user.email.split('@')[0],
           amount: transaction.amount.toFixed(2),
           transactionId: transaction._id.toString(),
+          accountId: transaction.type === 'Deposit' ? 'Main wallet' : (transaction._id.toString()),
           paymentMethod: transaction.paymentMethod || 'Wallet',
           date: new Date().toLocaleString(),
           newBalance: wallet.balance.toFixed(2),
+          dashboardUrl: `${appOrigin}/dashboard`,
           platformName: settings?.platformName || 'BlueStone',
           supportEmail: settings?.supportEmail || 'support@BlueStone.com',
           year: new Date().getFullYear().toString()
@@ -628,13 +634,16 @@ router.put('/transaction/:id/approve', async (req, res) => {
       if (user && user.email) {
         const settings = await EmailSettings.findOne()
         const templateSlug = transaction.type === 'Deposit' ? 'deposit_success' : 'withdrawal_success'
+        const appOrigin = process.env.CORS_ORIGIN || 'https://bluestoneexchange.com'
         await sendTemplateEmail(templateSlug, user.email, {
           firstName: user.firstName || user.email.split('@')[0],
           amount: transaction.amount.toFixed(2),
           transactionId: transaction._id.toString(),
+          accountId: transaction.type === 'Deposit' ? 'Main wallet' : (transaction._id.toString()),
           paymentMethod: transaction.paymentMethod || 'Wallet',
           date: new Date().toLocaleString(),
           newBalance: wallet.balance.toFixed(2),
+          dashboardUrl: `${appOrigin}/dashboard`,
           platformName: settings?.platformName || 'BlueStone',
           supportEmail: settings?.supportEmail || 'support@BlueStone.com',
           year: new Date().getFullYear().toString()

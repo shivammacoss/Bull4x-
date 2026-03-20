@@ -123,28 +123,24 @@ const defaultTemplates = [
   {
     name: 'Admin/Employee Login OTP',
     slug: 'admin_login_otp',
-    subject: 'Login Verification - Bluestone Exchange',
+    subject: 'Your Login OTP Code - Bluestone Exchange',
     description: 'Sent when admin or employee logs in to verify with OTP',
     category: 'verification',
     variables: ['otp', 'firstName', 'email', 'expiryMinutes', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        A login attempt was made to your admin account. Use the following OTP to complete your login:
+        We received a request to log in to your Bluestone Exchange admin account.
       </p>
-      
-      <p style="color: #888; font-size: 13px; margin: 20px 0 8px 0;">🔐 Your Login OTP:</p>
-      <p style="color: #f59e0b; font-size: 22px; letter-spacing: 4px; margin: 0 0 20px 0;">{{otp}}</p>
-      
-      <p style="color: #666; font-size: 14px; margin: 0 0 20px 0;">This code will expire in {{expiryMinutes}} minutes.</p>
-      
-      <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px 20px; margin: 25px 0;">
-        <p style="color: #dc2626; font-size: 14px; margin: 0;">⚠️ If you didn't attempt to login, please secure your account immediately and contact support.</p>
-      </div>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 8px 0;">
+        For your security, please use the One-Time Password (OTP) below:
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 8px 0;">OTP</p>
+      <p style="color: #f59e0b; font-size: 24px; letter-spacing: 6px; margin: 0 0 16px 0; font-weight: 700;">{{otp}}</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 0 0 24px 0;">This OTP will expire in {{expiryMinutes}} minutes.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you did not request this login, please ignore this email or contact support.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange, Security Team</p>
     `)
   },
   {
@@ -155,333 +151,332 @@ const defaultTemplates = [
     category: 'verification',
     variables: ['otp', 'firstName', 'email', 'expiryMinutes', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Thank you for registering with Bluestone Exchange. To complete your registration, please verify your email address using the OTP below.
+        Thank you for registering with Bluestone Exchange.
       </p>
-      
-      <p style="color: #888; font-size: 13px; margin: 20px 0 8px 0;">Your Verification Code:</p>
-      <p style="color: #22c55e; font-size: 22px; letter-spacing: 4px; margin: 0 0 20px 0;">{{otp}}</p>
-      
-      <p style="color: #666; font-size: 14px; margin: 0 0 20px 0;">This code will expire in {{expiryMinutes}} minutes.</p>
-      
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        If you did not create an account with us, please ignore this email.
+        To activate your account, please verify your email address using the verification code below.
       </p>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 8px 0;">Verify email</p>
+      <p style="color: #4ade80; font-size: 24px; letter-spacing: 6px; margin: 0 0 12px 0; font-weight: 700;">{{otp}}</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 0 0 20px 0;">This code will expire in {{expiryMinutes}} minutes.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you did not create an account with us, please ignore this email.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange, Security Team</p>
     `)
   },
   {
     name: 'Challenge Completed',
     slug: 'challenge_completed',
-    subject: 'Congratulations! Challenge Completed Successfully',
+    subject: 'Congratulations - Challenge Passed - Bluestone Exchange',
     description: 'Sent when a user successfully completes a trading challenge',
     category: 'challenge',
     variables: ['firstName', 'challengeName', 'fundSize', 'accountId', 'completionDate', 'loginUrl', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;"><strong style="color:#e5e7eb;">Congratulations!</strong></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Congratulations! You have successfully completed the <strong>{{challengeName}}</strong> challenge.
+        We are pleased to inform you that you have successfully progressed in your Funded Trading Challenge on Bluestone Exchange (<strong>{{challengeName}}</strong>).
       </p>
-      
-      <div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #22c55e;">
-        <div style="text-align: center; margin-bottom: 15px;">
-          <span style="display: inline-block; background: #22c55e; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">🎉 CHALLENGE COMPLETED</span>
-        </div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #666;">Challenge Name</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #333; font-weight: bold; text-align: right;">{{challengeName}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #666;">Fund Size</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #333; font-weight: bold; text-align: right;">{{fundSize}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #666;">Account ID</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #333; font-weight: bold; text-align: right;">{{accountId}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; color: #666;">Completion Date</td>
-            <td style="padding: 10px 0; color: #333; text-align: right;">{{completionDate}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); color: #fff; padding: 14px 40px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;">View Results</a>
-      </div>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Your trading performance has met the required evaluation criteria, and your account is under review for the next stage.
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Challenge account details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Account ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right; font-weight: 600;">{{accountId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Evaluation period</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{completionDate}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Fund / balance reference</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right; font-weight: 600;">{{fundSize}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">
+        Our team will complete the verification process shortly and notify you once your funded stage is updated.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+        Thank you for your dedication and disciplined trading. We look forward to your continued success with Bluestone Exchange.
+      </p>
+      <p style="text-align: center; margin: 20px 0;">
+        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Login here</a>
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Funding Evaluation Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@bluestoneexchange.com</p>
     `)
   },
   {
     name: 'Challenge Failed',
     slug: 'challenge_failed',
-    subject: 'Challenge Failed - Try Again',
+    subject: 'Challenge Result - Bluestone Exchange',
     description: 'Sent when a user fails a trading challenge',
     category: 'challenge',
     variables: ['firstName', 'challengeName', 'fundSize', 'accountId', 'failureReason', 'failureDate', 'loginUrl', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Unfortunately, you did not meet the requirements for the <strong>{{challengeName}}</strong> challenge.
+        We regret to inform you that your Funded Trading Challenge (<strong>{{challengeName}}</strong>) has ended and did not meet the required trading conditions.
       </p>
-      
-      <div style="background-color: #fef2f2; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #ef4444;">
-        <div style="text-align: center; margin-bottom: 15px;">
-          <span style="display: inline-block; background: #ef4444; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">⚠️ CHALLENGE FAILED</span>
-        </div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #666;">Challenge Name</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #333; font-weight: bold; text-align: right;">{{challengeName}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #666;">Fund Size</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #333; font-weight: bold; text-align: right;">{{fundSize}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #666;">Account ID</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #333; font-weight: bold; text-align: right;">{{accountId}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #666;">Failure Reason</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #dc2626; font-weight: bold; text-align: right;">{{failureReason}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; color: #666;">Failure Date</td>
-            <td style="padding: 10px 0; color: #333; text-align: right;">{{failureDate}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: #fff; padding: 14px 40px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;">Try Again</a>
-      </div>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        As a result, the challenge account has been closed according to our program rules.
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Account details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 12px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Challenge account ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right; font-weight: 600;">{{accountId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Evaluation period</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{failureDate}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Reason</td>
+          <td style="padding: 8px 0; color: #fca5a5; font-size: 14px; text-align: right;">{{failureReason}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        You are welcome to participate again by purchasing a new challenge and continuing your trading journey with us.
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Start a new challenge</p>
+      <p style="margin: 0 0 20px 0;"><a href="{{loginUrl}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{loginUrl}}</a></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you have any questions, please contact our support team.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Support Team</p>
     `)
   },
   {
     name: 'Password Reset',
     slug: 'password_reset',
-    subject: 'Reset Your Password - Bluestone Exchange',
+    subject: 'Password Reset OTP - Bluestone Exchange',
     description: 'Sent when user requests password reset',
     category: 'security',
     variables: ['firstName', 'email', 'otp', 'expiryMinutes', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        You have requested to reset the password for the account <a href="mailto:{{email}}" style="color: #1e40af; text-decoration: none;">{{email}}</a>. Here is your reset code, which is available for {{expiryMinutes}} minutes and can be used only once.
+        We have received a request to reset the password for your Bluestone Exchange account
+        (<a href="mailto:{{email}}" style="color: #60a5fa; text-decoration: none;">{{email}}</a>).
       </p>
-      
-      <p style="color: #888; font-size: 13px; margin: 20px 0 8px 0;">Your OTP Code:</p>
-      <p style="color: #3b82f6; font-size: 22px; letter-spacing: 4px; margin: 0 0 20px 0;">{{otp}}</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;">Your One Time Password (OTP) is:</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 16px 0 8px 0;">OTP</p>
+      <p style="color: #60a5fa; font-size: 24px; letter-spacing: 6px; margin: 0 0 16px 0; font-weight: 700;">{{otp}}</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 0 0 24px 0;">This OTP will expire in {{expiryMinutes}} minutes.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        If you have any questions or require assistance please do not hesitate to contact <a href="mailto:support@bluestoneexchange.com" style="color: #1e40af; text-decoration: none;">support@bluestoneexchange.com</a>.
+        If you did not request this change, please contact our support team immediately.
       </p>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange, Security Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 6px 0 0 0;">support@bluestoneexchange.com</p>
     `)
   },
   {
     name: 'Welcome Email',
     slug: 'welcome',
-    subject: 'Welcome to Bluestone Exchange!',
+    subject: 'Welcome to Bluestone Exchange - Your Trading Account is Ready',
     description: 'Sent after successful email verification',
     category: 'account',
-    variables: ['firstName', 'email', 'loginUrl', 'year'],
+    variables: ['firstName', 'email', 'accountId', 'accountType', 'loginUrl', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;">Welcome to Bluestone Exchange.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Welcome to <strong style="color: #1e40af;">Bluestone Exchange</strong>! Your account has been successfully created and verified.
+        Your trading account has been successfully created on our platform. We are excited to have you joined in our global trading community.
       </p>
-      
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Account details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Account ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right; font-weight: 600;">{{accountId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Email</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{email}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Account type</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{accountType}}</td>
+        </tr>
+      </table>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        You're now ready to explore the world of trading with access to Forex, Indices, Commodities, and more.
+        You can now log in to your client dashboard and start exploring our services including Forex trading and funded account opportunities.
       </p>
-      
-      <div style="background-color: #f0f9ff; border-left: 4px solid #1e40af; padding: 15px 20px; margin: 25px 0;">
-        <p style="color: #333; font-size: 14px; margin: 0 0 10px 0;"><strong>Your Account Details:</strong></p>
-        <p style="color: #666; font-size: 14px; margin: 0;">Email: <strong>{{email}}</strong></p>
-      </div>
-      
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color: #fff; padding: 14px 40px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;">Start Trading Now</a>
-      </div>
-      
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Login here</p>
+      <p style="margin: 0 0 24px 0;"><a href="{{loginUrl}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{loginUrl}}</a></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        If you have any questions, our support team is here to help at <a href="mailto:support@bluestoneexchange.com" style="color: #1e40af; text-decoration: none;">support@bluestoneexchange.com</a>.
+        If you need any assistance, our support team is always ready to help.
       </p>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange, Support Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 8px 0 0 0;">Email: support@bluestoneexchange.com</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">Website: www.bluestoneexchange.com</p>
     `)
   },
   {
     name: 'Deposit Pending',
     slug: 'deposit_pending',
-    subject: 'Deposit Request Received - ${{amount}}',
+    subject: 'Deposit Request Submitted - Bluestone Exchange',
     description: 'Sent when a deposit is pending admin approval',
     category: 'transaction',
     variables: ['firstName', 'amount', 'transactionId', 'paymentMethod', 'date', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        We have received your deposit request and it is currently being reviewed by our team.
+        Your deposit request has been successfully submitted.
       </p>
-      
-      <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin: 25px 0;">
-        <div style="text-align: center; margin-bottom: 15px;">
-          <span style="display: inline-block; background: #f59e0b; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">⏳ PENDING REVIEW</span>
-        </div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #666;">Amount</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #16a34a; font-weight: bold; text-align: right; font-size: 18px;">\${{amount}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #666;">Transaction ID</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #333; text-align: right; font-family: monospace;">{{transactionId}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #666;">Payment Method</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #333; text-align: right;">{{paymentMethod}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; color: #666;">Date</td>
-            <td style="padding: 10px 0; color: #333; text-align: right;">{{date}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <p style="color: #666; font-size: 14px; margin: 0 0 20px 0;">You will receive another email once your deposit is processed.</p>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Deposit details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Transaction ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 13px; text-align: right; font-family: monospace;">{{transactionId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Amount</td>
+          <td style="padding: 8px 0; color: #4ade80; font-size: 16px; text-align: right; font-weight: 700;">\${{amount}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Payment method</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{paymentMethod}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Date</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{date}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Our finance team will verify the transaction shortly. Once confirmed, the funds will be credited to your trading account.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for choosing Blue Stone Exchange.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Finance Department</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">Bluestone Exchange</p>
     `)
   },
   {
     name: 'Deposit Success',
     slug: 'deposit_success',
-    subject: 'Deposit Approved - ${{amount}} Added!',
+    subject: 'Deposit Successful - Funds Credited to Your Account',
     description: 'Sent when a deposit is successfully processed',
     category: 'transaction',
-    variables: ['firstName', 'amount', 'transactionId', 'newBalance', 'year'],
+    variables: ['firstName', 'amount', 'transactionId', 'accountId', 'paymentMethod', 'date', 'newBalance', 'dashboardUrl', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 8px 0;"><strong style="color:#e5e7eb;">Good news!</strong></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Great news! Your deposit has been approved and credited to your wallet.
+        Your deposit has been successfully credited to your Bluestone Exchange trading account.
       </p>
-      
-      <div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #22c55e;">
-        <div style="text-align: center; margin-bottom: 15px;">
-          <span style="display: inline-block; background: #22c55e; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">✓ APPROVED</span>
-        </div>
-        <div style="text-align: center; margin-bottom: 20px;">
-          <p style="color: #22c55e; font-size: 36px; font-weight: bold; margin: 0;">+\${{amount}}</p>
-        </div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #666;">New Balance</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #333; font-weight: bold; text-align: right;">\${{newBalance}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; color: #666;">Transaction ID</td>
-            <td style="padding: 10px 0; color: #333; text-align: right; font-family: monospace;">{{transactionId}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Transaction details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Transaction ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 13px; text-align: right; font-family: monospace;">{{transactionId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Amount credited</td>
+          <td style="padding: 8px 0; color: #4ade80; font-size: 16px; text-align: right; font-weight: 700;">\${{amount}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Account ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{accountId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Date</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{date}}</td>
+        </tr>
+      </table>
+      <p style="color: #9ca3af; font-size: 13px; margin: 0 0 16px 0;">Wallet balance after credit: <strong style="color:#e5e7eb;">\${{newBalance}}</strong></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">You can now log in and start trading.</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 16px 0 8px 0;">Login here</p>
+      <p style="margin: 0 0 24px 0;"><a href="{{dashboardUrl}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{dashboardUrl}}</a></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange, Finance Team</p>
     `)
   },
   {
     name: 'Withdrawal Pending',
     slug: 'withdrawal_pending',
-    subject: 'Withdrawal Request Received - ${{amount}}',
+    subject: 'Withdrawal Request Received - Bluestone Exchange',
     description: 'Sent when a withdrawal request is submitted',
     category: 'transaction',
-    variables: ['firstName', 'amount', 'transactionId', 'date', 'year'],
+    variables: ['firstName', 'amount', 'transactionId', 'paymentMethod', 'walletAddress', 'date', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Your withdrawal request has been submitted and is being processed.
+        We have successfully received your withdrawal request.
       </p>
-      
-      <div style="background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin: 25px 0;">
-        <div style="text-align: center; margin-bottom: 15px;">
-          <span style="display: inline-block; background: #f59e0b; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">⏳ PROCESSING</span>
-        </div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #666;">Amount</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #dc2626; font-weight: bold; text-align: right; font-size: 18px;">-\${{amount}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #666;">Transaction ID</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; color: #333; text-align: right; font-family: monospace;">{{transactionId}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; color: #666;">Date</td>
-            <td style="padding: 10px 0; color: #333; text-align: right;">{{date}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <p style="color: #666; font-size: 14px; margin: 0 0 20px 0;">Processing time: 1-3 business days</p>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Withdrawal details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Request ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 13px; text-align: right; font-family: monospace;">{{transactionId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Amount</td>
+          <td style="padding: 8px 0; color: #fca5a5; font-size: 16px; text-align: right; font-weight: 700;">\${{amount}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Payment method</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{paymentMethod}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Date</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{date}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px; vertical-align: top;">Destination</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 13px; text-align: right; word-break: break-all;">{{walletAddress}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Your request is currently under review by our finance team. Once approved, the funds will be transferred to your selected payment method.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Finance Team</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">Bluestone Exchange</p>
     `)
   },
   {
     name: 'Withdrawal Success',
     slug: 'withdrawal_success',
-    subject: 'Withdrawal Completed - ${{amount}}',
+    subject: 'Withdrawal Successful - Bluestone Exchange',
     description: 'Sent when a withdrawal is successfully processed',
     category: 'transaction',
-    variables: ['firstName', 'amount', 'transactionId', 'year'],
+    variables: ['firstName', 'amount', 'transactionId', 'date', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Your withdrawal has been processed and sent to your account.
+        Your withdrawal request has been successfully processed.
       </p>
-      
-      <div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #22c55e;">
-        <div style="text-align: center; margin-bottom: 15px;">
-          <span style="display: inline-block; background: #22c55e; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">✓ COMPLETED</span>
-        </div>
-        <div style="text-align: center; margin-bottom: 20px;">
-          <p style="color: #dc2626; font-size: 36px; font-weight: bold; margin: 0;">-\${{amount}}</p>
-        </div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 10px 0; color: #666;">Transaction ID</td>
-            <td style="padding: 10px 0; color: #333; text-align: right; font-family: monospace;">{{transactionId}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Transaction details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Withdrawal ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 13px; text-align: right; font-family: monospace;">{{transactionId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Amount</td>
+          <td style="padding: 8px 0; color: #fca5a5; font-size: 16px; text-align: right; font-weight: 700;">\${{amount}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Processed date</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{date}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        The funds should reflect in your payment account shortly depending on the payment method used.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for trading with Blue Stone Exchange.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Finance Team</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">Bluestone Exchange</p>
     `)
   },
   {
@@ -549,117 +544,444 @@ const defaultTemplates = [
   {
     name: 'KYC Submitted',
     slug: 'kyc_submitted',
-    subject: 'KYC Documents Submitted - Under Review',
+    subject: 'KYC Documents Required',
     description: 'Sent when a user submits their KYC documents',
     category: 'verification',
-    variables: ['firstName', 'documentType', 'submittedAt', 'year'],
+    variables: ['firstName', 'email', 'documentType', 'submittedAt', 'kycLink', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Thank you for submitting your KYC documents. Our team is now reviewing your submission.
+        To comply with financial regulations, please ensure your KYC verification documents are complete. We have recorded your submission.
       </p>
-      
-      <div style="background-color: #fef3c7; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #f59e0b;">
-        <div style="text-align: center; margin-bottom: 15px;">
-          <span style="display: inline-block; background: #f59e0b; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">📄 UNDER REVIEW</span>
-        </div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fde68a; color: #666;">Document Type</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fde68a; color: #333; font-weight: bold; text-align: right;">{{documentType}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; color: #666;">Submitted At</td>
-            <td style="padding: 10px 0; color: #333; text-align: right;">{{submittedAt}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <p style="color: #666; font-size: 14px; margin: 0 0 20px 0;">⏳ Verification usually takes 24-48 hours. We'll notify you once your documents are reviewed.</p>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Required documents</p>
+      <ul style="color: #d1d5db; font-size: 15px; line-height: 1.7; margin: 0 0 20px 0; padding-left: 20px;">
+        <li>Identity proof</li>
+        <li>Address proof</li>
+      </ul>
+      <p style="color: #9ca3af; font-size: 14px; margin: 0 0 8px 0;">Submitted document type: <strong style="color:#e5e7eb;">{{documentType}}</strong></p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 0 0 20px 0;">Submitted at: {{submittedAt}}</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Upload / profile</p>
+      <p style="margin: 0 0 24px 0;"><a href="{{kycLink}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{kycLink}}</a></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for your cooperation.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Bluestone Exchange Compliance Team</p>
     `)
   },
   {
     name: 'KYC Approved',
     slug: 'kyc_approved',
-    subject: 'KYC Verified - Account Fully Activated',
+    subject: 'KYC Verification Successful',
     description: 'Sent when admin approves user KYC documents',
     category: 'verification',
-    variables: ['firstName', 'documentType', 'approvedAt', 'loginUrl', 'year'],
+    variables: ['firstName', 'accountId', 'documentType', 'approvedAt', 'loginUrl', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Congratulations! Your KYC documents have been verified and your account is now fully activated.
+        Your KYC verification has been successfully completed.
       </p>
-      
-      <div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #22c55e;">
-        <div style="text-align: center; margin-bottom: 15px;">
-          <span style="display: inline-block; background: #22c55e; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">✅ VERIFIED</span>
-        </div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #666;">Document Type</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #d1fae5; color: #333; font-weight: bold; text-align: right;">{{documentType}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; color: #666;">Approved At</td>
-            <td style="padding: 10px 0; color: #333; text-align: right;">{{approvedAt}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); color: #fff; padding: 14px 40px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;">Start Trading</a>
-      </div>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Your account is now fully verified and ready for trading.
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Account</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 16px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Account ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{accountId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Document type</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{documentType}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Approved at</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{approvedAt}}</td>
+        </tr>
+      </table>
+      <p style="text-align: center; margin: 24px 0;">
+        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Login</a>
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Bluestone Exchange, Compliance Team</p>
     `)
   },
   {
     name: 'KYC Rejected',
     slug: 'kyc_rejected',
-    subject: 'KYC Verification Failed - Action Required',
+    subject: 'KYC Documents - Action Required',
     description: 'Sent when admin rejects user KYC documents',
     category: 'verification',
     variables: ['firstName', 'documentType', 'rejectionReason', 'rejectedAt', 'loginUrl', 'year'],
     htmlContent: wrapEmailContent(`
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Dear {{firstName}},</p>
-      
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Unfortunately, we were unable to verify your KYC documents. Please review the reason below and resubmit.
+        We were unable to verify your KYC documents. Please review the reason below and resubmit through your profile.
       </p>
-      
-      <div style="background-color: #fef2f2; border-radius: 8px; padding: 20px; margin: 25px 0; border: 1px solid #ef4444;">
-        <div style="text-align: center; margin-bottom: 15px;">
-          <span style="display: inline-block; background: #ef4444; color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: bold;">❌ REJECTED</span>
-        </div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #666;">Document Type</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #333; font-weight: bold; text-align: right;">{{documentType}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #666;">Rejection Reason</td>
-            <td style="padding: 10px 0; border-bottom: 1px solid #fecaca; color: #dc2626; font-weight: bold; text-align: right;">{{rejectionReason}}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px 0; color: #666;">Rejected At</td>
-            <td style="padding: 10px 0; color: #333; text-align: right;">{{rejectedAt}}</td>
-          </tr>
-        </table>
-      </div>
-      
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: #fff; padding: 14px 40px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;">Resubmit Documents</a>
-      </div>
-      
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Document type</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{documentType}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Reason</td>
+          <td style="padding: 8px 0; color: #fca5a5; font-size: 14px; text-align: right;">{{rejectionReason}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Rejected at</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{rejectedAt}}</td>
+        </tr>
+      </table>
+      <p style="text-align: center; margin: 24px 0;">
+        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Resubmit documents</a>
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange, Compliance Team</p>
+    `)
+  },
+  {
+    name: 'Account Approved',
+    slug: 'account_approved',
+    subject: 'Your Account Has Been Approved',
+    description: 'Sent when a user trading account is approved (matches email_template.txt)',
+    category: 'account',
+    variables: ['firstName', 'accountId', 'loginUrl', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 8px 0;"><strong style="color:#e5e7eb;">Good news!</strong></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Your trading account has been successfully approved.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">You can now deposit funds and start trading.</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Account ID</p>
+      <p style="color: #f3f4f6; font-size: 16px; font-weight: 600; margin: 0 0 20px 0;">{{accountId}}</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 16px 0 8px 0;">Login</p>
+      <p style="margin: 0 0 24px 0;"><a href="{{loginUrl}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{loginUrl}}</a></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Bluestone Exchange</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 0;">Admin Team</p>
+    `)
+  },
+  {
+    name: 'KYC Document Request',
+    slug: 'kyc_document_request',
+    subject: 'KYC Documents Required',
+    description: 'Proactive request to upload KYC (matches email_template.txt)',
+    category: 'verification',
+    variables: ['firstName', 'kycLink', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        To comply with financial regulations, please upload your KYC verification documents.
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Required documents</p>
+      <ul style="color: #d1d5db; font-size: 15px; line-height: 1.7; margin: 0 0 20px 0; padding-left: 20px;">
+        <li>Identity proof</li>
+        <li>Address proof</li>
+      </ul>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Upload here</p>
+      <p style="margin: 0 0 24px 0;"><a href="{{kycLink}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{kycLink}}</a></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for your cooperation.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Bluestone Exchange Compliance Team</p>
+    `)
+  },
+  {
+    name: 'User Login OTP',
+    slug: 'user_login_otp',
+    subject: 'Your Login OTP Code - Bluestone Exchange',
+    description: 'OTP for client user login (matches email_template.txt)',
+    category: 'security',
+    variables: ['firstName', 'otp', 'expiryMinutes', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        We received a request to log in to your Bluestone Exchange account.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 8px 0;">
+        For your security, please use the One-Time Password (OTP) below:
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 8px 0;">OTP</p>
+      <p style="color: #4ade80; font-size: 24px; letter-spacing: 6px; margin: 0 0 16px 0; font-weight: 700;">{{otp}}</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 0 0 24px 0;">This OTP will expire in {{expiryMinutes}} minutes.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you did not request this login, please ignore this email.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange, Security Team</p>
+    `)
+  },
+  {
+    name: 'Password Changed Successfully',
+    slug: 'password_changed',
+    subject: 'Password Changed Successfully',
+    description: 'Sent after user successfully changes password (matches email_template.txt)',
+    category: 'security',
+    variables: ['firstName', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Your account password has been successfully updated.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        If you did not perform this action, please contact support immediately.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange, Security Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 6px 0 0 0;">support@bluestoneexchange.com</p>
+    `)
+  },
+  {
+    name: 'Forgot Password — Reset Link',
+    slug: 'password_reset_link',
+    subject: 'Reset Your Password - Bluestone Exchange',
+    description: 'Password reset via link (matches email_template.txt; use when link flow is enabled)',
+    category: 'security',
+    variables: ['firstName', 'resetLink', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        We received a request to reset your account password.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;">Click the link below to create a new password.</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Reset password</p>
+      <p style="margin: 0 0 24px 0;"><a href="{{resetLink}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{resetLink}}</a></p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 0 0 20px 0;">This link will expire in 30 minutes for security reasons.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you did not request a password reset, please ignore this email.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange, Security Team</p>
+    `)
+  },
+  {
+    name: 'Trading Account Activated',
+    slug: 'trading_account_activated',
+    subject: 'Trading Account Activated',
+    description: 'Sent when a trading account becomes active (matches email_template.txt)',
+    category: 'account',
+    variables: ['firstName', 'accountId', 'loginUrl', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Your trading account is now active.</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Account ID</p>
+      <p style="color: #f3f4f6; font-size: 16px; font-weight: 600; margin: 0 0 24px 0;">{{accountId}}</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">You can start trading immediately.</p>
+      <p style="text-align: center; margin: 20px 0;">
+        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Open dashboard</a>
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Finance Team</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">Bluestone Exchange</p>
+    `)
+  },
+  {
+    name: 'Funded Account Challenge Started',
+    slug: 'challenge_started',
+    subject: 'Funded Account Challenge Started',
+    description: 'Sent when a funded challenge account is activated (matches email_template.txt)',
+    category: 'challenge',
+    variables: ['firstName', 'accountId', 'balance', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Your funded account challenge has been successfully activated.
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Challenge account</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Challenge Account ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right; font-weight: 600;">{{accountId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Balance</td>
+          <td style="padding: 8px 0; color: #4ade80; font-size: 14px; text-align: right; font-weight: 700;">{{balance}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Good luck with your trading challenge.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Funding Evaluation Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@bluestoneexchange.com</p>
+    `)
+  },
+  {
+    name: 'Challenge Passed — Phase I',
+    slug: 'challenge_passed_phase_1',
+    subject: 'Congratulations - Challenge Passed for Phase I',
+    description: 'Phase 1 funded challenge passed (matches email_template.txt)',
+    category: 'challenge',
+    variables: ['firstName', 'accountId', 'dateRange', 'finalBalance', 'loginUrl', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;"><strong style="color:#e5e7eb;">Congratulations!</strong></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        We are pleased to inform you that you have successfully passed the Phase 1 Funded Trading Challenge on Bluestone Exchange.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Your trading performance has met all the required evaluation criteria, and your account is now under review for the Funded Trader stage.
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Challenge account details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Account ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right; font-weight: 600;">{{accountId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Evaluation period</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{dateRange}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Final balance</td>
+          <td style="padding: 8px 0; color: #4ade80; font-size: 14px; text-align: right; font-weight: 700;">{{finalBalance}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">
+        Our team will complete the verification process shortly and notify you once your Funded Trading Account is activated.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Thank you for your dedication and disciplined trading. We look forward to seeing your continued success with Bluestone Exchange.
+      </p>
+      <p style="text-align: center; margin: 20px 0;">
+        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Login here</a>
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Funding Evaluation Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@bluestoneexchange.com</p>
+    `)
+  },
+  {
+    name: 'Challenge Passed — Phase II',
+    slug: 'challenge_passed_phase_2',
+    subject: 'Congratulations - Challenge Passed for Phase II',
+    description: 'Phase 2 funded challenge passed (matches email_template.txt)',
+    category: 'challenge',
+    variables: ['firstName', 'accountId', 'dateRange', 'finalBalance', 'loginUrl', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;"><strong style="color:#e5e7eb;">Congratulations!</strong></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        We are pleased to inform you that you have successfully passed the Phase 2 Funded Trading Challenge on Bluestone Exchange.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Your trading performance has met all the required evaluation criteria, and your account is now under review for the Funded Trader stage.
+      </p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Challenge account details</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Account ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right; font-weight: 600;">{{accountId}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Evaluation period</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{dateRange}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Final balance</td>
+          <td style="padding: 8px 0; color: #4ade80; font-size: 14px; text-align: right; font-weight: 700;">{{finalBalance}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">
+        Our team will complete the verification process shortly and notify you once your Funded Trading Account is activated.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Thank you for your dedication and disciplined trading. We look forward to seeing your continued success with Bluestone Exchange.
+      </p>
+      <p style="text-align: center; margin: 20px 0;">
+        <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Login here</a>
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Bluestone Exchange</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Funding Evaluation Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@bluestoneexchange.com</p>
+    `)
+  },
+  {
+    name: 'Support Ticket Received',
+    slug: 'support_ticket_received',
+    subject: 'Support Ticket Received',
+    description: 'Confirmation to user when a support ticket is created (matches email_template.txt)',
+    category: 'support',
+    variables: ['firstName', 'ticketId', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">We have received your support request.</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Ticket ID</p>
+      <p style="color: #38bdf8; font-size: 18px; font-weight: 700; margin: 0 0 24px 0; font-family: monospace;">{{ticketId}}</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Our support team will respond shortly.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Bluestone Exchange, Support Team</p>
+    `)
+  },
+  {
+    name: 'Support Ticket Resolved',
+    slug: 'support_ticket_resolved',
+    subject: 'Support Ticket Resolved',
+    description: 'Sent when a support ticket is resolved (matches email_template.txt)',
+    category: 'support',
+    variables: ['firstName', 'ticketId', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Your support request has been resolved.</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Ticket ID</p>
+      <p style="color: #4ade80; font-size: 18px; font-weight: 700; margin: 0 0 24px 0; font-family: monospace;">{{ticketId}}</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you need further assistance, feel free to contact us.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Bluestone Exchange, Support Team</p>
+    `)
+  },
+  {
+    name: 'IB Commission Credited',
+    slug: 'ib_commission_credited',
+    subject: 'IB Commission Credited',
+    description: 'When IB commission is credited (matches email_template.txt)',
+    category: 'ib',
+    variables: ['firstName', 'amount', 'date', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Your IB commission has been credited.</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Amount</td>
+          <td style="padding: 8px 0; color: #4ade80; font-size: 16px; text-align: right; font-weight: 700;">\${{amount}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Date</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{date}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for being a valued partner.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Bluestone Exchange, Partner Program</p>
+    `)
+  },
+  {
+    name: 'IB Partner Registration Approved',
+    slug: 'ib_partner_approved',
+    subject: 'IB Partner Account Approved',
+    description: 'When an IB application is approved (matches email_template.txt)',
+    category: 'ib',
+    variables: ['firstName', 'partnerId', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;"><strong style="color:#e5e7eb;">Congratulations!</strong></p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Your Introducing Broker account has been approved.</p>
+      <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Partner ID</p>
+      <p style="color: #f3f4f6; font-size: 16px; font-weight: 600; margin: 0 0 24px 0;">{{partnerId}}</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Bluestone Exchange, Partner Program</p>
+    `)
+  },
+  {
+    name: 'Copy Trading Subscription Activated',
+    slug: 'copy_trading_activated',
+    subject: 'Copy Trading Activated',
+    description: 'When copy trading subscription is active (matches email_template.txt)',
+    category: 'notification',
+    variables: ['firstName', 'masterTrader', 'accountId', 'year'],
+    htmlContent: wrapEmailContent(`
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Your copy trading subscription has been activated.</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Master trader</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right; font-weight: 600;">{{masterTrader}}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 0; color: #9ca3af; font-size: 14px;">Account ID</td>
+          <td style="padding: 8px 0; color: #f3f4f6; font-size: 14px; text-align: right;">{{accountId}}</td>
+        </tr>
+      </table>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+        Your account will automatically copy trades from the selected strategy.
+      </p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Bluestone Exchange, Compliance Team</p>
     `)
   },
   {
