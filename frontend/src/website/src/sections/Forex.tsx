@@ -74,7 +74,7 @@ export default function Forex() {
           }}
         >
           Trade major, minor, and exotic currency pairs with tight spreads and fast execution.
-          Whether you are a beginner or professional trader, Blue Stone provides stable
+          Whether you are a beginner or professional trader, Unicap provides stable
           infrastructure for consistent performance.
         </p>
 

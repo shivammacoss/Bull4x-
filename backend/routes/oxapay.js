@@ -60,11 +60,11 @@ router.post('/create-payment', async (req, res) => {
 
     // Create OxaPay payment
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://api.bluestoneexchange.com'
+      ? 'https://api.unicapmarkets.com'
       : 'http://localhost:5001'
 
     const frontendUrl = process.env.NODE_ENV === 'production'
-      ? 'https://bluestoneexchange.com'
+      ? 'https://unicapmarkets.com'
       : 'http://localhost:5173'
 
     console.log('Creating OxaPay payment:', { amount, currency, orderId })
@@ -75,7 +75,7 @@ router.post('/create-payment', async (req, res) => {
       orderId: orderId,
       callbackUrl: `${baseUrl}/api/oxapay/webhook`,
       returnUrl: `${frontendUrl}/wallet?deposit=success`,
-      description: `BlueStone Deposit - $${amount}`
+      description: `Unicap Deposit - $${amount}`
     })
 
     console.log('OxaPay payment result:', paymentResult)
@@ -242,7 +242,7 @@ router.post('/webhook', async (req, res) => {
           const user = await User.findById(transaction.userId)
           if (user && user.email) {
             const settings = await EmailSettings.findOne()
-            const appOrigin = process.env.CORS_ORIGIN || 'https://bluestoneexchange.com'
+            const appOrigin = process.env.CORS_ORIGIN || 'https://unicapmarkets.com'
             await sendTemplateEmail('deposit_success', user.email, {
               firstName: user.firstName || user.email.split('@')[0],
               amount: transaction.amount.toFixed(2),
@@ -252,8 +252,8 @@ router.post('/webhook', async (req, res) => {
               date: new Date().toLocaleString(),
               newBalance: wallet.balance.toFixed(2),
               dashboardUrl: `${appOrigin}/dashboard`,
-              platformName: settings?.platformName || 'BlueStone',
-              supportEmail: settings?.supportEmail || 'support@BlueStone.com',
+              platformName: settings?.platformName || 'Unicap',
+              supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
               year: new Date().getFullYear().toString()
             })
           }
@@ -341,7 +341,7 @@ router.post('/create-withdrawal', async (req, res) => {
 
     // Try OxaPay automatic payout
     const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://api.bluestoneexchange.com'
+      ? 'https://api.unicapmarkets.com'
       : 'http://localhost:5001'
 
     console.log('Attempting OxaPay payout...')
@@ -351,7 +351,7 @@ router.post('/create-withdrawal', async (req, res) => {
       currency: currency || 'USDT',
       network: network || 'TRC20',
       callbackUrl: `${baseUrl}/api/oxapay/payout-webhook`,
-      description: `BlueStone Withdrawal - User ${userId}`
+      description: `Unicap Withdrawal - User ${userId}`
     })
 
     console.log('OxaPay payout result:', payoutResult)
@@ -396,8 +396,8 @@ router.post('/create-withdrawal', async (req, res) => {
           paymentMethod: `Crypto (${currency || 'USDT'})`,
           walletAddress: walletAddress,
           date: new Date().toLocaleString(),
-          platformName: settings?.platformName || 'BlueStone',
-          supportEmail: settings?.supportEmail || 'support@BlueStone.com',
+          platformName: settings?.platformName || 'Unicap',
+          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
           year: new Date().getFullYear().toString()
         })
       }
@@ -467,8 +467,8 @@ router.post('/payout-webhook', async (req, res) => {
             walletAddress: transaction.cryptoDetails?.address,
             txID: txID,
             date: new Date().toLocaleString(),
-            platformName: settings?.platformName || 'BlueStone',
-            supportEmail: settings?.supportEmail || 'support@BlueStone.com',
+            platformName: settings?.platformName || 'Unicap',
+            supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
             year: new Date().getFullYear().toString()
           })
         }

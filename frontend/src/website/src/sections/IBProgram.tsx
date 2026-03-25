@@ -76,7 +76,7 @@ export default function IBProgram() {
                 transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             >
-              Become a Blue Stone IB partner and grow your network while earning attractive commissions.
+              Become a Unicap IB partner and grow your network while earning attractive commissions.
               Build your trading community with confidence.
             </p>
 

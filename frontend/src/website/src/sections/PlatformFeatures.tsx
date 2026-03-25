@@ -195,7 +195,7 @@ export default function PlatformFeatures() {
             }`}
             style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
           >
-            Why Choose Bluestone
+            Why Choose Unicap
           </span>
           <h2
             className={`font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-white mb-6 transition-all duration-600 ${

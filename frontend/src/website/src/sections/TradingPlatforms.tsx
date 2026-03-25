@@ -183,7 +183,7 @@ export default function TradingPlatforms() {
                       <span className="text-white font-bold">B</span>
                     </div>
                     <div>
-                      <div className="text-white font-semibold">Bluestone MT5</div>
+                      <div className="text-white font-semibold">Unicap MT5</div>
                       <div className="text-xs text-white/50">Connected to server</div>
                     </div>
                   </div>

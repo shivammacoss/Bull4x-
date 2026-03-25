@@ -109,7 +109,7 @@ const AdminLogin = () => {
 
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <img src={logo} alt="BlueStone" className="h-12 object-contain" />
+          <img src={logo} alt="Unicap" className="h-12 object-contain" />
         </div>
 
         <div className="flex items-center gap-2 mb-6">

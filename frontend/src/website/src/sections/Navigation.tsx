@@ -110,7 +110,7 @@ export default function Navigation({ scrollY }: NavigationProps) {
             >
               <img
                 src="/logo.png"
-                alt="Bluestone"
+                alt="Unicap"
                 className="h-10 w-auto object-contain transform group-hover:scale-105 transition-transform duration-400"
               />
             </a>

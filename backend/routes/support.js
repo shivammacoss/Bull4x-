@@ -17,7 +17,7 @@ router.post('/contact', async (req, res) => {
 
     // Get support email from settings
     const settings = await EmailSettings.findOne()
-    const supportEmail = settings?.fromEmail || 'support@bluestoneexchange.com'
+    const supportEmail = settings?.fromEmail || 'support@unicapmarkets.com'
 
     // Send email to support
     const emailResult = await sendTemplateEmail('contact_inquiry', supportEmail, {

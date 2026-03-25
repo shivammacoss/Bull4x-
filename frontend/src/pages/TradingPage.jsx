@@ -1447,7 +1447,7 @@ const TradingPage = () => {
         <header className="h-14 sm:h-12 border-b flex items-center shrink-0 relative bg-black border-gray-800">
           {/* BlueStone Logo - Centered above Instruments panel (280px width, no padding) */}
           <div className="w-[280px] flex justify-center items-center shrink-0 border-r border-gray-800">
-            <img src={bluestoneLogo} alt="BlueStone" className="h-7 sm:h-8" />
+            <img src={bluestoneLogo} alt="Unicap" className="h-7 sm:h-8" />
           </div>
           {/* Account info - starts right after Instruments panel border */}
           {!isMobile && (

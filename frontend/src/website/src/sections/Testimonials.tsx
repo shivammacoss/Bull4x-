@@ -8,7 +8,7 @@ const testimonials = [
     location: 'United Kingdom',
     avatar: '/avatar-1.jpg',
     rating: 5,
-    quote: "Bluestone's execution speed is unmatched. I've seen my win rate improve significantly since switching. The tight spreads and reliable platform make all the difference in my scalping strategy.",
+    quote: "Unicap's execution speed is unmatched. I've seen my win rate improve significantly since switching. The tight spreads and reliable platform make all the difference in my scalping strategy.",
   },
   {
     name: 'Marcus Chen',
@@ -24,7 +24,7 @@ const testimonials = [
     location: 'Spain',
     avatar: '/avatar-3.jpg',
     rating: 5,
-    quote: "After trying multiple brokers, Bluestone stands out for transparency. No hidden fees, no requotes, just honest trading conditions. My account manager is always there when I need guidance.",
+    quote: "After trying multiple brokers, Unicap stands out for transparency. No hidden fees, no requotes, just honest trading conditions. My account manager is always there when I need guidance.",
   },
   {
     name: 'David Thompson',
@@ -32,7 +32,7 @@ const testimonials = [
     location: 'United States',
     avatar: '/avatar-4.jpg',
     rating: 5,
-    quote: "The API integration is rock-solid. I run multiple EAs on MT4 and MT5 without any issues. The low latency execution is crucial for my automated strategies, and Bluestone delivers.",
+    quote: "The API integration is rock-solid. I run multiple EAs on MT4 and MT5 without any issues. The low latency execution is crucial for my automated strategies, and Unicap delivers.",
   },
 ];
 
@@ -178,7 +178,7 @@ export default function Testimonials() {
               transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            Hear from our community of traders who have chosen Bluestone as their trusted broker.
+            Hear from our community of traders who have chosen Unicap as their trusted broker.
           </p>
         </div>
 

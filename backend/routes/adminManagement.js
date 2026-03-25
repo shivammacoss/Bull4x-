@@ -162,8 +162,8 @@ router.post('/send-login-otp', async (req, res) => {
 
     // Get platform name from settings
     const settings = await EmailSettings.findOne()
-    const platformName = settings?.fromName || 'Bluestone Exchange'
-    const supportEmail = settings?.fromEmail || 'support@bluestoneexchange.com'
+    const platformName = settings?.fromName || 'Unicap'
+    const supportEmail = settings?.fromEmail || 'support@unicapmarkets.com'
 
     // Send OTP email directly (no template needed)
     const emailResult = await sendOTPEmail(email, otp, admin.firstName || 'Admin')

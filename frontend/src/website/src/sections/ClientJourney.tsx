@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { UserPlus, ShieldCheck, Settings, TrendingUp } from 'lucide-react';
 
 const steps = [
-  { icon: UserPlus, step: '01', title: 'Register Account', description: 'Create your Blue Stone account in minutes with a simple registration process.' },
+  { icon: UserPlus, step: '01', title: 'Register Account', description: 'Create your Unicap account in minutes with a simple registration process.' },
   { icon: ShieldCheck, step: '02', title: 'Complete Verification', description: 'Verify your identity securely to unlock full platform access.' },
   { icon: Settings, step: '03', title: 'Choose Service', description: 'Select from Trade, Funding, IB Partnership, or Copy Trading based on your goals.' },
   { icon: TrendingUp, step: '04', title: 'Start Growing', description: 'Begin your journey towards consistent growth and financial success.' },
@@ -62,7 +62,7 @@ export default function ClientJourney() {
               transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            Your Journey With Blue Stone
+            Your Journey With Unicap
           </h2>
         </div>
 

@@ -64,7 +64,7 @@ export default function WhyChoose() {
               transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            Why Choose Blue Stone?
+            Why Choose Unicap?
           </h2>
         </div>
 

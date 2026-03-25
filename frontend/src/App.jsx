@@ -63,6 +63,7 @@ import FundingsPage from './website/src/pages/FundingsPage'
 import FundingCartPage from './pages/FundingCartPage'
 import PDFViewerPage from './pages/PDFViewerPage'
 import WebsiteLayout from './components/WebsiteLayout'
+import { TermsAndConditionsPage, PrivacyPolicyPage, RiskDisclosurePage, IBagreementPage, FundingRulesPage } from './website/src/pages/legal'
 
 function App() {
   return (
@@ -131,7 +132,12 @@ function App() {
         <Route path="/copy-trading" element={<WebsiteLayout><CopyTradingPage /></WebsiteLayout>} />
         <Route path="/fundings" element={<WebsiteLayout><FundingsPage /></WebsiteLayout>} />
         <Route path="/cart" element={<WebsiteLayout><FundingCartPage /></WebsiteLayout>} />
-        <Route path="/legal/:docType" element={<PDFViewerPage />} />
+        {/* Legal Pages */}
+        <Route path="/legal/terms-and-conditions" element={<TermsAndConditionsPage />} />
+        <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/legal/risk-disclosure" element={<RiskDisclosurePage />} />
+        <Route path="/legal/ib-agreement" element={<IBagreementPage />} />
+        <Route path="/legal/funding-rules" element={<FundingRulesPage />} />
         <Route path="/:slug/login" element={<BrandedLogin />} />
         <Route path="/:slug/signup" element={<BrandedSignup />} />
       </Routes>

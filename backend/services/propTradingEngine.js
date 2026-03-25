@@ -540,9 +540,9 @@ class PropTradingEngine {
             accountId: account.accountId,
             failureReason: breachReason,
             failureDate: account.failedAt.toLocaleDateString(),
-            platformName: 'BlueStone',
+            platformName: 'Unicap',
             loginUrl: 'http://localhost:5173/login',
-            supportEmail: 'support@BlueStone.com',
+            supportEmail: 'support@unicapmarkets.com',
             year: new Date().getFullYear().toString()
           })
           console.log(`Challenge failure email sent to ${user.email} for drawdown breach`)
@@ -610,9 +610,9 @@ class PropTradingEngine {
               fundSize: `$${challenge.fundSize.toLocaleString()}`,
               accountId: account.accountId,
               completionDate: account.passedAt.toLocaleDateString(),
-              platformName: 'BlueStone',
+              platformName: 'Unicap',
               loginUrl: 'http://localhost:5173/login',
-              supportEmail: 'support@BlueStone.com',
+              supportEmail: 'support@unicapmarkets.com',
               year: new Date().getFullYear().toString()
             })
           }
@@ -691,9 +691,9 @@ class PropTradingEngine {
           fundSize: `$${challenge.fundSize.toLocaleString()}`,
           accountId: account.accountId,
           completionDate: account.passedAt.toLocaleDateString(),
-          platformName: 'BlueStone',
+          platformName: 'Unicap',
           loginUrl: 'http://localhost:5173/login',
-          supportEmail: 'support@BlueStone.com',
+          supportEmail: 'support@unicapmarkets.com',
           year: new Date().getFullYear().toString()
         })
         console.log(`Challenge completion email sent to ${user.email} (admin force pass)`)
@@ -734,9 +734,9 @@ class PropTradingEngine {
           accountId: account.accountId,
           failureReason: account.failReason,
           failureDate: account.failedAt.toLocaleDateString(),
-          platformName: 'BlueStone',
+          platformName: 'Unicap',
           loginUrl: 'http://localhost:5173/login',
-          supportEmail: 'support@BlueStone.com',
+          supportEmail: 'support@unicapmarkets.com',
           year: new Date().getFullYear().toString()
         })
       }
@@ -934,9 +934,9 @@ class PropTradingEngine {
             accountId: account.accountId,
             failureReason: account.failReason,
             failureDate: account.failedAt.toLocaleDateString(),
-            platformName: 'BlueStone',
+            platformName: 'Unicap',
             loginUrl: 'http://localhost:5173/login',
-            supportEmail: 'support@BlueStone.com',
+            supportEmail: 'support@unicapmarkets.com',
             year: new Date().getFullYear().toString()
           })
         }

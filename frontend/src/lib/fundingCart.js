@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'bluestone_funding_cart'
+const STORAGE_KEY = 'unicap_funding_cart'
 
 /** @typedef {{ id: string, challengeType: '1-step' | '2-step', stepsCount: 1 | 2, accountSize: number, price: number, label: string }} FundingCartItem */
 

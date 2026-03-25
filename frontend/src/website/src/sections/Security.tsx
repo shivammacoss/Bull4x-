@@ -73,7 +73,7 @@ export default function Security() {
               transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            At Blue Stone, we believe financial relationships must be transparent and secure.
+            At Unicap, we believe financial relationships must be transparent and secure.
             We focus on long-term trust, not short-term gains.
           </p>
         </div>

@@ -5,11 +5,11 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 // Admin credentials to be used for initial setup
-const ADMIN_EMAIL = 'admin@BlueStone.com'
+const ADMIN_EMAIL = 'admin@unicapmarkets.com'
 const ADMIN_PASSWORD = 'Admin@123'
 const ADMIN_FIRST_NAME = 'Super'
 const ADMIN_LAST_NAME = 'Admin'
-const ADMIN_URL_SLUG = 'BlueStone'
+const ADMIN_URL_SLUG = 'unicap'
 
 const adminSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true },
@@ -86,7 +86,7 @@ async function createAdmin() {
       lastName: ADMIN_LAST_NAME,
       role: 'SUPER_ADMIN',
       urlSlug: ADMIN_URL_SLUG,
-      brandName: 'BlueStone24',
+      brandName: 'Unicap',
       status: 'ACTIVE'
     })
 

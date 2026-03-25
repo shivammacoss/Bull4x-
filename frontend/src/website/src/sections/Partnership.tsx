@@ -121,7 +121,7 @@ export default function Partnership() {
                 transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             >
-              Grow Your Business with Bluestone
+              Grow Your Business with Unicap
             </h2>
             <p
               className={`text-lg text-white/70 mb-8 transition-all duration-600 ${

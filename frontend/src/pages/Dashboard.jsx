@@ -481,7 +481,7 @@ const Dashboard = () => {
       {/* Full Width Header */}
       <div className="w-full shrink-0 relative border-b bg-gradient-to-r from-dark-800 via-dark-900 to-dark-800 border-gray-800">
         <div className="flex items-center justify-between px-6 py-3">
-          <img src={logoImage} alt="BlueStone" className="h-8 w-auto object-contain" />
+          <img src={logoImage} alt="Unicap" className="h-8 w-auto object-contain" />
           <UserHeader />
         </div>
       </div>

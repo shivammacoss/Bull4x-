@@ -74,7 +74,7 @@ const HomePage = () => {
     {
       name: 'Rajesh Kumar',
       role: 'Professional Trader',
-      content: 'BlueStone has transformed my trading experience. The platform is incredibly fast and reliable.',
+      content: 'Unicap has transformed my trading experience. The platform is incredibly fast and reliable.',
       rating: 5
     },
     {
@@ -98,7 +98,7 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <img src={logo} alt="BlueStone" className="h-12 object-contain" />
+              <img src={logo} alt="Unicap" className="h-12 object-contain" />
             </div>
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-gray-300 hover:text-white transition-colors">Features</a>
@@ -108,7 +108,7 @@ const HomePage = () => {
             {/* Desktop buttons */}
             <div className="hidden md:flex items-center gap-4">
               <button 
-                onClick={() => window.location.href = 'https://trade.bluestoneexchange.com/user/login'}
+                onClick={() => window.location.href = 'https://trade.unicapmarkets.com/user/login'}
                 className="bg-sky-400 hover:bg-sky-500 text-white px-6 py-2.5 rounded-full font-medium transition-all transform hover:scale-105"
               >
                 Login
@@ -116,7 +116,7 @@ const HomePage = () => {
               <div className="relative group">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 via-purple-500 via-blue-500 via-cyan-500 via-green-500 via-yellow-500 to-pink-500 rounded-full bg-[length:400%_100%] animate-rainbow blur-sm opacity-75 group-hover:opacity-100 transition-opacity"></div>
                 <button 
-                  onClick={() => window.location.href = 'https://trade.bluestoneexchange.com/user/signup'}
+                  onClick={() => window.location.href = 'https://trade.unicapmarkets.com/user/signup'}
                   className="relative bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2.5 rounded-full font-medium transition-all transform hover:scale-105"
                 >
                   Get Started
@@ -145,13 +145,13 @@ const HomePage = () => {
               <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="text-gray-300 hover:text-white transition-colors py-2">Testimonials</a>
               <hr className="border-gray-700 my-2" />
               <button 
-                onClick={() => { setMobileMenuOpen(false); window.location.href = 'https://trade.bluestoneexchange.com/user/login'; }}
+                onClick={() => { setMobileMenuOpen(false); window.location.href = 'https://trade.unicapmarkets.com/user/login'; }}
                 className="bg-sky-400 hover:bg-sky-500 text-white px-6 py-3 rounded-full font-medium transition-all w-full"
               >
                 Login
               </button>
               <button 
-                onClick={() => { setMobileMenuOpen(false); window.location.href = 'https://trade.bluestoneexchange.com/user/signup'; }}
+                onClick={() => { setMobileMenuOpen(false); window.location.href = 'https://trade.unicapmarkets.com/user/signup'; }}
                 className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-full font-medium transition-all w-full"
               >
                 Get Started
@@ -193,7 +193,7 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-              Why Choose <span className="text-blue-500">BlueStone</span>?
+              Why Choose <span className="text-blue-500">Unicap</span>?
             </h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
               We provide everything you need to succeed in the financial markets
@@ -227,7 +227,7 @@ const HomePage = () => {
                 Trusted by Traders <span className="text-blue-500">Worldwide</span>
               </h2>
               <p className="text-gray-400 mb-8">
-                Join thousands of successful traders who have chosen BlueStone as their preferred trading platform. 
+                Join thousands of successful traders who have chosen Unicap as their preferred trading platform. 
                 Our commitment to excellence and innovation sets us apart.
               </p>
               <ul className="space-y-4">
@@ -261,7 +261,7 @@ const HomePage = () => {
               What Our <span className="text-blue-500">Traders</span> Say
             </h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              Real stories from real traders who have achieved success with BlueStone
+              Real stories from real traders who have achieved success with Unicap
             </p>
           </div>
 
@@ -300,14 +300,14 @@ const HomePage = () => {
             Ready to Start Your Trading Journey?
           </h2>
           <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
-            Join BlueStone today and get access to world-class trading tools, 
+            Join Unicap today and get access to world-class trading tools, 
             educational resources, and 24/7 support.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 via-blue-400 via-teal-400 to-cyan-400 rounded-full bg-[length:400%_100%] animate-rainbow blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
               <button 
-                onClick={() => window.location.href = 'https://trade.bluestoneexchange.com/user/signup'}
+                onClick={() => window.location.href = 'https://trade.unicapmarkets.com/user/signup'}
                 className="relative bg-gradient-to-r from-cyan-500 via-teal-500 to-blue-500 bg-[length:200%_100%] animate-gradient-x text-white px-8 py-4 rounded-full font-semibold text-lg transition-all transform hover:scale-105"
               >
                 Create Free Account
@@ -316,7 +316,7 @@ const HomePage = () => {
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-teal-400 via-cyan-400 via-blue-400 to-teal-400 rounded-full bg-[length:400%_100%] animate-rainbow blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
               <button 
-                onClick={() => window.location.href = 'https://trade.bluestoneexchange.com/user/login'}
+                onClick={() => window.location.href = 'https://trade.unicapmarkets.com/user/login'}
                 className="relative bg-gradient-to-r from-teal-500 via-blue-500 to-cyan-500 bg-[length:200%_100%] animate-gradient-x text-white px-8 py-4 rounded-full font-semibold text-lg transition-all transform hover:scale-105"
               >
                 Login
@@ -331,7 +331,7 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <img src={logo} alt="BlueStone" className="h-10 object-contain mb-4" />
+              <img src={logo} alt="Unicap" className="h-10 object-contain mb-4" />
               <p className="text-gray-400 text-sm">
                 Your trusted partner in forex and crypto trading. Trade with confidence.
               </p>
@@ -357,18 +357,42 @@ const HomePage = () => {
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Risk Disclosure</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">AML Policy</a></li>
+                <li><a href="/legal/terms-and-conditions" className="hover:text-white transition-colors">Terms & Conditions</a></li>
+                <li><a href="/legal/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="/legal/risk-disclosure" className="hover:text-white transition-colors">Risk Disclosure</a></li>
+                <li><a href="/legal/ib-agreement" className="hover:text-white transition-colors">IB Agreement</a></li>
+                <li><a href="/legal/funding-rules" className="hover:text-white transition-colors">Funding Rules</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-            <p> 2026 BlueStone. All rights reserved.</p>
-            <p className="mt-2 text-xs">
-              Trading involves significant risk of loss. Past performance is not indicative of future results.
-            </p>
+          <div className="border-t border-gray-800 pt-8 space-y-4">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <p className="text-xs text-gray-400 leading-relaxed">
+                <strong className="text-gray-300">Unicap Markets</strong> (previously known as UC Markets - ucmarkets.com) is the trading name of Unicap Markets LLC, which is Registered in Saint Vincent and the Grenadines through registration number 3766 LLC 2024.
+              </p>
+            </div>
+            
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <p className="text-xs text-gray-400 leading-relaxed">
+                <strong className="text-gray-300">Risk Warning:</strong> Trading in securities involves significant risk. Prices may fluctuate and securities can become entirely valueless. You may incur losses that exceed your potential profits, and in some cases, losses may exceed the amount you have deposited. Securities, futures, options, and contracts for differences are complex financial instruments and are not suitable for all investors. Engaging in such transactions requires a sound understanding of the associated risks. Please read and ensure you fully understand our Risk Disclosure. Our leverage is dynamic and may change at any time. Such changes may affect your positions and margin requirements. You are responsible for monitoring your positions and maintaining sufficient margin at all times.
+              </p>
+            </div>
+            
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <p className="text-xs text-gray-400 leading-relaxed">
+                <strong className="text-gray-300">Restricted Countries:</strong> Unicap Markets LLC does not provide services for residents of certain countries such as the United States of America, Canada, New Zealand, Iran and North Korea (Democratic People's Republic of Korea) or a country where such distribution or use would be contrary to local law or regulation.
+              </p>
+            </div>
+            
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+              <p className="text-xs text-gray-400 leading-relaxed">
+                You must be 18 years old, or of legal age as determined in your country. Upon registering an account with Unicap Markets LLC, you acknowledge that you are registering at your own free will, without solicitation on behalf of Unicap Markets LLC. Unicap Markets LLC does not direct its website and services to any individual in any country in which the use of its website and services are prohibited by local laws or regulations. When accessing this website from a country in which its use may or may not be prohibited, it is the user's responsibility to ensure that any use of the website or services adheres to local laws or regulations. Unicap Markets LLC does not affirm that the information on its website is suitable for all jurisdictions.
+              </p>
+            </div>
+            
+            <div className="text-center pt-4">
+              <p className="text-xs text-gray-500"> 2026 Unicap Markets LLC. All Rights Reserved.</p>
+            </div>
           </div>
         </div>
       </footer>

@@ -163,7 +163,7 @@ export default function About() {
             }`}
             style={{ transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
           >
-            About Blue Stone
+            About Unicap
           </span>
           <h2
             className={`font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-white mb-6 transition-all duration-600 ${
@@ -185,7 +185,7 @@ export default function About() {
               transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            Blue Stone is built for modern traders and partners who demand transparency, security, and performance.
+            Unicap is built for modern traders and partners who demand transparency, security, and performance.
             Our mission is simple — empower traders with tools, capital, and reliable infrastructure.
           </p>
         </div>

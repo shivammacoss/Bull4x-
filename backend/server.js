@@ -233,9 +233,9 @@ app.use('/api/oxapay', oxapayRoutes)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
 // Serve APK download
-app.get('/downloads/BlueStone.apk', (req, res) => {
-  const apkPath = path.join(__dirname, 'apk', 'BlueStone.apk')
-  res.download(apkPath, 'BlueStone.apk', (err) => {
+app.get('/downloads/Unicap.apk', (req, res) => {
+  const apkPath = path.join(__dirname, 'apk', 'Unicap.apk')
+  res.download(apkPath, 'Unicap.apk', (err) => {
     if (err) {
       console.error('APK download error:', err)
       res.status(404).json({ error: 'APK not found' })
@@ -245,7 +245,7 @@ app.get('/downloads/BlueStone.apk', (req, res) => {
 
 // Health check
 app.get('/', (req, res) => {
-  res.json({ message: 'BlueStone API is running' })
+  res.json({ message: 'Unicap API is running' })
 })
 
 const PORT = process.env.PORT || 5000

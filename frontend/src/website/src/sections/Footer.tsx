@@ -5,7 +5,6 @@ import {
   Linkedin, 
   Instagram, 
   Youtube, 
-  Shield,
   Mail,
   MapPin
 } from 'lucide-react';
@@ -96,7 +95,7 @@ export default function Footer() {
             <a href="#hero" onClick={() => scrollToSection('#hero')} className="flex items-center mb-6">
               <img
                 src="/logo.png"
-                alt="Bluestone"
+                alt="Unicap"
                 className="h-10 w-auto object-contain"
               />
             </a>
@@ -247,18 +246,18 @@ export default function Footer() {
           >
             {/* Contact Info */}
             <div className="space-y-3">
-              <h5 className="text-white/80 text-sm font-medium">Dubai Office: Bluestone Exchange</h5>
+              <h5 className="text-white/80 text-sm font-medium">Dubai Office: Unicap Exchange</h5>
               <div className="flex items-start gap-2 text-sm text-white/60 hover:text-white/80 transition-colors duration-400">
                 <MapPin className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
                 <span>Offices 5, One Central Plaza, Dubai, United Arab Emirates</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-white/60 hover:text-white/80 transition-colors duration-400">
                 <Mail className="w-4 h-4 text-gold flex-shrink-0" />
-                <span>Support@bluestoneexchange.com</span>
+                <span>Support@unicapmarkets.com</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-white/60 hover:text-white/80 transition-colors duration-400">
                 <span className="w-4 h-4 text-gold flex items-center justify-center">🌐</span>
-                www.bluestoneexchange.com
+                www.unicapmarkets.com
               </div>
             </div>
           </div>
@@ -278,7 +277,7 @@ export default function Footer() {
           }}
         >
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm text-white/50">
-            <span>&copy; 2026 Blue Stone. All Rights Reserved.</span>
+            <span>&copy; 2026 Unicap. All Rights Reserved.</span>
           </div>
           
           <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
@@ -297,47 +296,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Risk Warning & Disclaimers */}
-        <div
-          className={`mt-8 space-y-4 transition-all duration-600 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-          style={{ 
-            transitionDelay: '600ms',
-            transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
-          }}
-        >
-          {/* Risk Warning */}
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-gold flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-white/50 leading-relaxed">
-                <strong className="text-white/70">Risk Warning:</strong> FX and CFDs are leveraged products and involve a high level of risk. Trading may result in losses exceeding your initial investment and may not be suitable for all investors. Please ensure you fully understand the risks before trading. Past performance is not indicative of future results.
-              </p>
-            </div>
-          </div>
-
-          {/* Disclaimer */}
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-            <p className="text-xs text-white/50 leading-relaxed">
-              <strong className="text-white/70">Disclaimer:</strong> The information on this website is provided for general informational purposes only and does not take into account your investment objectives or financial situation. Access to this website is at your own initiative. Bluestone Exchange Ltd makes no representations or warranties as to the accuracy or completeness of the content and accepts no liability for any reliance placed on it.
-            </p>
-          </div>
-
-          {/* Regulatory Notice */}
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-            <p className="text-xs text-white/50 leading-relaxed">
-              <strong className="text-white/70">Regulatory Notice:</strong> Bluestone Exchange Ltd is a trading name of Bluestone Exchange and Bluestone Exchange Cyprus Limited. Bluestone Exchange Europe Limited is authorised and regulated as an Investment Firm by the Cyprus Securities and Exchange Commission (licence number Z157892L).
-            </p>
-          </div>
-
-          {/* Copyright */}
-          <div className="text-center pt-4">
-            <p className="text-xs text-white/40">
-              © 2026 Bluestone Exchange Group
-            </p>
-          </div>
-        </div>
       </div>
     </footer>
   );
