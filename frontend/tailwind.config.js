@@ -2,15 +2,7 @@
 export default {
   content: [
     "./index.html",
-    "./src/pages/*.jsx",
-    "./src/components/*.jsx",
-    "./src/context/*.jsx",
-    "./src/services/*.js",
-    "./src/api/*.js",
-    "./src/lib/*.js",
-    "./src/*.jsx",
-    "./src/website/src/**/*.tsx",
-    "./src/website/src/**/*.ts",
+    "./src/**/*.{js,jsx,ts,tsx}",
   ],
   theme: {
     extend: {

@@ -1,15 +1,40 @@
-import { useState } from 'react'
+import { useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, MessageSquare, Headphones, ArrowRight } from 'lucide-react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 export default function Contact() {
   const navigate = useNavigate()
+  const sectionRef = useRef(null)
+  const bannerRef = useRef(null)
+  const cardsRef = useRef(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(bannerRef.current,
+        { y: 60, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 1, ease: 'power3.out',
+          scrollTrigger: { trigger: bannerRef.current, start: 'top 85%', toggleActions: 'play none none reverse' }
+        }
+      )
+      gsap.fromTo(cardsRef.current.children,
+        { y: 40, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.15, ease: 'power3.out',
+          scrollTrigger: { trigger: cardsRef.current, start: 'top 85%', toggleActions: 'play none none reverse' }
+        }
+      )
+    }, sectionRef)
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <section id="contact" className="py-24 bg-[#0a0f1a]">
+    <section ref={sectionRef} id="contact" className="py-24 bg-[#0a0f1a]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* CTA Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-cyan-600 p-12 md:p-16">
+        <div ref={bannerRef} className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-cyan-600 p-12 md:p-16">
           {/* Background pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-0 left-0 w-40 h-40 bg-white rounded-full blur-3xl" />
@@ -42,7 +67,7 @@ export default function Contact() {
         </div>
 
         {/* Contact options */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+        <div ref={cardsRef} className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
           <div className="p-8 bg-white/[0.02] border border-white/10 rounded-2xl text-center hover:border-blue-500/30 transition-all">
             <div className="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center mx-auto mb-4">
               <Mail className="w-7 h-7 text-blue-400" />

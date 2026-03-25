@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
 
 const categories = [
   { id: 'forex', name: 'Forex', count: 60 },
@@ -38,12 +42,35 @@ const instruments = {
 
 export default function Instruments() {
   const [activeCategory, setActiveCategory] = useState('forex')
+  const sectionRef = useRef(null)
+  const headerRef = useRef(null)
+  const tableRef = useRef(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(headerRef.current.children,
+        { y: 40, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.7, stagger: 0.1, ease: 'power3.out',
+          scrollTrigger: { trigger: headerRef.current, start: 'top 85%', toggleActions: 'play none none reverse' }
+        }
+      )
+      gsap.fromTo(tableRef.current,
+        { y: 60, opacity: 0 },
+        {
+          y: 0, opacity: 1, duration: 0.8, ease: 'power3.out',
+          scrollTrigger: { trigger: tableRef.current, start: 'top 85%', toggleActions: 'play none none reverse' }
+        }
+      )
+    }, sectionRef)
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <section id="instruments" className="py-24 bg-[#080c14]">
+    <section ref={sectionRef} id="instruments" className="py-24 bg-[#080c14]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
-        <div className="text-center mb-12">
+        <div ref={headerRef} className="text-center mb-12">
           <span className="inline-block px-4 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm font-medium mb-4">
             Markets
           </span>
@@ -79,7 +106,7 @@ export default function Instruments() {
         </div>
 
         {/* Instruments table */}
-        <div className="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
+        <div ref={tableRef} className="bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
           {/* Table header */}
           <div className="grid grid-cols-4 gap-4 px-6 py-4 bg-white/5 border-b border-white/10 text-sm font-medium text-white/60">
             <div>Instrument</div>
