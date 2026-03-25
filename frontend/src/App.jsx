@@ -47,23 +47,24 @@ import AdminProfile from './pages/AdminProfile'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
 import AccountDeletion from './pages/AccountDeletion'
-import StandardAccountPage from './website/src/pages/StandardAccountPage'
-import ProAccountPage from './website/src/pages/ProAccountPage'
-import EcnAccountPage from './website/src/pages/EcnAccountPage'
-import StarterFundPage from './website/src/pages/funding/StarterFundPage'
-import GrowthFundPage from './website/src/pages/funding/GrowthFundPage'
-import ProFundPage from './website/src/pages/funding/ProFundPage'
-import EliteFundPage from './website/src/pages/funding/EliteFundPage'
-import PrimeFundPage from './website/src/pages/funding/PrimeFundPage'
-import CustomPlanPage from './website/src/pages/funding/CustomPlanPage'
-import ExclusivePlanPage from './website/src/pages/funding/ExclusivePlanPage'
-import IBProgramPage from './website/src/pages/IBProgramPage'
-import CopyTradingPage from './website/src/pages/CopyTradingPage'
-import FundingsPage from './website/src/pages/FundingsPage'
+// Website pages temporarily disabled - using simplified homepage
+// import StandardAccountPage from './website/src/pages/StandardAccountPage'
+// import ProAccountPage from './website/src/pages/ProAccountPage'
+// import EcnAccountPage from './website/src/pages/EcnAccountPage'
+// import StarterFundPage from './website/src/pages/funding/StarterFundPage'
+// import GrowthFundPage from './website/src/pages/funding/GrowthFundPage'
+// import ProFundPage from './website/src/pages/funding/ProFundPage'
+// import EliteFundPage from './website/src/pages/funding/EliteFundPage'
+// import PrimeFundPage from './website/src/pages/funding/PrimeFundPage'
+// import CustomPlanPage from './website/src/pages/funding/CustomPlanPage'
+// import ExclusivePlanPage from './website/src/pages/funding/ExclusivePlanPage'
+// import IBProgramPage from './website/src/pages/IBProgramPage'
+// import CopyTradingPage from './website/src/pages/CopyTradingPage'
+// import FundingsPage from './website/src/pages/FundingsPage'
 import FundingCartPage from './pages/FundingCartPage'
 import PDFViewerPage from './pages/PDFViewerPage'
-import WebsiteLayout from './components/WebsiteLayout'
-import { TermsAndConditionsPage, PrivacyPolicyPage, RiskDisclosurePage, IBagreementPage, FundingRulesPage } from './website/src/pages/legal'
+// import WebsiteLayout from './components/WebsiteLayout'
+// import { TermsAndConditionsPage, PrivacyPolicyPage, RiskDisclosurePage, IBagreementPage, FundingRulesPage } from './website/src/pages/legal'
 
 function App() {
   return (
@@ -117,27 +118,19 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/account-deletion" element={<AccountDeletion />} />
-        {/* Website Sub-Pages */}
-        <Route path="/accounts/standard" element={<WebsiteLayout><StandardAccountPage /></WebsiteLayout>} />
-        <Route path="/accounts/pro" element={<WebsiteLayout><ProAccountPage /></WebsiteLayout>} />
-        <Route path="/accounts/ecn" element={<WebsiteLayout><EcnAccountPage /></WebsiteLayout>} />
-        <Route path="/funding/starter" element={<WebsiteLayout><StarterFundPage /></WebsiteLayout>} />
-        <Route path="/funding/growth" element={<WebsiteLayout><GrowthFundPage /></WebsiteLayout>} />
-        <Route path="/funding/pro" element={<WebsiteLayout><ProFundPage /></WebsiteLayout>} />
-        <Route path="/funding/elite" element={<WebsiteLayout><EliteFundPage /></WebsiteLayout>} />
-        <Route path="/funding/prime" element={<WebsiteLayout><PrimeFundPage /></WebsiteLayout>} />
-        <Route path="/funding/custom" element={<WebsiteLayout><CustomPlanPage /></WebsiteLayout>} />
-        <Route path="/funding/exclusive" element={<WebsiteLayout><ExclusivePlanPage /></WebsiteLayout>} />
-        <Route path="/ib-program" element={<WebsiteLayout><IBProgramPage /></WebsiteLayout>} />
-        <Route path="/copy-trading" element={<WebsiteLayout><CopyTradingPage /></WebsiteLayout>} />
-        <Route path="/fundings" element={<WebsiteLayout><FundingsPage /></WebsiteLayout>} />
-        <Route path="/cart" element={<WebsiteLayout><FundingCartPage /></WebsiteLayout>} />
-        {/* Legal Pages */}
-        <Route path="/legal/terms-and-conditions" element={<TermsAndConditionsPage />} />
-        <Route path="/legal/privacy-policy" element={<PrivacyPolicyPage />} />
-        <Route path="/legal/risk-disclosure" element={<RiskDisclosurePage />} />
-        <Route path="/legal/ib-agreement" element={<IBagreementPage />} />
-        <Route path="/legal/funding-rules" element={<FundingRulesPage />} />
+        {/* Website Sub-Pages - temporarily redirect to buy-challenge */}
+        <Route path="/accounts/*" element={<Navigate to="/buy-challenge" replace />} />
+        <Route path="/funding/*" element={<Navigate to="/buy-challenge" replace />} />
+        <Route path="/ib-program" element={<Navigate to="/ib" replace />} />
+        <Route path="/copy-trading" element={<Navigate to="/copytrade" replace />} />
+        <Route path="/fundings" element={<Navigate to="/buy-challenge" replace />} />
+        <Route path="/cart" element={<FundingCartPage />} />
+        {/* Legal Pages - redirect to existing pages */}
+        <Route path="/legal/terms-and-conditions" element={<Navigate to="/terms-of-service" replace />} />
+        <Route path="/legal/privacy-policy" element={<Navigate to="/privacy-policy" replace />} />
+        <Route path="/legal/risk-disclosure" element={<Navigate to="/terms-of-service" replace />} />
+        <Route path="/legal/ib-agreement" element={<Navigate to="/terms-of-service" replace />} />
+        <Route path="/legal/funding-rules" element={<Navigate to="/terms-of-service" replace />} />
         <Route path="/:slug/login" element={<BrandedLogin />} />
         <Route path="/:slug/signup" element={<BrandedSignup />} />
       </Routes>
