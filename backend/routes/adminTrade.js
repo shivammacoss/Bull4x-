@@ -8,6 +8,7 @@ import TradeSettings from '../models/TradeSettings.js'
 import AdminLog from '../models/AdminLog.js'
 import tradeEngine from '../services/tradeEngine.js'
 import copyTradingEngine from '../services/copyTradingEngine.js'
+import MasterTrader from '../models/MasterTrader.js'
 
 const router = express.Router()
 
@@ -98,6 +99,12 @@ router.post('/create', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Trading account not found' })
     }
 
+    // Always attach trade to the account owner (admin form can send mismatched userId)
+    const ownerUserId = account.userId
+    if (userId && String(ownerUserId) !== String(userId)) {
+      console.warn('[AdminTrade] create: body userId does not match account owner; using account.userId')
+    }
+
     // Get contract size
     const contractSize = tradeEngine.getContractSize(symbol)
     const leverage = account.leverage || '1:100'
@@ -109,7 +116,7 @@ router.post('/create', async (req, res) => {
 
     // Create trade
     const trade = await Trade.create({
-      userId,
+      userId: ownerUserId,
       tradingAccountId,
       tradeId,
       symbol,
@@ -132,7 +139,28 @@ router.post('/create', async (req, res) => {
       adminModifiedAt: new Date()
     })
 
-    res.json({ success: true, message: 'Trade created', trade })
+    // Same as user-open path: if this account is an active master, copy to followers
+    let copyResults = []
+    const master = await MasterTrader.findOne({
+      tradingAccountId: account._id,
+      status: 'ACTIVE'
+    })
+    if (master) {
+      try {
+        copyResults = await copyTradingEngine.copyTradeToFollowers(trade, master._id)
+        const ok = copyResults.filter((r) => r.status === 'SUCCESS').length
+        console.log(`[AdminTrade] Master trade created; copied to ${ok} follower(s)`)
+      } catch (copyError) {
+        console.error('[AdminTrade] copyTradeToFollowers:', copyError)
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Trade created',
+      trade,
+      copyResults: copyResults.length > 0 ? copyResults : undefined
+    })
   } catch (error) {
     console.error('Error creating trade:', error)
     res.status(500).json({ success: false, message: error.message })

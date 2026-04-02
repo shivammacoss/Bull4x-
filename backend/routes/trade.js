@@ -1,4 +1,5 @@
 import express from 'express'
+import mongoose from 'mongoose'
 import Trade from '../models/Trade.js'
 import TradingAccount from '../models/TradingAccount.js'
 import ChallengeAccount from '../models/ChallengeAccount.js'
@@ -33,6 +34,11 @@ async function getFreshPrice(symbol) {
 }
 
 const router = express.Router()
+
+function castTradingAccountId(id) {
+  if (!id) return id
+  return mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : id
+}
 
 // POST /api/trade/open - Open a new trade
 router.post('/open', async (req, res) => {
@@ -372,7 +378,7 @@ router.put('/modify', async (req, res) => {
 // GET /api/trade/open/:tradingAccountId - Get all open trades for an account
 router.get('/open/:tradingAccountId', async (req, res) => {
   try {
-    const { tradingAccountId } = req.params
+    const tradingAccountId = castTradingAccountId(req.params.tradingAccountId)
 
     const trades = await Trade.find({ 
       tradingAccountId, 
@@ -395,7 +401,7 @@ router.get('/open/:tradingAccountId', async (req, res) => {
 // GET /api/trade/pending/:tradingAccountId - Get all pending orders for an account
 router.get('/pending/:tradingAccountId', async (req, res) => {
   try {
-    const { tradingAccountId } = req.params
+    const tradingAccountId = castTradingAccountId(req.params.tradingAccountId)
 
     const trades = await Trade.find({ 
       tradingAccountId, 
@@ -418,7 +424,7 @@ router.get('/pending/:tradingAccountId', async (req, res) => {
 // GET /api/trade/history/:tradingAccountId - Get trade history for an account
 router.get('/history/:tradingAccountId', async (req, res) => {
   try {
-    const { tradingAccountId } = req.params
+    const tradingAccountId = castTradingAccountId(req.params.tradingAccountId)
     const { limit = 50, offset = 0 } = req.query
 
     const trades = await Trade.find({ 
@@ -453,7 +459,7 @@ router.get('/history/:tradingAccountId', async (req, res) => {
 // GET /api/trade/summary/:tradingAccountId - Get account summary with real-time values
 router.get('/summary/:tradingAccountId', async (req, res) => {
   try {
-    const { tradingAccountId } = req.params
+    const tradingAccountId = castTradingAccountId(req.params.tradingAccountId)
     const { prices } = req.query // JSON string of current prices
 
     // Check for regular trading account first
