@@ -42,7 +42,6 @@ import AdminEmailTemplates from './pages/AdminEmailTemplates'
 import AdminBonusManagement from './pages/AdminBonusManagement'
 import AdminBannerManagement from './pages/AdminBannerManagement'
 import WebsiteLandingPage from './pages/WebsiteLandingPage'
-import EmployeeLogin from './pages/EmployeeLogin'
 import AdminProfile from './pages/AdminProfile'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
@@ -112,7 +111,8 @@ function App() {
         <Route path="/admin/bonus-management" element={<AdminBonusManagement />} />
         <Route path="/admin/banners" element={<AdminBannerManagement />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
-        <Route path="/admin-employee" element={<EmployeeLogin />} />
+        <Route path="/admin-employee" element={<AdminLogin />} />
+        <Route path="/employee/login" element={<AdminLogin />} />
         <Route path="/buy-challenge" element={<BuyChallengePage />} />
         <Route path="/challenge-dashboard" element={<ChallengeDashboardPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />

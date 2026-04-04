@@ -14,6 +14,10 @@ export default defineConfig(({ mode }) => {
       },
     },
     server: {
+      // Reduces stale JS after git pull (browser holding old EmployeeLogin OTP bundle)
+      headers: {
+        'Cache-Control': 'no-store',
+      },
       proxy: {
         '/api': {
           target: backendTarget,

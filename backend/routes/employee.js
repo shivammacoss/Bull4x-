@@ -2,7 +2,7 @@ import express from 'express'
 import jwt from 'jsonwebtoken'
 import Employee from '../models/Employee.js'
 import OTP from '../models/OTP.js'
-import { sendTemplateEmail, sendOTPEmail, generateOTP, isOTPEnabled, getOTPExpiry } from '../services/emailService.js'
+import { sendOTPEmail, generateOTP, getOTPExpiry } from '../services/emailService.js'
 import EmailSettings from '../models/EmailSettings.js'
 
 const router = express.Router()
@@ -182,12 +182,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' })
     }
 
-    // Check if OTP verification is enabled
-    const otpEnabled = await isOTPEnabled()
-    if (otpEnabled) {
-      return res.json({ success: true, otpRequired: true, message: 'Please use OTP verification' })
-    }
-
+    // Employee portal: always email + password (OTP routes remain for optional flows)
     // Update last login
     employee.lastLogin = new Date()
     await employee.save()
