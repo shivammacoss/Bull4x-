@@ -503,10 +503,35 @@ router.get('/my-copy-trades/:userId', async (req, res) => {
     if (status) query.status = status
 
     const copyTrades = await CopyTrade.find(query)
-      .populate('masterId', 'displayName')
+      .populate('masterId', 'displayName approvedCommissionPercentage adminSharePercentage')
       .populate('followerTradeId')
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
+
+    const keySeen = new Set()
+    const commissionOr = []
+    for (const ct of copyTrades) {
+      if (ct.status !== 'CLOSED') continue
+      const mid = ct.masterId?._id ?? ct.masterId
+      const fid = ct.followerId?._id ?? ct.followerId
+      const td = ct.tradingDay
+      if (!mid || !fid || !td) continue
+      const k = `${mid}_${fid}_${td}`
+      if (keySeen.has(k)) continue
+      keySeen.add(k)
+      commissionOr.push({ masterId: mid, followerId: fid, tradingDay: td })
+    }
+
+    const commissionDocs =
+      commissionOr.length > 0
+        ? await CopyCommission.find({ $or: commissionOr }).lean()
+        : []
+    const commissionMap = new Map()
+    for (const c of commissionDocs) {
+      commissionMap.set(`${c.masterId}_${c.followerId}_${c.tradingDay}`, c)
+    }
+
+    const round2 = (n) => Math.round(Number(n) * 100) / 100
 
     const enriched = copyTrades.map((ct) => {
       const plain = ct.toObject ? ct.toObject() : { ...ct }
@@ -530,7 +555,64 @@ router.get('/my-copy-trades/:userId', async (req, res) => {
           : liveFloatingPnl !== null
             ? liveFloatingPnl
             : null
-      return { ...plain, liveFloatingPnl, displayPnl }
+
+      const mid = plain.masterId?._id ?? plain.masterId
+      const fid = plain.followerId?._id ?? plain.followerId
+      const dayKey = mid && fid && plain.tradingDay ? `${mid}_${fid}_${plain.tradingDay}` : null
+      const cc = dayKey ? commissionMap.get(dayKey) : null
+
+      let commissionBreakdown = {
+        followerTotalFee: null,
+        masterShare: null,
+        adminShare: null,
+        status: 'NONE',
+        copyCommissionStatus: null,
+        isEstimate: false
+      }
+
+      if (plain.status === 'CLOSED') {
+        if (cc && Math.abs(Number(cc.dailyProfit) || 0) > 1e-9) {
+          const ratio = (plain.followerPnl || 0) / cc.dailyProfit
+          commissionBreakdown = {
+            followerTotalFee: round2((cc.totalCommission || 0) * ratio),
+            masterShare: round2((cc.masterShare || 0) * ratio),
+            adminShare: round2((cc.adminShare || 0) * ratio),
+            status: cc.status === 'FAILED' ? 'FAILED' : 'ALLOCATED',
+            copyCommissionStatus: cc.status,
+            isEstimate: false
+          }
+        } else if (!plain.commissionApplied) {
+          commissionBreakdown = {
+            followerTotalFee: null,
+            masterShare: null,
+            adminShare: null,
+            status: 'PENDING',
+            copyCommissionStatus: null,
+            isEstimate: false
+          }
+        }
+      } else if (plain.status === 'OPEN' && displayPnl != null && displayPnl > 0) {
+        const m = plain.masterId
+        const pct = typeof m === 'object' && m ? m.approvedCommissionPercentage : null
+        const adminPct =
+          typeof m === 'object' && m && m.adminSharePercentage != null
+            ? m.adminSharePercentage
+            : 30
+        if (pct != null && pct > 0) {
+          const totalFee = displayPnl * (pct / 100)
+          const admin = totalFee * (adminPct / 100)
+          commissionBreakdown = {
+            followerTotalFee: round2(totalFee),
+            masterShare: round2(totalFee - admin),
+            adminShare: round2(admin),
+            status: 'ESTIMATE',
+            copyCommissionStatus: null,
+            isEstimate: true
+          }
+        }
+      }
+
+      return { ...plain, liveFloatingPnl, displayPnl, commissionBreakdown }
     })
 
     res.json({ copyTrades: enriched })

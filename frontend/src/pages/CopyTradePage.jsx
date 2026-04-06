@@ -74,6 +74,73 @@ const CopyTradePage = () => {
     { name: 'Instructions', label: t('nav.instructions'), icon: FileText, path: '/instructions' },
   ]
 
+  const copyTradeCommissionFeeCells = (trade) => {
+    const cb = trade.commissionBreakdown
+    const cellCls = `px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`
+    const fmtFee = (val) => {
+      if (val == null || Number.isNaN(val)) return '—'
+      const n = Number(val)
+      const color = n >= 0 ? (isDarkMode ? 'text-gray-300' : 'text-gray-700') : 'text-red-500'
+      return (
+        <span className={color}>
+          {`${n < 0 ? '-' : ''}$${Math.abs(n).toFixed(2)}`}
+        </span>
+      )
+    }
+    if (!cb) {
+      return (
+        <>
+          <td className={cellCls}>—</td>
+          <td className={cellCls}>—</td>
+          <td className={cellCls}>—</td>
+        </>
+      )
+    }
+    if (cb.status === 'PENDING') {
+      return (
+        <>
+          <td className={cellCls} colSpan={3}>
+            <span className="text-amber-500 text-xs">{t('copytrade.commissionPending')}</span>
+          </td>
+        </>
+      )
+    }
+    if (cb.status === 'NONE') {
+      return (
+        <>
+          <td className={cellCls}>{fmtFee(0)}</td>
+          <td className={cellCls}>{fmtFee(0)}</td>
+          <td className={cellCls}>{fmtFee(0)}</td>
+        </>
+      )
+    }
+    if (cb.status === 'ESTIMATE') {
+      const suffix = (
+        <span className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} text-xs ml-0.5`}>est.</span>
+      )
+      return (
+        <>
+          <td className={cellCls} title={t('copytrade.commissionEstimateHint')}>
+            {fmtFee(cb.followerTotalFee)}{suffix}
+          </td>
+          <td className={cellCls}>{fmtFee(cb.masterShare)}{suffix}</td>
+          <td className={cellCls}>{fmtFee(cb.adminShare)}{suffix}</td>
+        </>
+      )
+    }
+    const failedHint = cb.copyCommissionStatus === 'FAILED'
+    return (
+      <>
+        <td className={cellCls} title={failedHint ? t('copytrade.commissionFailedHint') : undefined}>
+          {fmtFee(cb.followerTotalFee)}
+          {failedHint && <span className="text-amber-500 text-[10px] block">{t('copytrade.notDeducted')}</span>}
+        </td>
+        <td className={cellCls}>{fmtFee(cb.masterShare)}</td>
+        <td className={cellCls}>{fmtFee(cb.adminShare)}</td>
+      </>
+    )
+  }
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768)
     window.addEventListener('resize', handleResize)
@@ -90,7 +157,7 @@ const CopyTradePage = () => {
   }, [])
 
   useEffect(() => {
-    if (activeTab !== 'trades') return
+    if (activeTab !== 'trades' && activeTab !== 'commissions') return
     let debounceTimer
     const debouncedRefetch = () => {
       clearTimeout(debounceTimer)
@@ -593,7 +660,7 @@ const CopyTradePage = () => {
 
           {/* Tabs - Scrollable on mobile */}
           <div className={`flex ${isMobile ? 'gap-2 overflow-x-auto pb-2' : 'gap-4'} mb-4`}>
-            {['discover', 'subscriptions', 'trades', ...(myMasterProfile?.status === 'ACTIVE' ? ['my-followers'] : [])].map(tab => (
+            {['discover', 'subscriptions', 'trades', 'commissions', ...(myMasterProfile?.status === 'ACTIVE' ? ['my-followers'] : [])].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -601,9 +668,11 @@ const CopyTradePage = () => {
                   activeTab === tab ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' : isDarkMode ? 'bg-dark-800 text-gray-400 hover:text-white' : 'bg-white text-gray-600 hover:text-gray-900 border border-gray-200'
                 }`}
               >
-                {tab === 'discover' ? t('copytrade.discover') : 
-                 tab === 'subscriptions' ? t('copytrade.subscriptions') : 
-                 tab === 'trades' ? t('copytrade.trades') : t('copytrade.followers')}
+                {tab === 'discover' ? t('copytrade.discover') :
+                 tab === 'subscriptions' ? t('copytrade.subscriptions') :
+                 tab === 'trades' ? t('copytrade.trades') :
+                 tab === 'commissions' ? t('copytrade.commissions') :
+                 t('copytrade.followers')}
               </button>
             ))}
           </div>
@@ -794,10 +863,10 @@ const CopyTradePage = () => {
               {myCopyTrades.length === 0 ? (
                 <div className="text-center py-12">
                   <TrendingUp size={48} className="mx-auto text-gray-600 mb-4" />
-                  <p className="text-gray-500">No copy trades yet</p>
+                  <p className="text-gray-500">{t('copytrade.noTrades')}</p>
                 </div>
               ) : (
-                <div className={`${isDarkMode ? 'bg-dark-800 border-gray-800' : 'bg-white border-gray-200 shadow-sm'} rounded-xl border overflow-hidden`}>
+                <div className={`${isDarkMode ? 'bg-dark-800 border-gray-800' : 'bg-white border-gray-200 shadow-sm'} rounded-xl border overflow-x-auto`}>
                   <table className="w-full">
                     <thead className={isDarkMode ? 'bg-dark-700' : 'bg-gray-50'}>
                       <tr>
@@ -808,18 +877,20 @@ const CopyTradePage = () => {
                         <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Open Price</th>
                         <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Close Price</th>
                         <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>P/L</th>
-                        <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Status</th>
+                        <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('copytrade.status')}</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {myCopyTrades.map(trade => (
+                      {myCopyTrades.map(trade => {
+                        const cellCls = `px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`
+                        return (
                         <tr key={trade._id} className={`border-t ${isDarkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{trade.masterId?.displayName || '-'}</td>
-                          <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{trade.symbol}</td>
+                          <td className={cellCls}>{trade.masterId?.displayName || '-'}</td>
+                          <td className={cellCls}>{trade.symbol}</td>
                           <td className={`px-4 py-3 text-sm ${trade.side === 'BUY' ? 'text-green-500' : 'text-red-500'}`}>{trade.side}</td>
-                          <td className="px-4 py-3 text-white text-sm">{trade.followerLotSize}</td>
-                          <td className="px-4 py-3 text-white text-sm">{trade.followerOpenPrice?.toFixed(5)}</td>
-                          <td className="px-4 py-3 text-white text-sm">{trade.followerClosePrice?.toFixed(5) || '-'}</td>
+                          <td className={cellCls}>{trade.followerLotSize}</td>
+                          <td className={cellCls}>{trade.followerOpenPrice?.toFixed(5)}</td>
+                          <td className={cellCls}>{trade.followerClosePrice?.toFixed(5) || '-'}</td>
                           <td className={`px-4 py-3 text-sm font-medium ${
                             (trade.displayPnl != null ? trade.displayPnl : trade.followerPnl || 0) >= 0
                               ? 'text-green-500'
@@ -849,7 +920,84 @@ const CopyTradePage = () => {
                             </span>
                           </td>
                         </tr>
-                      ))}
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Commission breakdown (per copied trade) */}
+          {activeTab === 'commissions' && (
+            <div>
+              <div className={`mb-4 flex items-start gap-3 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                <DollarSign className="shrink-0 text-cyan-500 mt-0.5" size={22} />
+                <div>
+                  <h3 className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{t('copytrade.commissions')}</h3>
+                  <p className="text-sm mt-0.5">{t('copytrade.commissionsSubtitle')}</p>
+                </div>
+              </div>
+              {myCopyTrades.length === 0 ? (
+                <div className="text-center py-12">
+                  <DollarSign size={48} className="mx-auto text-gray-600 mb-4 opacity-60" />
+                  <p className="text-gray-500">{t('copytrade.noTrades')}</p>
+                  <p className="text-gray-600 text-sm mt-2">{t('copytrade.noTradesDesc')}</p>
+                </div>
+              ) : (
+                <div className={`${isDarkMode ? 'bg-dark-800 border-gray-800' : 'bg-white border-gray-200 shadow-sm'} rounded-xl border overflow-x-auto`}>
+                  <table className="w-full min-w-[820px]">
+                    <thead className={isDarkMode ? 'bg-dark-700' : 'bg-gray-50'}>
+                      <tr>
+                        <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Master</th>
+                        <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Symbol</th>
+                        <th className={`text-left text-xs font-medium px-4 py-3 whitespace-nowrap ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('copytrade.tradingDay')}</th>
+                        <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>P/L</th>
+                        <th className={`text-left text-xs font-medium px-4 py-3 whitespace-nowrap ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} title={t('copytrade.commissionsSubtitle')}>{t('copytrade.yourFee')}</th>
+                        <th className={`text-left text-xs font-medium px-4 py-3 whitespace-nowrap ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('copytrade.masterShareCol')}</th>
+                        <th className={`text-left text-xs font-medium px-4 py-3 whitespace-nowrap ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('copytrade.adminShareCol')}</th>
+                        <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{t('copytrade.status')}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {myCopyTrades.map(trade => {
+                        const cellCls = `px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`
+                        return (
+                          <tr key={trade._id} className={`border-t ${isDarkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+                            <td className={cellCls}>{trade.masterId?.displayName || '-'}</td>
+                            <td className={cellCls}>{trade.symbol}</td>
+                            <td className={cellCls}>{trade.tradingDay || '—'}</td>
+                            <td className={`px-4 py-3 text-sm font-medium ${
+                              (trade.displayPnl != null ? trade.displayPnl : trade.followerPnl || 0) >= 0
+                                ? 'text-green-500'
+                                : 'text-red-500'
+                            }`}>
+                              {trade.status === 'OPEN' && trade.displayPnl != null ? (
+                                <span title="Unrealized P/L (updates with price)">
+                                  {(trade.displayPnl >= 0 ? '+' : '')}${trade.displayPnl.toFixed(2)}
+                                  <span className="text-gray-500 text-xs ml-1">live</span>
+                                </span>
+                              ) : trade.status === 'OPEN' ? (
+                                <span className="text-gray-500">—</span>
+                              ) : (
+                                <span>
+                                  {(trade.followerPnl >= 0 ? '+' : '')}${(trade.followerPnl ?? 0).toFixed(2)}
+                                </span>
+                              )}
+                            </td>
+                            {copyTradeCommissionFeeCells(trade)}
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                trade.status === 'OPEN' ? 'bg-blue-500/20 text-blue-500' :
+                                trade.status === 'CLOSED' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
+                              }`}>
+                                {trade.status}
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>
