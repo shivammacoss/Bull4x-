@@ -18,6 +18,55 @@ import {
 import { API_URL, API_BASE_URL } from '../config/api'
 import toast from 'react-hot-toast'
 
+/** Aligns with backend Transaction model: Approved + Completed; Deposit, Admin_Fund_Add, etc. */
+function computeFundStats(transactions) {
+  const typeU = (t) => (t.type || '').toUpperCase()
+  const statU = (s) => (s || '').toUpperCase()
+  const isApprovedLike = (s) => {
+    const u = statU(s)
+    return u === 'APPROVED' || u === 'COMPLETED'
+  }
+  const isPending = (s) => statU(s) === 'PENDING'
+  const isInflowType = (t) => {
+    const u = typeU(t)
+    return u === 'DEPOSIT' || u === 'ADMIN_FUND_ADD' || u === 'ADMIN_CREDIT_ADD'
+  }
+  const isOutflowType = (t) => {
+    const u = typeU(t)
+    return u === 'WITHDRAWAL' || u === 'ADMIN_CREDIT_REMOVE'
+  }
+  let deposits = 0
+  let withdrawals = 0
+  let pending = 0
+  for (const t of transactions) {
+    if (isPending(t.status)) pending += 1
+    if (!isApprovedLike(t.status)) continue
+    if (isInflowType(t)) {
+      const base = Number(t.amount) || 0
+      const bonus = typeU(t) === 'DEPOSIT' ? Number(t.bonusAmount) || 0 : 0
+      deposits += base + bonus
+    }
+    if (isOutflowType(t)) {
+      withdrawals += Number(t.amount) || 0
+    }
+  }
+  return {
+    deposits,
+    withdrawals,
+    pending,
+    net: deposits - withdrawals
+  }
+}
+
+const isWalletInflowType = (type) => {
+  const u = (type || '').toUpperCase()
+  return u === 'DEPOSIT' || u === 'ADMIN_FUND_ADD' || u === 'ADMIN_CREDIT_ADD'
+}
+const isWalletOutflowType = (type) => {
+  const u = (type || '').toUpperCase()
+  return u === 'WITHDRAWAL' || u === 'ADMIN_CREDIT_REMOVE'
+}
+
 const AdminFundManagement = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState('all')
@@ -40,52 +89,54 @@ const AdminFundManagement = () => {
     try {
       const res = await fetch(`${API_URL}/wallet/admin/transactions`)
       const data = await res.json()
-      if (data.transactions) {
-        let filtered = data.transactions
-        if (filterType !== 'all') {
+      const raw = Array.isArray(data.transactions) ? data.transactions : []
+      if (!res.ok) {
+        toast.error(data.message || 'Failed to load transactions')
+        setTransactions([])
+        setStats({ deposits: 0, withdrawals: 0, pending: 0, net: 0 })
+        setLoading(false)
+        return
+      }
+
+      setStats(computeFundStats(raw))
+
+      let filtered = raw
+      if (filterType !== 'all') {
+        if (filterType === 'deposit') {
+          filtered = filtered.filter(t => isWalletInflowType(t.type))
+        } else if (filterType === 'withdrawal') {
+          filtered = filtered.filter(t => isWalletOutflowType(t.type))
+        } else {
           filtered = filtered.filter(t => t.type?.toLowerCase() === filterType)
         }
-        // Account type filter (forex vs challenge)
-        if (filterAccountType === 'challenge') {
-          filtered = filtered.filter(t => 
-            t.type?.toLowerCase() === 'challenge_purchase' || 
-            t.type?.toLowerCase().includes('challenge')
-          )
-        } else if (filterAccountType === 'forex') {
-          filtered = filtered.filter(t => 
-            t.type?.toLowerCase() !== 'challenge_purchase' && 
-            !t.type?.toLowerCase().includes('challenge')
-          )
-        }
-        // Date filter
-        if (startDate) {
-          const start = new Date(startDate)
-          start.setHours(0, 0, 0, 0)
-          filtered = filtered.filter(t => new Date(t.createdAt) >= start)
-        }
-        if (endDate) {
-          const end = new Date(endDate)
-          end.setHours(23, 59, 59, 999)
-          filtered = filtered.filter(t => new Date(t.createdAt) <= end)
-        }
-        setTransactions(filtered)
-        
-        // Calculate stats
-        const deposits = data.transactions.filter(t => t.type?.toUpperCase() === 'DEPOSIT' && t.status?.toUpperCase() === 'APPROVED')
-          .reduce((sum, t) => sum + (t.amount || 0), 0)
-        const withdrawals = data.transactions.filter(t => t.type?.toUpperCase() === 'WITHDRAWAL' && t.status?.toUpperCase() === 'APPROVED')
-          .reduce((sum, t) => sum + (t.amount || 0), 0)
-        const pending = data.transactions.filter(t => t.status?.toUpperCase() === 'PENDING').length
-        
-        setStats({
-          deposits,
-          withdrawals,
-          pending,
-          net: deposits - withdrawals
-        })
       }
+      if (filterAccountType === 'challenge') {
+        filtered = filtered.filter(t =>
+          t.type?.toLowerCase() === 'challenge_purchase' ||
+          t.type?.toLowerCase().includes('challenge')
+        )
+      } else if (filterAccountType === 'forex') {
+        filtered = filtered.filter(t =>
+          t.type?.toLowerCase() !== 'challenge_purchase' &&
+          !t.type?.toLowerCase().includes('challenge')
+        )
+      }
+      if (startDate) {
+        const start = new Date(startDate)
+        start.setHours(0, 0, 0, 0)
+        filtered = filtered.filter(t => new Date(t.createdAt) >= start)
+      }
+      if (endDate) {
+        const end = new Date(endDate)
+        end.setHours(23, 59, 59, 999)
+        filtered = filtered.filter(t => new Date(t.createdAt) <= end)
+      }
+      setTransactions(filtered)
     } catch (error) {
       console.error('Error fetching transactions:', error)
+      toast.error('Failed to load transactions')
+      setTransactions([])
+      setStats({ deposits: 0, withdrawals: 0, pending: 0, net: 0 })
     }
     setLoading(false)
   }
@@ -330,9 +381,9 @@ const AdminFundManagement = () => {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        txn.type?.toUpperCase() === 'DEPOSIT' ? 'bg-green-500/20' : 'bg-red-500/20'
+                        isWalletInflowType(txn.type) ? 'bg-green-500/20' : 'bg-red-500/20'
                       }`}>
-                        {txn.type?.toUpperCase() === 'DEPOSIT' ? (
+                        {isWalletInflowType(txn.type) ? (
                           <ArrowDownRight size={16} className="text-green-500" />
                         ) : (
                           <ArrowUpRight size={16} className="text-red-500" />
@@ -350,14 +401,14 @@ const AdminFundManagement = () => {
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
                       <p className="text-gray-500">Amount</p>
-                      <p className={txn.type?.toUpperCase() === 'DEPOSIT' ? 'text-green-500 font-medium' : 'text-red-500 font-medium'}>
-                        {txn.type?.toUpperCase() === 'DEPOSIT' ? '+' : '-'}${(txn.amount || 0).toLocaleString()}
+                      <p className={isWalletInflowType(txn.type) ? 'text-green-500 font-medium' : 'text-red-500 font-medium'}>
+                        {isWalletInflowType(txn.type) ? '+' : '-'}${(txn.amount || 0).toLocaleString()}
                       </p>
                     </div>
                     <div>
                       <p className="text-gray-500">Bonus</p>
                       <p className="text-green-500 font-medium">
-                        {txn.type?.toUpperCase() === 'DEPOSIT' ? (
+                        {isWalletInflowType(txn.type) ? (
                           txn.bonusAmount && txn.bonusAmount > 0 ? `+$${txn.bonusAmount.toLocaleString()}` : '$0'
                         ) : '-'}
                       </p>
@@ -365,7 +416,9 @@ const AdminFundManagement = () => {
                     <div>
                       <p className="text-gray-500">Total</p>
                       <p className="text-white font-medium">
-                        {txn.type?.toUpperCase() === 'DEPOSIT' ? `$${(txn.totalAmount || (txn.amount + (txn.bonusAmount || 0))).toLocaleString()}` : '-'}
+                        {isWalletInflowType(txn.type)
+                          ? `$${(txn.totalAmount || (Number(txn.amount || 0) + Number(txn.bonusAmount || 0))).toLocaleString()}`
+                          : '-'}
                       </p>
                     </div>
                     <div>
@@ -410,16 +463,16 @@ const AdminFundManagement = () => {
                       <td className="py-4 px-4 text-white font-mono text-sm">{txn.transactionRef || txn._id?.slice(-8)}</td>
                       <td className="py-4 px-4 text-white">{txn.userId?.firstName || txn.userId?.email}</td>
                       <td className="py-4 px-4">
-                        <span className={`flex items-center gap-1 ${txn.type?.toUpperCase() === 'DEPOSIT' ? 'text-green-500' : 'text-red-500'}`}>
-                          {txn.type?.toUpperCase() === 'DEPOSIT' ? <ArrowDownRight size={14} /> : <ArrowUpRight size={14} />}
+                        <span className={`flex items-center gap-1 ${isWalletInflowType(txn.type) ? 'text-green-500' : 'text-red-500'}`}>
+                          {isWalletInflowType(txn.type) ? <ArrowDownRight size={14} /> : <ArrowUpRight size={14} />}
                           {txn.type}
                         </span>
                       </td>
-                      <td className={`py-4 px-4 font-medium ${txn.type?.toUpperCase() === 'DEPOSIT' ? 'text-green-500' : 'text-red-500'}`}>
-                        {txn.type?.toUpperCase() === 'DEPOSIT' ? '+' : '-'}${(txn.amount || 0).toLocaleString()}
+                      <td className={`py-4 px-4 font-medium ${isWalletInflowType(txn.type) ? 'text-green-500' : 'text-red-500'}`}>
+                        {isWalletInflowType(txn.type) ? '+' : '-'}${(txn.amount || 0).toLocaleString()}
                       </td>
                       <td className="py-4 px-4">
-                        {txn.type?.toUpperCase() === 'DEPOSIT' ? (
+                        {isWalletInflowType(txn.type) ? (
                           txn.bonusAmount && txn.bonusAmount > 0 ? (
                             <span className="text-green-500 font-medium">+${txn.bonusAmount.toLocaleString()}</span>
                           ) : (
@@ -430,7 +483,7 @@ const AdminFundManagement = () => {
                         )}
                       </td>
                       <td className="py-4 px-4">
-                        {txn.type?.toUpperCase() === 'DEPOSIT' ? (
+                        {isWalletInflowType(txn.type) ? (
                           <span className="text-white font-medium">
                             ${(txn.totalAmount || (txn.amount + (txn.bonusAmount || 0))).toLocaleString()}
                           </span>
@@ -489,7 +542,7 @@ const AdminFundManagement = () => {
               {/* Transaction Info */}
               <div className="space-y-3">
                 <h3 className="text-white font-semibold flex items-center gap-2">
-                  {selectedTxn.type?.toLowerCase() === 'withdrawal' ? (
+                  {isWalletOutflowType(selectedTxn.type) ? (
                     <ArrowUpRight size={18} className="text-red-500" />
                   ) : (
                     <ArrowDownRight size={18} className="text-green-500" />
@@ -503,11 +556,11 @@ const AdminFundManagement = () => {
                   </div>
                   <div>
                     <p className="text-gray-500">Amount</p>
-                    <p className={`text-lg font-bold ${selectedTxn.type?.toLowerCase() === 'deposit' ? 'text-green-500' : 'text-red-500'}`}>
+                    <p className={`text-lg font-bold ${isWalletInflowType(selectedTxn.type) ? 'text-green-500' : 'text-red-500'}`}>
                       ${selectedTxn.amount?.toLocaleString()}
                     </p>
                   </div>
-                  {selectedTxn.type?.toLowerCase() === 'deposit' && (
+                  {(selectedTxn.type || '').toUpperCase() === 'DEPOSIT' && (
                     <div>
                       <p className="text-gray-500">Bonus</p>
                       <p className="text-green-500 font-bold">
@@ -517,11 +570,11 @@ const AdminFundManagement = () => {
                       </p>
                     </div>
                   )}
-                  {selectedTxn.type?.toLowerCase() === 'deposit' && (
+                  {isWalletInflowType(selectedTxn.type) && (
                     <div>
                       <p className="text-gray-500">Total</p>
                       <p className="text-white font-bold">
-                        ${(selectedTxn.totalAmount || (selectedTxn.amount + (selectedTxn.bonusAmount || 0))).toLocaleString()}
+                        ${(selectedTxn.totalAmount || (Number(selectedTxn.amount || 0) + Number(selectedTxn.bonusAmount || 0))).toLocaleString()}
                       </p>
                     </div>
                   )}
@@ -580,7 +633,7 @@ const AdminFundManagement = () => {
               </div>
 
               {/* Bank/UPI Details (for withdrawals) */}
-              {selectedTxn.type?.toLowerCase() === 'withdrawal' && (
+              {isWalletOutflowType(selectedTxn.type) && (
                 <div className="border-t border-gray-700 pt-4">
                   <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                     {selectedTxn.bankAccountDetails?.type === 'UPI' ? (
