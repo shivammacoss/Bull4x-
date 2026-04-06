@@ -237,7 +237,7 @@ class IBEngine {
   }
 
   // Admin approve IB — creates chain link from application; issues referral code
-  async approveIB(userId, planId = null, adminId = null) {
+  async approveIB(userId, planId = null, adminId = null, ibLevelId = null) {
     const user = await User.findById(userId)
     if (!user) throw new Error('User not found')
     if (user.ibStatus === 'ACTIVE') {
@@ -296,7 +296,7 @@ class IBEngine {
 
     await user.save()
     await IBWallet.getOrCreateWallet(userId)
-    await this.assignInitialLevel(userId)
+    await this.assignInitialLevel(userId, ibLevelId)
 
     return user
   }
@@ -517,6 +517,7 @@ class IBEngine {
             ibStatus: 1,
             isIB: 1,
             parentIBId: 1,
+            referredBy: 1,
             level: 1
           }
         }
@@ -762,12 +763,21 @@ class IBEngine {
     }
   }
 
-  // Assign initial level to new IB
-  async assignInitialLevel(userId) {
+  // Assign initial tier (IB Level document) to new IB — optional admin-picked level
+  async assignInitialLevel(userId, preferredIbLevelId = null) {
     const user = await User.findById(userId)
     if (!user) throw new Error('User not found')
 
-    // Get the first level (Standard)
+    if (preferredIbLevelId) {
+      const picked = await IBLevel.findOne({ _id: preferredIbLevelId, isActive: true })
+      if (picked) {
+        user.ibLevelId = picked._id
+        user.ibLevelOrder = picked.order
+        await user.save()
+        return user
+      }
+    }
+
     let firstLevel = await IBLevel.findOne({ order: 1, isActive: true })
     if (!firstLevel) {
       await IBLevel.initializeDefaultLevels()

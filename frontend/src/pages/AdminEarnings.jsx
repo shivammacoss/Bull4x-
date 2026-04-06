@@ -7,8 +7,7 @@ import {
   Users,
   BarChart3,
   RefreshCw,
-  ChevronDown,
-  Download
+  Layers
 } from 'lucide-react'
 import { API_URL } from '../config/api'
 
@@ -17,6 +16,10 @@ const AdminEarnings = () => {
   const [dailyEarnings, setDailyEarnings] = useState([])
   const [userEarnings, setUserEarnings] = useState([])
   const [symbolEarnings, setSymbolEarnings] = useState([])
+  const [copyMasterEarnings, setCopyMasterEarnings] = useState([])
+  const [copyMasterTotals, setCopyMasterTotals] = useState(null)
+  const [copyMasterTotalsToday, setCopyMasterTotalsToday] = useState(null)
+  const [copyMasterTotalsAllTime, setCopyMasterTotalsAllTime] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('overview')
   const [dateRange, setDateRange] = useState('30')
@@ -31,7 +34,8 @@ const AdminEarnings = () => {
       fetchSummary(),
       fetchDailyEarnings(),
       fetchUserEarnings(),
-      fetchSymbolEarnings()
+      fetchSymbolEarnings(),
+      fetchCopyMasterEarnings()
     ])
     setLoading(false)
   }
@@ -81,6 +85,21 @@ const AdminEarnings = () => {
       }
     } catch (error) {
       console.error('Error fetching symbol earnings:', error)
+    }
+  }
+
+  const fetchCopyMasterEarnings = async () => {
+    try {
+      const res = await fetch(`${API_URL}/earnings/by-copy-master?days=${dateRange}`)
+      const data = await res.json()
+      if (data.success) {
+        setCopyMasterEarnings(data.earnings || [])
+        setCopyMasterTotals(data.totals || null)
+        setCopyMasterTotalsToday(data.totalsToday || null)
+        setCopyMasterTotalsAllTime(data.totalsAllTime || null)
+      }
+    } catch (error) {
+      console.error('Error fetching copy-master earnings:', error)
     }
   }
 
@@ -139,6 +158,24 @@ const AdminEarnings = () => {
         </div>
       ) : (
         <>
+          {/* Commission: daily (today) vs total (all-time) — platform-wide */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <div className="bg-dark-800 rounded-xl border border-gray-800 p-5">
+              <p className="text-gray-400 text-sm font-medium">Daily commission</p>
+              <p className="text-2xl sm:text-3xl font-bold text-green-400 font-mono mt-1">
+                {formatCurrency(summary?.today?.commission)}
+              </p>
+              <p className="text-gray-500 text-xs mt-2">Commission collected today (calendar day)</p>
+            </div>
+            <div className="bg-dark-800 rounded-xl border border-gray-800 p-5">
+              <p className="text-gray-400 text-sm font-medium">Total commission</p>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-400 font-mono mt-1">
+                {formatCurrency(summary?.allTime?.commission)}
+              </p>
+              <p className="text-gray-500 text-xs mt-2">All-time commission (entire platform)</p>
+            </div>
+          </div>
+
           {/* Summary Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <StatCard 
@@ -185,7 +222,7 @@ const AdminEarnings = () => {
               <h3 className="text-white font-semibold mb-4">Commission Earnings</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Today</span>
+                  <span className="text-gray-400">Daily (today)</span>
                   <span className="text-white font-mono">{formatCurrency(summary?.today?.commission)}</span>
                 </div>
                 <div className="flex justify-between">
@@ -197,7 +234,7 @@ const AdminEarnings = () => {
                   <span className="text-white font-mono">{formatCurrency(summary?.thisMonth?.commission)}</span>
                 </div>
                 <div className="flex justify-between border-t border-gray-700 pt-3">
-                  <span className="text-gray-400">All Time</span>
+                  <span className="text-gray-400">Total (all-time)</span>
                   <span className="text-green-500 font-mono font-bold">{formatCurrency(summary?.allTime?.commission)}</span>
                 </div>
               </div>
@@ -269,6 +306,13 @@ const AdminEarnings = () => {
               className={`px-4 py-2 rounded-lg text-sm ${activeTab === 'symbols' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'}`}
             >
               By Symbol
+            </button>
+            <button
+              onClick={() => setActiveTab('copymasters')}
+              className={`px-4 py-2 rounded-lg text-sm flex items-center gap-1.5 ${activeTab === 'copymasters' ? 'bg-blue-500 text-white' : 'text-gray-400 hover:text-white'}`}
+            >
+              <Layers size={14} />
+              By Copy Master
             </button>
           </div>
 
@@ -387,6 +431,127 @@ const AdminEarnings = () => {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* By Copy Master — platform fees from follower copies + master&apos;s own trades */}
+          {activeTab === 'copymasters' && (
+            <div className="space-y-4">
+              <p className="text-gray-500 text-sm">
+                Earnings attributed to each copy master: trades opened by followers who copy them, plus that master&apos;s own trading account in the selected period.
+              </p>
+              {(copyMasterTotalsToday || copyMasterTotalsAllTime) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="bg-dark-800 rounded-lg border border-gray-800 px-4 py-3">
+                    <p className="text-gray-500 text-xs">Daily commission (today)</p>
+                    <p className="text-green-400 font-mono font-semibold text-lg">
+                      {formatCurrency(copyMasterTotalsToday?.commission)}
+                    </p>
+                    <p className="text-gray-600 text-[11px] mt-1">Copy master + follower trades, today only</p>
+                  </div>
+                  <div className="bg-dark-800 rounded-lg border border-gray-800 px-4 py-3">
+                    <p className="text-gray-500 text-xs">Total commission (all-time)</p>
+                    <p className="text-blue-400 font-mono font-semibold text-lg">
+                      {formatCurrency(copyMasterTotalsAllTime?.commission)}
+                    </p>
+                    <p className="text-gray-600 text-[11px] mt-1">Copy master + follower trades, lifetime</p>
+                  </div>
+                </div>
+              )}
+              {copyMasterTotals && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                  <div className="bg-dark-800 rounded-lg border border-gray-800 px-4 py-3">
+                    <p className="text-gray-500 text-xs">Period commission</p>
+                    <p className="text-blue-400 font-mono font-semibold">{formatCurrency(copyMasterTotals.commission)}</p>
+                  </div>
+                  <div className="bg-dark-800 rounded-lg border border-gray-800 px-4 py-3">
+                    <p className="text-gray-500 text-xs" title="Your share from follower copy-profit commission (settled)">
+                      Period admin commission
+                    </p>
+                    <p className="text-amber-400 font-mono font-semibold">{formatCurrency(copyMasterTotals.adminCommission)}</p>
+                  </div>
+                  <div className="bg-dark-800 rounded-lg border border-gray-800 px-4 py-3">
+                    <p className="text-gray-500 text-xs">Period swap</p>
+                    <p className="text-cyan-400 font-mono font-semibold">{formatCurrency(copyMasterTotals.swap)}</p>
+                  </div>
+                  <div className="bg-dark-800 rounded-lg border border-gray-800 px-4 py-3">
+                    <p className="text-gray-500 text-xs">Follower copy trades</p>
+                    <p className="text-white font-mono font-semibold">{copyMasterTotals.followerTrades}</p>
+                  </div>
+                  <div className="bg-dark-800 rounded-lg border border-gray-800 px-4 py-3">
+                    <p className="text-gray-500 text-xs">Master&apos;s own trades</p>
+                    <p className="text-white font-mono font-semibold">{copyMasterTotals.masterTrades}</p>
+                  </div>
+                  <div className="bg-dark-800 rounded-lg border border-gray-800 px-4 py-3">
+                    <p className="text-gray-500 text-xs">Volume (lots)</p>
+                    <p className="text-white font-mono font-semibold">{copyMasterTotals.volume?.toFixed(2)}</p>
+                  </div>
+                </div>
+              )}
+              <div className="bg-dark-800 rounded-xl border border-gray-800 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-dark-700">
+                      <tr>
+                        <th className="text-left text-gray-400 text-xs font-medium px-4 py-3">Copy master</th>
+                        <th className="text-left text-gray-400 text-xs font-medium px-4 py-3">Status</th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Commission</th>
+                        <th
+                          className="text-right text-gray-400 text-xs font-medium px-4 py-3"
+                          title="Admin share from copy-profit commission (DEDUCTED / SETTLED)"
+                        >
+                          Admin commission
+                        </th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Swap</th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Total</th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3" title="Trades from copying followers">
+                          F. trades
+                        </th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3" title="Master account trades">
+                          M. trades
+                        </th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Volume</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {copyMasterEarnings.length === 0 ? (
+                        <tr>
+                          <td colSpan="9" className="text-center text-gray-500 py-8">No copy masters registered</td>
+                        </tr>
+                      ) : (
+                        copyMasterEarnings.map((row) => (
+                          <tr key={row.masterId} className="border-t border-gray-800 hover:bg-dark-700">
+                            <td className="px-4 py-3">
+                              <div>
+                                <p className="text-white text-sm font-medium">{row.displayName}</p>
+                                <p className="text-gray-500 text-xs">{row.masterEmail}</p>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span
+                                className={`text-xs font-medium px-2 py-0.5 rounded ${
+                                  row.status === 'ACTIVE'
+                                    ? 'bg-green-500/15 text-green-400'
+                                    : 'bg-gray-600/30 text-gray-400'
+                                }`}
+                              >
+                                {row.status || '—'}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(row.commission)}</td>
+                            <td className="px-4 py-3 text-right text-amber-400/90 font-mono text-sm">{formatCurrency(row.adminCommission)}</td>
+                            <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(row.swap)}</td>
+                            <td className="px-4 py-3 text-right text-green-500 font-mono text-sm font-semibold">{formatCurrency(row.total)}</td>
+                            <td className="px-4 py-3 text-right text-gray-400 text-sm">{row.followerTrades}</td>
+                            <td className="px-4 py-3 text-right text-gray-400 text-sm">{row.masterTrades}</td>
+                            <td className="px-4 py-3 text-right text-gray-400 text-sm">{row.volume?.toFixed(2)}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}

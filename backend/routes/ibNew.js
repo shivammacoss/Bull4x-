@@ -12,6 +12,19 @@ import mongoose from 'mongoose'
 
 const router = express.Router()
 
+/** True if targetIBId is the user or anywhere in user's downline (would create a cycle as parent). */
+async function wouldCreateReferralCycle(userId, targetIBId) {
+  if (!userId || !targetIBId) return false
+  if (String(userId) === String(targetIBId)) return true
+  try {
+    const tree = await ibEngine.getIBTree(new mongoose.Types.ObjectId(userId), 30)
+    const down = tree?.downlines || []
+    return down.some((d) => String(d._id) === String(targetIBId))
+  } catch {
+    return false
+  }
+}
+
 function userIdFromQuery(req) {
   const q = req.query.userId
   if (q === undefined || q === null || q === '' || q === 'undefined' || q === 'null') return null
@@ -452,12 +465,21 @@ router.get('/admin/all', async (req, res) => {
 
     const ibs = await User.find(query)
       .populate('ibPlanId', 'name')
-      .select('firstName email referralCode ibStatus ibLevel ibPlanId createdAt')
+      .populate('parentIBId', 'firstName email referralCode')
+      .populate('ibLevelId', 'name order commissionRate commissionType')
+      .select('firstName email referralCode ibStatus ibLevel ibPlanId parentIBId ibLevelId ibLevelOrder createdAt')
       .sort({ createdAt: -1 })
       .skip(parseInt(offset))
       .limit(parseInt(limit))
 
     const total = await User.countDocuments(query)
+
+    const ibIds = ibs.map((ib) => ib._id)
+    const directCounts = await User.aggregate([
+      { $match: { parentIBId: { $in: ibIds } } },
+      { $group: { _id: '$parentIBId', count: { $sum: 1 } } }
+    ])
+    const directMap = new Map(directCounts.map((d) => [String(d._id), d.count]))
 
     // Get wallet balances for each IB
     const ibsWithWallets = await Promise.all(ibs.map(async (ib) => {
@@ -465,7 +487,8 @@ router.get('/admin/all', async (req, res) => {
       return {
         ...ib.toObject(),
         walletBalance: wallet?.balance || 0,
-        totalEarned: wallet?.totalEarned || 0
+        totalEarned: wallet?.totalEarned || 0,
+        directReferralCount: directMap.get(String(ib._id)) || 0
       }
     }))
 
@@ -513,9 +536,9 @@ router.get('/admin/requests', async (req, res) => {
 router.put('/admin/approve/:userId', async (req, res) => {
   try {
     const { userId } = req.params
-    const { planId, adminId } = req.body
+    const { planId, adminId, ibLevelId } = req.body
 
-    const user = await ibEngine.approveIB(userId, planId, adminId || null)
+    const user = await ibEngine.approveIB(userId, planId, adminId || null, ibLevelId || null)
     res.json({
       success: true,
       message: 'IB approved successfully',
@@ -602,19 +625,27 @@ router.put('/admin/unblock/:userId', async (req, res) => {
   }
 })
 
-// PUT /api/ib/admin/update/:userId - Update IB details (level)
+// PUT /api/ib/admin/update/:userId - Update IB tier (IBLevel doc) and/or legacy chain depth
 router.put('/admin/update/:userId', async (req, res) => {
   try {
     const { userId } = req.params
-    const { ibLevel } = req.body
+    const { ibLevel, ibLevelId } = req.body
 
     const user = await User.findById(userId)
     if (!user) throw new Error('User not found')
     if (!user.isIB) throw new Error('User is not an IB')
 
-    // Update IB level if provided
-    if (ibLevel !== undefined) {
-      user.ibLevel = parseInt(ibLevel) || 1
+    if (ibLevelId) {
+      const lvl = await IBLevel.findOne({ _id: ibLevelId, isActive: true })
+      if (!lvl) {
+        return res.status(400).json({ success: false, message: 'Invalid or inactive IB tier' })
+      }
+      user.ibLevelId = lvl._id
+      user.ibLevelOrder = lvl.order
+    }
+
+    if (ibLevel !== undefined && !ibLevelId) {
+      user.ibLevel = parseInt(ibLevel, 10) || 1
     }
 
     await user.save()
@@ -625,7 +656,9 @@ router.put('/admin/update/:userId', async (req, res) => {
       user: {
         _id: user._id,
         firstName: user.firstName,
-        ibLevel: user.ibLevel
+        ibLevel: user.ibLevel,
+        ibLevelId: user.ibLevelId,
+        ibLevelOrder: user.ibLevelOrder
       }
     })
   } catch (error) {
@@ -892,7 +925,7 @@ router.delete('/admin/plans/:planId', async (req, res) => {
   }
 })
 
-// POST /api/ib/admin/transfer-referrals - Transfer users to a different IB
+// POST /api/ib/admin/transfer-referrals - Transfer users to a different IB (hierarchy-safe)
 router.post('/admin/transfer-referrals', async (req, res) => {
   try {
     const { userIds, targetIBId } = req.body
@@ -917,33 +950,174 @@ router.post('/admin/transfer-referrals', async (req, res) => {
     }
 
     let transferredCount = 0
+    const errors = []
 
-    // Update each user's parentIBId to point to new IB
     for (const userId of userIds) {
       try {
-        const result = await User.findByIdAndUpdate(userId, { 
-          parentIBId: targetIBId,
-          referredBy: targetIB.referralCode
-        }, { new: true })
-        if (result) {
-          transferredCount++
-          console.log(`Transferred user ${userId} to IB ${targetIBId}`)
+        if (String(userId) === String(targetIBId)) {
+          errors.push({ userId, message: 'Cannot assign IB to self' })
+          continue
         }
+        if (await wouldCreateReferralCycle(userId, targetIBId)) {
+          errors.push({ userId, message: 'Would create hierarchy cycle (target is under this user)' })
+          continue
+        }
+        const u = await User.findById(userId)
+        if (!u) {
+          errors.push({ userId, message: 'User not found' })
+          continue
+        }
+        u.parentIBId = targetIB._id
+        u.referredBy = targetIB.referralCode || null
+        if (u.isIB && u.ibStatus === 'ACTIVE') {
+          u.ibLevel = (targetIB.ibLevel || 1) + 1
+        }
+        await u.save()
+        transferredCount++
+        console.log(`Transferred user ${userId} to IB ${targetIBId}`)
       } catch (err) {
         console.error(`Error transferring user ${userId}:`, err)
+        errors.push({ userId, message: err.message })
       }
     }
 
     console.log(`[Admin] Transferred ${transferredCount} users to IB ${targetIB.email}`)
 
-    res.json({ 
-      success: true, 
-      message: `Successfully transferred ${transferredCount} users`,
-      transferredCount
+    res.json({
+      success: true,
+      message: `Successfully transferred ${transferredCount} user(s)`,
+      transferredCount,
+      errors: errors.length ? errors : undefined
     })
   } catch (error) {
     console.error('Error transferring referrals:', error)
     res.status(500).json({ success: false, message: 'Error transferring referrals', error: error.message })
+  }
+})
+
+// GET /api/ib/admin/referred-users — users under an IB (direct or full downline tree)
+router.get('/admin/referred-users', async (req, res) => {
+  try {
+    const { ibId, scope = 'downline', search = '' } = req.query
+    const searchRx = search ? new RegExp(String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') : null
+
+    if (ibId) {
+      const ib = await User.findById(ibId).select('firstName email referralCode isIB ibStatus')
+      if (!ib?.isIB) {
+        return res.status(404).json({ success: false, message: 'IB not found' })
+      }
+
+      if (scope === 'direct') {
+        let q = { parentIBId: ib._id }
+        if (searchRx) {
+          q = {
+            parentIBId: ib._id,
+            $or: [{ firstName: searchRx }, { email: searchRx }]
+          }
+        }
+        const users = await User.find(q)
+          .select('firstName email isIB ibStatus parentIBId referredBy createdAt')
+          .populate('parentIBId', 'firstName email referralCode')
+          .sort({ createdAt: -1 })
+          .limit(500)
+          .lean()
+
+        return res.json({
+          success: true,
+          scope: 'direct',
+          ib: {
+            _id: ib._id,
+            firstName: ib.firstName,
+            email: ib.email,
+            referralCode: ib.referralCode
+          },
+          users: users.map((u) => ({ ...u, depth: 1 }))
+        })
+      }
+
+      const tree = await ibEngine.getIBTree(ib._id, 25)
+      const raw = tree?.downlines || []
+      const parentIds = [...new Set(raw.map((u) => u.parentIBId).filter(Boolean).map(String))]
+      const parents = await User.find({ _id: { $in: parentIds } })
+        .select('firstName email referralCode')
+        .lean()
+      const pById = Object.fromEntries(parents.map((p) => [String(p._id), p]))
+
+      let users = raw.map((u) => ({
+        _id: u._id,
+        firstName: u.firstName,
+        email: u.email,
+        isIB: u.isIB,
+        ibStatus: u.ibStatus,
+        parentIBId: u.parentIBId,
+        referredBy: u.referredBy,
+        depth: (u.level ?? 0) + 1,
+        parentIB: u.parentIBId ? pById[String(u.parentIBId)] : null
+      }))
+
+      if (searchRx) {
+        users = users.filter(
+          (u) => searchRx.test(u.firstName || '') || searchRx.test(u.email || '')
+        )
+      }
+
+      return res.json({
+        success: true,
+        scope: 'downline',
+        ib: {
+          _id: ib._id,
+          firstName: ib.firstName,
+          email: ib.email,
+          referralCode: ib.referralCode
+        },
+        users
+      })
+    }
+
+    // No ibId: all users attached to any IB (flat list for admin overview)
+    let q = { parentIBId: { $ne: null } }
+    if (searchRx) {
+      q = {
+        parentIBId: { $ne: null },
+        $or: [{ firstName: searchRx }, { email: searchRx }]
+      }
+    }
+    const users = await User.find(q)
+      .select('firstName email isIB ibStatus parentIBId referredBy createdAt')
+      .populate('parentIBId', 'firstName email referralCode isIB')
+      .sort({ createdAt: -1 })
+      .limit(500)
+      .lean()
+
+    return res.json({ success: true, scope: 'all', ib: null, users })
+  } catch (error) {
+    console.error('Error fetching referred users:', error)
+    res.status(500).json({ success: false, message: error.message })
+  }
+})
+
+// POST /api/ib/admin/detach-referrals — remove user(s) from IB tree (no parent)
+router.post('/admin/detach-referrals', async (req, res) => {
+  try {
+    const { userIds } = req.body
+    if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'userIds array required' })
+    }
+
+    let detached = 0
+    for (const id of userIds) {
+      const u = await User.findById(id)
+      if (!u) continue
+      u.parentIBId = null
+      u.referredBy = null
+      await u.save()
+      detached++
+    }
+
+    res.json({ success: true, message: `Detached ${detached} user(s) from IB`, detachedCount: detached })
+  } catch (error) {
+    console.error('Error detaching referrals:', error)
+    res.status(500).json({ success: false, message: error.message })
   }
 })
 
@@ -1052,8 +1226,13 @@ router.post('/admin/requests/:id/approve', async (req, res) => {
     if (!application || application.status !== 'PENDING') {
       return res.status(400).json({ success: false, message: 'Pending application not found' })
     }
-    const { planId, adminId } = req.body
-    const user = await ibEngine.approveIB(application.userId.toString(), planId, adminId || null)
+    const { planId, adminId, ibLevelId } = req.body
+    const user = await ibEngine.approveIB(
+      application.userId.toString(),
+      planId,
+      adminId || null,
+      ibLevelId || null
+    )
     res.json({
       success: true,
       message: 'IB approved',

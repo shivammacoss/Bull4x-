@@ -27,7 +27,7 @@ import {
 
 const AdminIBManagement = () => {
   const [searchTerm, setSearchTerm] = useState('')
-  const [activeTab, setActiveTab] = useState('ibs') // ibs, applications, commission, plans, settings, transfer
+  const [activeTab, setActiveTab] = useState('ibs') // ibs, network, applications, ...
   const [ibs, setIbs] = useState([])
   const [applications, setApplications] = useState([])
   const [plans, setPlans] = useState([])
@@ -53,9 +53,18 @@ const AdminIBManagement = () => {
   // IB Details Modal states
   const [showIBModal, setShowIBModal] = useState(false)
   const [viewingIB, setViewingIB] = useState(null)
-  const [ibCommission, setIbCommission] = useState('')
-  const [ibPlan, setIbPlan] = useState('')
+  const [ibDetailTierId, setIbDetailTierId] = useState('')
   const [savingIB, setSavingIB] = useState(false)
+
+  // IB network: filter by IB, hierarchy scope, detach
+  const [filterIbId, setFilterIbId] = useState('')
+  const [networkScope, setNetworkScope] = useState('downline') // direct | downline
+  const [networkSearch, setNetworkSearch] = useState('')
+  const [networkUsers, setNetworkUsers] = useState([])
+  const [networkLoading, setNetworkLoading] = useState(false)
+  const [selectedNetworkIds, setSelectedNetworkIds] = useState([])
+  const [moveTargetIb, setMoveTargetIb] = useState('')
+  const [networkActionLoading, setNetworkActionLoading] = useState(false)
 
   const [commissionGrouped, setCommissionGrouped] = useState([])
   const [commissionAccountTypes, setCommissionAccountTypes] = useState([])
@@ -114,7 +123,11 @@ const AdminIBManagement = () => {
       })
       const data = await res.json()
       if (data.success) {
-        toast.success(`Successfully transferred ${data.transferredCount} users to the selected IB`)
+        toast.success(data.message || `Transferred ${data.transferredCount} user(s)`)
+        if (data.errors?.length) {
+          data.errors.slice(0, 5).forEach((e) => toast.error(String(e.message || e)))
+          if (data.errors.length > 5) toast.error(`…and ${data.errors.length - 5} more errors`)
+        }
         setSelectedUsers([])
         setTargetIB('')
         fetchAllUsers()
@@ -250,6 +263,100 @@ const AdminIBManagement = () => {
   useEffect(() => {
     if (activeTab === 'commission') fetchCommissionConfig()
   }, [activeTab])
+
+  const fetchNetworkUsers = async () => {
+    setNetworkLoading(true)
+    try {
+      const params = new URLSearchParams()
+      if (filterIbId) {
+        params.set('ibId', filterIbId)
+        params.set('scope', networkScope)
+      }
+      if (networkSearch.trim()) params.set('search', networkSearch.trim())
+      const res = await fetch(`${API_URL}/ib/admin/referred-users?${params.toString()}`)
+      const data = await res.json()
+      if (data.success) {
+        setNetworkUsers(data.users || [])
+        setSelectedNetworkIds([])
+      } else {
+        toast.error(data.message || 'Failed to load network')
+      }
+    } catch (e) {
+      console.error(e)
+      toast.error('Failed to load IB network')
+    }
+    setNetworkLoading(false)
+  }
+
+  useEffect(() => {
+    if (activeTab === 'network') fetchNetworkUsers()
+  }, [activeTab, filterIbId, networkScope])
+
+  const handleDetachNetwork = async (userIds) => {
+    if (!userIds?.length) return
+    if (!confirm(`Remove ${userIds.length} user(s) from their IB (unlink only)?`)) return
+    setNetworkActionLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/ib/admin/detach-referrals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userIds })
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success(data.message || 'Detached')
+        fetchNetworkUsers()
+        fetchAllUsers()
+        fetchIBs()
+      } else {
+        toast.error(data.message || 'Detach failed')
+      }
+    } catch (e) {
+      toast.error('Detach failed')
+    }
+    setNetworkActionLoading(false)
+  }
+
+  const handleMoveNetworkUsers = async () => {
+    if (!selectedNetworkIds.length) {
+      toast.error('Select at least one user')
+      return
+    }
+    if (!moveTargetIb) {
+      toast.error('Select target IB')
+      return
+    }
+    setNetworkActionLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/ib/admin/transfer-referrals`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userIds: selectedNetworkIds, targetIBId: moveTargetIb })
+      })
+      const data = await res.json()
+      if (data.success) {
+        toast.success(data.message || 'Moved')
+        if (data.errors?.length) {
+          data.errors.forEach((e) => toast.error(`${e.userId}: ${e.message}`))
+        }
+        setMoveTargetIb('')
+        fetchNetworkUsers()
+        fetchAllUsers()
+        fetchIBs()
+      } else {
+        toast.error(data.message || 'Move failed')
+      }
+    } catch (e) {
+      toast.error('Move failed')
+    }
+    setNetworkActionLoading(false)
+  }
+
+  const toggleNetworkSelect = (id) => {
+    setSelectedNetworkIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    )
+  }
 
   const selectCommissionAccountType = (typeId) => {
     setCommissionEditTypeId(typeId)
@@ -390,12 +497,15 @@ const AdminIBManagement = () => {
     }
   }
 
-  const handleApprove = async (userId, planId = null) => {
+  const handleApprove = async (userId, planId = null, ibLevelId = null) => {
     try {
       const res = await fetch(`${API_URL}/ib/admin/approve/${userId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: planId })
+        body: JSON.stringify({
+          ...(planId ? { planId } : {}),
+          ...(ibLevelId ? { ibLevelId } : {})
+        })
       })
       const data = await res.json()
       if (data.success) {
@@ -478,12 +588,18 @@ const AdminIBManagement = () => {
 
   const handleViewIB = (ib) => {
     setViewingIB(ib)
-    setIbCommission(ib.ibLevel || 1)
+    const tiers = [...(ibLevels || [])].filter((l) => l.isActive !== false).sort((a, b) => (a.order || 0) - (b.order || 0))
+    const current = ib.ibLevelId?._id || ib.ibLevelId
+    setIbDetailTierId(current ? String(current) : tiers[0]?._id ? String(tiers[0]._id) : '')
     setShowIBModal(true)
   }
 
   const handleSaveIBDetails = async () => {
     if (!viewingIB) return
+    if (!ibDetailTierId) {
+      toast.error('Select an IB tier')
+      return
+    }
     setSavingIB(true)
     
     try {
@@ -491,7 +607,7 @@ const AdminIBManagement = () => {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ibLevel: parseInt(ibCommission) || 1
+          ibLevelId: ibDetailTierId
         })
       })
       const data = await res.json()
@@ -560,6 +676,11 @@ const AdminIBManagement = () => {
     ib.referralCode?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const uniqueIbPlans = Array.from(new Map((plans || []).map((p) => [String(p._id), p])).values())
+  const sortedIbTiers = [...(ibLevels || [])]
+    .filter((l) => l.isActive !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0))
+
   return (
     <AdminLayout title="IB Management" subtitle="Manage Introducing Brokers and partners">
       {/* Stats */}
@@ -601,6 +722,7 @@ const AdminIBManagement = () => {
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         {[
           { id: 'ibs', label: 'Active IBs', count: dashboard?.ibs?.active },
+          { id: 'network', label: 'IB & users' },
           { id: 'applications', label: 'Applications', count: applications.length },
           { id: 'commission', label: 'Commission %' },
           { id: 'levels', label: 'IB Levels', count: ibLevels.length, icon: Award },
@@ -665,7 +787,8 @@ const AdminIBManagement = () => {
                     <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">IB Partner</th>
                     <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Referral Code</th>
                     <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Plan</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Referrals</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Direct refs</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Upline IB</th>
                     <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Earnings</th>
                     <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
                     <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
@@ -680,14 +803,25 @@ const AdminIBManagement = () => {
                             <span className="text-blue-500 font-medium">{ib.firstName?.charAt(0) || '?'}</span>
                           </div>
                           <div>
-                            <p className="text-white font-medium">{ib.firstName} {ib.lastName}</p>
+                            <p className="text-white font-medium">{ib.firstName} {ib.lastName || ''}</p>
                             <p className="text-gray-500 text-sm">{ib.email}</p>
+                            {ib.parentIBId && (
+                              <p className="text-gray-600 text-xs mt-0.5">
+                                Under: {ib.parentIBId.firstName || 'IB'}{' '}
+                                <span className="text-gray-500 font-mono">{ib.parentIBId.referralCode || ''}</span>
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
                       <td className="py-4 px-4 text-white font-mono">{ib.referralCode || '-'}</td>
                       <td className="py-4 px-4 text-white">{ib.ibPlanId?.name || 'Default'}</td>
-                      <td className="py-4 px-4 text-white">{ib.ibLevel || 0}</td>
+                      <td className="py-4 px-4 text-white">{ib.directReferralCount ?? ib.ibLevel ?? 0}</td>
+                      <td className="py-4 px-4 text-gray-400 text-sm">
+                        {ib.parentIBId
+                          ? `${ib.parentIBId.firstName || ''} (${ib.parentIBId.referralCode || '—'})`
+                          : '—'}
+                      </td>
                       <td className="py-4 px-4 text-green-500 font-medium">-</td>
                       <td className="py-4 px-4">
                         <span className={`px-2 py-1 rounded-full text-xs ${
@@ -735,11 +869,209 @@ const AdminIBManagement = () => {
         </div>
       )}
 
+      {/* IB hierarchy: view users per IB, filter, move, detach */}
+      {activeTab === 'network' && (
+        <div className="space-y-4">
+          <div className="bg-dark-800 rounded-xl border border-gray-800 p-4 sm:p-5">
+            <h2 className="text-white font-semibold text-lg mb-1">IB network & referred users</h2>
+            <p className="text-gray-500 text-sm mb-4">
+              Hierarchy uses <span className="text-gray-400">parent IB</span> on each user. Filter by IB to see direct referrals or the full downline tree; move or unlink users here. Users with <span className="text-gray-400">no IB yet</span> appear in the <span className="text-gray-400">Referral Transfer</span> tab.
+            </p>
+            <div className="flex flex-col lg:flex-row flex-wrap gap-3 items-stretch lg:items-end">
+              <div className="flex-1 min-w-[200px]">
+                <label className="text-gray-500 text-xs block mb-1">Filter by IB</label>
+                <select
+                  value={filterIbId}
+                  onChange={(e) => {
+                    setFilterIbId(e.target.value)
+                    if (!e.target.value) setNetworkScope('downline')
+                  }}
+                  className="w-full bg-dark-700 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm"
+                >
+                  <option value="">All users with an IB (any upline)</option>
+                  {ibs.filter((ib) => ib.ibStatus === 'ACTIVE').map((ib) => (
+                    <option key={ib._id} value={ib._id}>
+                      {ib.firstName} — {ib.email} ({ib.referralCode || 'no code'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {filterIbId && (
+                <div>
+                  <label className="text-gray-500 text-xs block mb-1">Scope</label>
+                  <select
+                    value={networkScope}
+                    onChange={(e) => setNetworkScope(e.target.value)}
+                    className="w-full lg:w-48 bg-dark-700 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm"
+                  >
+                    <option value="downline">Full downline (all levels)</option>
+                    <option value="direct">Direct only (level 1)</option>
+                  </select>
+                </div>
+              )}
+              <div className="flex-1 min-w-[180px]">
+                <label className="text-gray-500 text-xs block mb-1">Search name / email</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={networkSearch}
+                    onChange={(e) => setNetworkSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && fetchNetworkUsers()}
+                    placeholder="Search…"
+                    className="flex-1 bg-dark-700 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={fetchNetworkUsers}
+                    disabled={networkLoading}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 disabled:opacity-50"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-col sm:flex-row flex-wrap gap-3 items-stretch sm:items-center border-t border-gray-800 pt-4">
+              <div className="flex-1 min-w-[200px]">
+                <label className="text-gray-500 text-xs block mb-1">Move selected to IB</label>
+                <select
+                  value={moveTargetIb}
+                  onChange={(e) => setMoveTargetIb(e.target.value)}
+                  className="w-full bg-dark-700 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm"
+                >
+                  <option value="">— Choose target IB —</option>
+                  {ibs.filter((ib) => ib.ibStatus === 'ACTIVE').map((ib) => (
+                    <option key={ib._id} value={ib._id}>
+                      {ib.firstName} ({ib.referralCode || ib.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                type="button"
+                onClick={handleMoveNetworkUsers}
+                disabled={networkActionLoading || !selectedNetworkIds.length || !moveTargetIb}
+                className="px-4 py-2 bg-purple-500 text-white rounded-lg text-sm hover:bg-purple-600 disabled:opacity-50 sm:self-end"
+              >
+                {networkActionLoading ? '…' : `Move ${selectedNetworkIds.length || ''} selected`}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDetachNetwork(selectedNetworkIds)}
+                disabled={networkActionLoading || !selectedNetworkIds.length}
+                className="px-4 py-2 bg-red-500/20 text-red-400 border border-red-500/40 rounded-lg text-sm hover:bg-red-500/30 disabled:opacity-50 sm:self-end"
+              >
+                Unlink selected from IB
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-dark-800 rounded-xl border border-gray-800 overflow-hidden">
+            {networkLoading ? (
+              <div className="p-8 text-center text-gray-500">Loading…</div>
+            ) : networkUsers.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">No users match this filter</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3 w-10">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all"
+                          checked={
+                            networkUsers.length > 0 &&
+                            selectedNetworkIds.length === networkUsers.length
+                          }
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedNetworkIds(networkUsers.map((u) => u._id))
+                            } else {
+                              setSelectedNetworkIds([])
+                            }
+                          }}
+                        />
+                      </th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">User</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">Role</th>
+                      {filterIbId && networkScope === 'downline' && (
+                        <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">Depth</th>
+                      )}
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">Parent / upline IB</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">Ref code</th>
+                      <th className="text-right text-gray-500 text-sm font-medium py-3 px-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {networkUsers.map((u) => (
+                      <tr key={u._id} className="border-b border-gray-800 hover:bg-dark-700/50">
+                        <td className="py-3 px-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedNetworkIds.includes(u._id)}
+                            onChange={() => toggleNetworkSelect(u._id)}
+                          />
+                        </td>
+                        <td className="py-3 px-3">
+                          <p className="text-white text-sm font-medium">{u.firstName}</p>
+                          <p className="text-gray-500 text-xs">{u.email}</p>
+                        </td>
+                        <td className="py-3 px-3">
+                          {u.isIB ? (
+                            <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">IB</span>
+                          ) : (
+                            <span className="text-xs px-2 py-0.5 rounded bg-gray-600 text-gray-300">User</span>
+                          )}
+                        </td>
+                        {filterIbId && networkScope === 'downline' && (
+                          <td className="py-3 px-3 text-gray-400 text-sm">{u.depth ?? '—'}</td>
+                        )}
+                        <td className="py-3 px-3 text-sm">
+                          {u.parentIB ? (
+                            <span className="text-gray-300">
+                              {u.parentIB.firstName} <span className="text-gray-500">{u.parentIB.referralCode}</span>
+                            </span>
+                          ) : u.parentIBId && typeof u.parentIBId === 'object' ? (
+                            <span className="text-gray-300">
+                              {u.parentIBId.firstName}{' '}
+                              <span className="text-gray-500">{u.parentIBId.referralCode}</span>
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-gray-500 font-mono text-xs">{u.referredBy || '—'}</td>
+                        <td className="py-3 px-3 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDetachNetwork([u._id])}
+                            disabled={networkActionLoading}
+                            className="text-xs text-red-400 hover:underline disabled:opacity-50"
+                          >
+                            Unlink
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Applications Tab */}
       {activeTab === 'applications' && (
         <div className="bg-dark-800 rounded-xl border border-gray-800 overflow-hidden">
           <div className="p-4 sm:p-5 border-b border-gray-800">
             <h2 className="text-white font-semibold text-lg">Pending Applications</h2>
+            <p className="text-gray-500 text-sm mt-1">
+              Choose the <span className="text-gray-400">IB tier</span> (your 5 levels) and optionally a{' '}
+              <span className="text-gray-400">commission plan</span> from the database. Leave plan on “Auto” if you only use defaults.
+            </p>
           </div>
 
           {applications.length === 0 ? (
@@ -747,60 +1079,125 @@ const AdminIBManagement = () => {
           ) : (
             <div className="divide-y divide-gray-800">
               {applications.map((app) => (
-                <div key={app._id} className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center">
-                      <span className="text-yellow-500 font-medium">{app.firstName?.charAt(0) || '?'}</span>
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">{app.firstName} {app.lastName}</p>
-                      <p className="text-gray-500 text-sm">{app.email}</p>
-                      <p className="text-gray-600 text-xs">Applied: {new Date(app.createdAt).toLocaleDateString()}</p>
-                      {app.referredByIb ? (
-                        <p className="text-gray-500 text-xs mt-1">
-                          Referred by:{' '}
-                          <span className="text-blue-400">
-                            {app.referredByIb.referralCode || app.referredByIb.email}{' '}
-                            ({app.referredByIb.firstName || 'IB'})
-                          </span>
+                <div
+                  key={app._id}
+                  className="p-4 sm:p-5 hover:bg-dark-700/25 transition-colors"
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
+                    <div className="flex gap-3 flex-1 min-w-0">
+                      <div className="w-12 h-12 shrink-0 bg-yellow-500/15 border border-yellow-500/25 rounded-full flex items-center justify-center">
+                        <span className="text-yellow-400 font-semibold text-lg">
+                          {app.firstName?.charAt(0) || '?'}
+                        </span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-white font-semibold text-base">
+                          {app.firstName} {app.lastName || ''}
                         </p>
-                      ) : (
-                        <p className="text-gray-600 text-xs mt-1">Referred by: (Organic)</p>
-                      )}
+                        <p className="text-gray-400 text-sm truncate">{app.email}</p>
+                        <p className="text-gray-600 text-xs mt-1">
+                          Applied {new Date(app.createdAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                        </p>
+                        {app.referredByIb ? (
+                          <p className="text-gray-500 text-xs mt-2">
+                            Referred by{' '}
+                            <span className="text-blue-400">
+                              {app.referredByIb.referralCode || app.referredByIb.email}
+                            </span>
+                            <span className="text-gray-600"> · {app.referredByIb.firstName || 'IB'}</span>
+                          </p>
+                        ) : (
+                          <p className="text-gray-600 text-xs mt-2">Organic signup (no referral code)</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <select 
-                      className="bg-dark-700 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm"
-                      id={`plan-${app._id}`}
-                      defaultValue=""
-                    >
-                      <option value="" disabled>Select Plan</option>
-                      {plans.map(plan => (
-                        <option key={plan._id} value={plan._id}>{plan.name}</option>
-                      ))}
-                      <option value="default">Default Plan</option>
-                    </select>
-                    <button
-                      onClick={() => {
-                        const planSelect = document.getElementById(`plan-${app._id}`)
-                        const planId = planSelect?.value === 'default' ? null : planSelect?.value
-                        if (!planSelect?.value) {
-                          toast.error('Please select a plan first')
-                          return
-                        }
-                        handleApprove(app.userId, planId)
-                      }}
-                      className="flex items-center gap-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm"
-                    >
-                      <Check size={16} /> Approve
-                    </button>
-                    <button
-                      onClick={() => handleReject(app.userId)}
-                      className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:bg-red-600 text-sm"
-                    >
-                      <X size={16} /> Reject
-                    </button>
+
+                    <div className="rounded-xl border border-gray-700/90 bg-dark-900/50 p-4 space-y-4 lg:w-full lg:max-w-md xl:max-w-lg shrink-0">
+                      <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-widest">
+                        On approval
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label
+                            htmlFor={`tier-${app._id}`}
+                            className="block text-xs font-medium text-gray-400"
+                          >
+                            IB tier
+                          </label>
+                          <select
+                            className="w-full bg-dark-800 border border-gray-600 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50"
+                            id={`tier-${app._id}`}
+                            key={`tier-${app._id}-${sortedIbTiers[0]?._id || 'none'}`}
+                            defaultValue={sortedIbTiers[0]?._id || ''}
+                          >
+                            {sortedIbTiers.length === 0 ? (
+                              <option value="" disabled>
+                                Add tiers in IB Levels tab
+                              </option>
+                            ) : (
+                              sortedIbTiers.map((lvl) => (
+                                <option key={lvl._id} value={lvl._id}>
+                                  {lvl.name} · tier {lvl.order}
+                                </option>
+                              ))
+                            )}
+                          </select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label
+                            htmlFor={`plan-${app._id}`}
+                            className="block text-xs font-medium text-gray-400"
+                          >
+                            Commission plan
+                          </label>
+                          <select
+                            className="w-full bg-dark-800 border border-gray-600 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50"
+                            id={`plan-${app._id}`}
+                            defaultValue=""
+                          >
+                            <option value="">Auto (default plan)</option>
+                            {uniqueIbPlans.map((plan) => (
+                              <option key={plan._id} value={plan._id}>
+                                {plan.name}
+                                {plan.maxLevels != null ? ` · ${plan.maxLevels} levels` : ''}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      {uniqueIbPlans.length === 0 && (
+                        <p className="text-xs text-amber-400/90 leading-relaxed bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
+                          No extra commission plans saved yet — approval will attach the system default plan. Add named plans via API or DB if you need more.
+                        </p>
+                      )}
+                      <div className="flex flex-wrap items-center gap-2 justify-end pt-1 border-t border-gray-800">
+                        <button
+                          type="button"
+                          onClick={() => handleReject(app.userId)}
+                          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium border border-red-500/40 text-red-400 bg-red-500/10 hover:bg-red-500/20 hover:text-red-300 transition-colors"
+                        >
+                          <X size={16} /> Reject
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const tierSel = document.getElementById(`tier-${app._id}`)
+                            const planSel = document.getElementById(`plan-${app._id}`)
+                            if (sortedIbTiers.length > 0 && !tierSel?.value) {
+                              toast.error('Select an IB tier')
+                              return
+                            }
+                            const ibLevelId = tierSel?.value || null
+                            const planRaw = planSel?.value
+                            const planId = planRaw && String(planRaw).length > 0 ? planRaw : null
+                            handleApprove(app.userId, planId, ibLevelId)
+                          }}
+                          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-500 shadow-sm shadow-green-900/20 transition-colors"
+                        >
+                          <Check size={16} /> Approve
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -1317,11 +1714,9 @@ const AdminIBManagement = () => {
       {showIBModal && (
         <IBDetailsModal
           ib={viewingIB}
-          plans={plans}
-          ibCommission={ibCommission}
-          setIbCommission={setIbCommission}
-          ibPlan={ibPlan}
-          setIbPlan={setIbPlan}
+          ibTiers={sortedIbTiers}
+          selectedTierId={ibDetailTierId}
+          setSelectedTierId={setIbDetailTierId}
           onSave={handleSaveIBDetails}
           onClose={() => { setShowIBModal(false); setViewingIB(null); }}
           saving={savingIB}
@@ -1664,88 +2059,120 @@ const LevelModal = ({ level, onSave, onClose, existingOrders }) => {
 }
 
 // IB Details Modal Component
-const IBDetailsModal = ({ ib, plans, ibCommission, setIbCommission, ibPlan, setIbPlan, onSave, onClose, saving }) => {
+const IBDetailsModal = ({ ib, ibTiers, selectedTierId, setSelectedTierId, onSave, onClose, saving }) => {
   if (!ib) return null
 
+  const tierName = ib.ibLevelId?.name || '—'
+  const parent = ib.parentIBId && typeof ib.parentIBId === 'object' ? ib.parentIBId : null
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-800 rounded-xl w-full max-w-lg border border-gray-700">
-        <div className="p-5 border-b border-gray-700 flex items-center justify-between">
-          <h3 className="text-white font-semibold text-lg">IB Details</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-dark-800 rounded-xl w-full max-w-md border border-gray-700 shadow-xl shadow-black/40">
+        <div className="px-5 py-4 border-b border-gray-700 flex items-center justify-between">
+          <div>
+            <h3 className="text-white font-semibold text-lg">IB details</h3>
+            <p className="text-gray-500 text-xs mt-0.5">Tier & hierarchy</p>
+          </div>
+          <button type="button" onClick={onClose} className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-dark-700">
             <X size={20} />
           </button>
         </div>
-        
-        <div className="p-5 space-y-4">
-          {/* IB Info */}
-          <div className="flex items-center gap-4 bg-dark-700 rounded-lg p-4">
-            <div className="w-14 h-14 bg-blue-500/20 rounded-full flex items-center justify-center">
-              <span className="text-blue-500 font-bold text-xl">{ib.firstName?.charAt(0) || '?'}</span>
+
+        <div className="p-5 space-y-5 max-h-[min(80vh,640px)] overflow-y-auto">
+          <div className="flex items-start gap-4 bg-dark-700/80 rounded-xl p-4 border border-gray-700/80">
+            <div className="w-14 h-14 shrink-0 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-500/20">
+              <span className="text-blue-400 font-bold text-xl">{ib.firstName?.charAt(0) || '?'}</span>
             </div>
-            <div>
-              <p className="text-white font-semibold text-lg">{ib.firstName} {ib.lastName}</p>
-              <p className="text-gray-400 text-sm">{ib.email}</p>
-              <p className="text-gray-500 text-xs">Referral Code: <span className="text-blue-400 font-mono">{ib.referralCode || 'N/A'}</span></p>
+            <div className="min-w-0">
+              <p className="text-white font-semibold text-lg leading-tight">{ib.firstName} {ib.lastName || ''}</p>
+              <p className="text-gray-400 text-sm truncate">{ib.email}</p>
+              <p className="text-gray-500 text-xs mt-2">
+                Code{' '}
+                <span className="text-blue-400 font-mono">{ib.referralCode || '—'}</span>
+              </p>
+              {parent && (
+                <p className="text-gray-500 text-xs mt-1.5">
+                  Under{' '}
+                  <span className="text-gray-300">{parent.firstName}</span>{' '}
+                  <span className="text-gray-600 font-mono">{parent.referralCode || ''}</span>
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Current Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-dark-700 rounded-lg p-3 text-center">
-              <p className="text-gray-500 text-xs">Status</p>
-              <p className={`font-semibold ${ib.ibStatus === 'ACTIVE' ? 'text-green-500' : ib.ibStatus === 'BLOCKED' ? 'text-red-500' : 'text-yellow-500'}`}>
-                {ib.ibStatus || 'N/A'}
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="bg-dark-900/60 rounded-lg p-3 text-center border border-gray-800">
+              <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-1">Status</p>
+              <p className={`text-sm font-semibold ${ib.ibStatus === 'ACTIVE' ? 'text-green-400' : ib.ibStatus === 'BLOCKED' ? 'text-red-400' : 'text-amber-400'}`}>
+                {ib.ibStatus || '—'}
               </p>
             </div>
-            <div className="bg-dark-700 rounded-lg p-3 text-center">
-              <p className="text-gray-500 text-xs">Level</p>
-              <p className="text-white font-semibold">{ib.ibLevel || 0}</p>
+            <div className="bg-dark-900/60 rounded-lg p-3 text-center border border-gray-800">
+              <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-1">IB tier</p>
+              <p className="text-sm font-semibold text-white truncate" title={tierName}>
+                {tierName}
+              </p>
             </div>
-            <div className="bg-dark-700 rounded-lg p-3 text-center">
-              <p className="text-gray-500 text-xs">Referrals</p>
-              <p className="text-white font-semibold">{ib.referralCount || 0}</p>
+            <div className="bg-dark-900/60 rounded-lg p-3 text-center border border-gray-800">
+              <p className="text-gray-500 text-[10px] uppercase tracking-wide mb-1">Direct refs</p>
+              <p className="text-sm font-semibold text-white">{ib.directReferralCount ?? ib.referralCount ?? 0}</p>
             </div>
           </div>
 
-          {/* IB Level Selection */}
-          <div>
-            <label className="text-gray-400 text-sm block mb-2">IB Level (Upgrade/Downgrade)</label>
-            <input
-              type="number"
-              min="1"
-              max="10"
-              value={ibCommission}
-              onChange={(e) => setIbCommission(e.target.value)}
-              placeholder="Enter level (1-10)"
-              className="w-full bg-dark-700 border border-gray-700 rounded-lg px-4 py-3 text-white"
-            />
-            <p className="text-gray-500 text-xs mt-1">Set the IB level. Commission rates are configured in IB Levels tab.</p>
+          <p className="text-gray-600 text-[11px] leading-relaxed">
+            <span className="text-gray-500">Chain depth</span> (upline levels):{' '}
+            <span className="text-gray-400 font-mono">{ib.ibLevel ?? 0}</span> — separate from reward tier below.
+          </p>
+
+          <div className="space-y-2">
+            <label htmlFor="ib-modal-tier" className="block text-sm font-medium text-gray-300">
+              Reward tier (IB Levels)
+            </label>
+            <select
+              id="ib-modal-tier"
+              value={selectedTierId}
+              onChange={(e) => setSelectedTierId(e.target.value)}
+              className="w-full bg-dark-900 border border-gray-600 rounded-lg px-3 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/50"
+            >
+              {ibTiers.length === 0 ? (
+                <option value="">Configure tiers in IB Levels tab</option>
+              ) : (
+                ibTiers.map((lvl) => (
+                  <option key={lvl._id} value={lvl._id}>
+                    {lvl.name} · order {lvl.order}
+                  </option>
+                ))
+              )}
+            </select>
+            <p className="text-gray-500 text-xs">Rates and targets for this tier are edited under IB Levels.</p>
           </div>
 
-          {/* Status Actions */}
-          <div className="flex gap-2">
-            {ib.ibStatus === 'BLOCKED' && (
+          <div className="rounded-lg border border-red-500/25 bg-red-500/5 p-4 space-y-2">
+            <p className="text-red-400/90 text-xs font-medium uppercase tracking-wide">Danger zone</p>
+            {ib.ibStatus === 'BLOCKED' ? (
               <button
+                type="button"
                 onClick={async () => {
                   try {
                     const res = await fetch(`${API_URL}/ib/admin/unblock/${ib._id}`, { method: 'PUT' })
                     const data = await res.json()
                     if (data.success) {
-                      toast.success('IB unblocked!')
+                      toast.success('IB unblocked')
                       onClose()
                     }
-                  } catch (e) { toast.error('Failed to unblock') }
+                  } catch (e) {
+                    toast.error('Failed to unblock')
+                  }
                 }}
-                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium bg-green-600/20 text-green-400 border border-green-500/30 hover:bg-green-600/30"
               >
                 Unblock IB
               </button>
-            )}
-            {ib.ibStatus === 'ACTIVE' && (
+            ) : (
               <button
+                type="button"
                 onClick={async () => {
-                  const reason = prompt('Enter block reason:')
+                  const reason = prompt('Block reason:')
                   if (!reason) return
                   try {
                     const res = await fetch(`${API_URL}/ib/admin/block/${ib._id}`, {
@@ -1755,12 +2182,14 @@ const IBDetailsModal = ({ ib, plans, ibCommission, setIbCommission, ibPlan, setI
                     })
                     const data = await res.json()
                     if (data.success) {
-                      toast.success('IB blocked!')
+                      toast.success('IB blocked')
                       onClose()
                     }
-                  } catch (e) { toast.error('Failed to block') }
+                  } catch (e) {
+                    toast.error('Failed to block')
+                  }
                 }}
-                className="flex-1 px-4 py-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 border border-red-500/50"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium border border-red-500/40 text-red-300 bg-red-500/10 hover:bg-red-500/20"
               >
                 Block IB
               </button>
@@ -1768,19 +2197,21 @@ const IBDetailsModal = ({ ib, plans, ibCommission, setIbCommission, ibPlan, setI
           </div>
         </div>
 
-        <div className="p-5 border-t border-gray-700 flex gap-3">
+        <div className="px-5 py-4 border-t border-gray-700 flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
           <button
+            type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-dark-700 text-white rounded-lg hover:bg-dark-600"
+            className="px-4 py-2.5 rounded-lg text-sm font-medium bg-dark-700 text-gray-200 hover:bg-dark-600 border border-gray-600"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={onSave}
-            disabled={saving}
-            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+            disabled={saving || !selectedTierId}
+            className="px-4 py-2.5 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Saving...' : 'Save Changes'}
+            {saving ? 'Saving…' : 'Save tier'}
           </button>
         </div>
       </div>
