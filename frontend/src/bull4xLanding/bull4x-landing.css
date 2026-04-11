@@ -1,0 +1,474 @@
+﻿/* ============================================
+   BULL4X MARKETS â€” Premium Global Styles
+   ============================================ */
+
+/* ---- Component Utilities ---- */
+@layer components {
+
+  /* â”€â”€ Gold gradient text â”€â”€ */
+  .text-red-gradient {
+    background: linear-gradient(135deg, #D9A136 0%, #F0C96F 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* â”€â”€ Gold gradient text (alias) â”€â”€ */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #D9A136 0%, #F0C96F 50%, #b8892a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* â”€â”€ PRIMARY BUTTON â€” Solid Gold + Neon Glow â”€â”€ */
+  .b4x-btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-[#D9A136] text-white font-semibold rounded-lg transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0;
+    box-shadow: 0 0 18px rgba(217, 161, 54, 0.35);
+  }
+  .b4x-btn-primary:hover {
+    box-shadow: 0 0 32px rgba(217, 161, 54, 0.6), 0 0 60px rgba(217, 161, 54, 0.2);
+  }
+
+  /* â”€â”€ SECONDARY BUTTON â€” Ghost Gold â”€â”€ */
+  .b4x-btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 border border-[#D9A136] text-[#D9A136] font-semibold rounded-lg transition-all duration-300 hover:bg-[#D9A136]/10 hover:-translate-y-0.5 active:translate-y-0;
+  }
+  .b4x-btn-secondary:hover {
+    box-shadow: 0 0 20px rgba(217, 161, 54, 0.2);
+  }
+
+  /* â”€â”€ OUTLINE BUTTON â€” Ghost White â”€â”€ */
+  .b4x-btn-outline {
+    @apply inline-flex items-center justify-center px-6 py-3 border border-white/20 text-white font-semibold rounded-lg transition-all duration-300 hover:border-white/50 hover:bg-white/5 hover:-translate-y-0.5;
+  }
+
+  /* â”€â”€ GLASSMORPHISM CARD â”€â”€ */
+  .card {
+    @apply bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6 transition-all duration-300 hover:border-white/25 hover:-translate-y-1;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+  .card:hover {
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(217, 161, 54, 0.08);
+  }
+
+  /* â”€â”€ Section container â”€â”€ */
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* â”€â”€ Section padding â”€â”€ */
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+
+  /* â”€â”€ Section title â”€â”€ */
+  .section-title {
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* â”€â”€ Section subtitle â”€â”€ */
+  .section-subtitle {
+    @apply text-lg text-slate-400 leading-relaxed;
+  }
+
+  /* â”€â”€ Gold divider â”€â”€ */
+  .red-divider {
+    @apply w-16 h-0.5 rounded-full;
+    background: linear-gradient(90deg, #D9A136, #F0C96F);
+  }
+
+  /* â”€â”€ Stat number â”€â”€ */
+  .stat-number {
+    @apply text-3xl md:text-4xl font-bold text-red-gradient;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* â”€â”€ Badge â”€â”€ */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  /* â”€â”€ Navbar link â”€â”€ */
+  .nav-link {
+    @apply text-slate-300 hover:text-white transition-colors duration-200 font-medium text-sm relative;
+  }
+  .nav-link-active {
+    @apply text-[#D9A136];
+  }
+
+  /* â”€â”€ Input field â”€â”€ */
+  .input-field {
+    @apply w-full bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#D9A136]/50 focus:ring-1 focus:ring-[#D9A136]/30 transition-all duration-200;
+  }
+
+  /* â”€â”€ Ticker item â”€â”€ */
+  .ticker-item {
+    @apply flex items-center gap-2 px-6 text-sm font-mono whitespace-nowrap;
+  }
+
+  /* â”€â”€ Feature icon wrapper â”€â”€ */
+  .feature-icon {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0;
+  }
+
+  /* â”€â”€ Data table â”€â”€ */
+  .data-table { @apply w-full border-collapse; }
+  .data-table th {
+    @apply text-left text-xs font-semibold text-slate-400 uppercase tracking-wider py-3 px-4 border-b border-white/5;
+  }
+  .data-table td {
+    @apply py-3 px-4 text-sm text-slate-300 border-b border-white/5;
+  }
+  .data-table tr:hover td { @apply bg-white/3; }
+
+  /* â”€â”€ Cyber heading â€” all-caps â”€â”€ */
+  .cyber-heading {
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    @apply font-bold text-white;
+  }
+
+  /* â”€â”€ Cyber badge â”€â”€ */
+  .cyber-badge {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10;
+  }
+}
+
+/* ---- Custom Utilities ---- */
+@layer utilities {
+
+  /* Neon glow â€” Gold */
+  .glow-red {
+    box-shadow: 0 0 20px rgba(217, 161, 54, 0.4), 0 0 60px rgba(217, 161, 54, 0.15);
+  }
+  .glow-red-sm {
+    box-shadow: 0 0 10px rgba(217, 161, 54, 0.3);
+  }
+  .glow-red-lg {
+    box-shadow: 0 0 30px rgba(217, 161, 54, 0.5), 0 0 80px rgba(217, 161, 54, 0.2);
+  }
+
+  /* Neon glow â€” Green */
+  .glow-green {
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+  }
+
+  /* Glassmorphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Cyber glass â€” slightly more opaque */
+  .cyber-glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+  }
+
+  /* Scan-line overlay */
+  .scanline-overlay {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* Grid pattern background â€” Gold */
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(217, 161, 54, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(217, 161, 54, 0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* Fine grid â€” shoji */
+  .shoji-bg {
+    background-image:
+      linear-gradient(rgba(217, 161, 54, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(217, 161, 54, 0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Dot pattern */
+  .dot-bg {
+    background-image: radial-gradient(rgba(217, 161, 54, 0.07) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  /* Text shadow â€” Gold neon */
+  .text-shadow-red {
+    text-shadow: 0 0 40px rgba(217, 161, 54, 0.5), 0 0 80px rgba(217, 161, 54, 0.2);
+  }
+
+  /* Positive / Negative */
+  .text-positive { color: #00d4aa; }
+  .text-negative { color: #D9A136; }
+
+  /* Animated underline â€” Gold */
+  .animated-underline { position: relative; }
+  .animated-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: linear-gradient(135deg, #D9A136, #F0C96F);
+    transition: width 0.3s ease;
+  }
+  .animated-underline:hover::after { width: 100%; }
+
+  /* bg-white/2 & bg-white/3 */
+  .bg-white\/2 { background-color: rgba(255, 255, 255, 0.02); }
+  .bg-white\/3 { background-color: rgba(255, 255, 255, 0.03); }
+
+  /* Cyber section background */
+  .cyber-section-dark {
+    background: linear-gradient(180deg, #0d1117 0%, #080b10 100%);
+  }
+  .cyber-section-mid {
+    background: linear-gradient(180deg, #111820 0%, #0d1117 100%);
+  }
+}
+
+/* ---- Page Transition ---- */
+.page-enter { opacity: 0; transform: translateY(20px); }
+.page-enter-active {
+  opacity: 1; transform: translateY(0);
+  transition: opacity 400ms ease, transform 400ms ease;
+}
+.page-exit { opacity: 1; }
+.page-exit-active { opacity: 0; transition: opacity 300ms ease; }
+
+/* ---- Ticker Animation ---- */
+.ticker-wrapper { overflow: hidden; white-space: nowrap; }
+.ticker-track {
+  display: inline-flex;
+  animation: ticker 40s linear infinite;
+}
+.ticker-track:hover { animation-play-state: paused; }
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ---- Gradient Borders â€” Gold ---- */
+.gradient-border {
+  position: relative;
+  background: #1a232e;
+  border-radius: 12px;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(217, 161, 54, 0.5), rgba(217, 161, 54, 0.05));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ---- Hero Background â€” BULL4X Premium ---- */
+.hero-bg {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(217, 161, 54, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 60%, rgba(0, 42, 91, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(217, 161, 54, 0.04) 0%, transparent 40%),
+    linear-gradient(180deg, #0d1117 0%, #080b10 100%);
+}
+
+/* ---- Japanese / Cyber Hybrid Utilities ---- */
+
+/* Wave pattern */
+.jp-wave-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='60' viewBox='0 0 200 60'%3E%3Cpath d='M0 30 C25 10, 50 10, 75 30 C100 50, 125 50, 150 30 C175 10, 200 10, 200 30' stroke='rgba(217,161,54,0.06)' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 45 C25 25, 50 25, 75 45 C100 65, 125 65, 150 45 C175 25, 200 25, 200 45' stroke='rgba(217,161,54,0.03)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+  background-size: 200px 60px;
+  background-repeat: repeat-x;
+  background-position: bottom;
+}
+
+/* Decorative watermark text */
+.jp-kanji {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Cyber card hover â€” top border sweep */
+.jp-card {
+  position: relative;
+  overflow: hidden;
+}
+.jp-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(217, 161, 54, 0.7), transparent);
+  transform: scaleX(0);
+  transition: transform 0.4s ease;
+}
+.jp-card:hover::before { transform: scaleX(1); }
+
+/* Ink wash background */
+.ink-wash-bg {
+  background:
+    radial-gradient(ellipse at 15% 40%, rgba(0, 42, 91, 0.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 60%, rgba(217, 161, 54, 0.04) 0%, transparent 50%),
+    linear-gradient(180deg, #0d1117 0%, #080b10 100%);
+}
+
+/* Japanese hero background */
+.jp-hero-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 42, 91, 0.1) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(217, 161, 54, 0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #0d1117 0%, #080b10 100%);
+}
+
+/* Brush stroke underline */
+.brush-underline { position: relative; display: inline-block; }
+.brush-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #D9A136, #F0C96F, #D9A136);
+  border-radius: 2px;
+  clip-path: polygon(0 0, 100% 20%, 98% 100%, 2% 80%);
+}
+
+/* Japanese section divider */
+.jp-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 auto;
+}
+.jp-divider::before,
+.jp-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(217, 161, 54, 0.4), transparent);
+}
+.jp-divider-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #D9A136;
+  box-shadow: 0 0 8px rgba(217, 161, 54, 0.7);
+}
+
+/* Gold gradient background */
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #D9A136 0%, #F0C96F 100%);
+}
+
+/* ---- Responsive Typography ---- */
+@media (max-width: 640px) {
+  .section-title {
+    font-size: 1.6rem;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ---- Loading Spinner ---- */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(217, 161, 54, 0.1);
+  border-top-color: #D9A136;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Accordion ---- */
+.accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; }
+.accordion-content.open { max-height: 500px; }
+
+/* ---- Chart placeholder ---- */
+.chart-placeholder {
+  background: linear-gradient(180deg, rgba(217, 161, 54, 0.05) 0%, rgba(217, 161, 54, 0.02) 100%);
+  border: 1px solid rgba(217, 161, 54, 0.1);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.chart-placeholder::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60%;
+  background: linear-gradient(180deg, transparent, rgba(13, 17, 23, 0.8));
+}
+
+/* ---- Smooth Scroll Animations ---- */
+.animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.animate-on-scroll.visible { opacity: 1; transform: translateY(0); }
+
+.stagger-1 { transition-delay: 0.1s; }
+.stagger-2 { transition-delay: 0.2s; }
+.stagger-3 { transition-delay: 0.3s; }
+.stagger-4 { transition-delay: 0.4s; }
+.stagger-5 { transition-delay: 0.5s; }
+
+.slide-in-left { opacity: 0; transform: translateX(-50px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.slide-in-left.visible { opacity: 1; transform: translateX(0); }
+.slide-in-right { opacity: 0; transform: translateX(50px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.slide-in-right.visible { opacity: 1; transform: translateX(0); }
+.scale-in { opacity: 0; transform: scale(0.9); transition: opacity 0.6s ease, transform 0.6s ease; }
+.scale-in.visible { opacity: 1; transform: scale(1); }
+
+/* ---- Cyber Neon Divider ---- */
+.cyber-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(217, 161, 54, 0.5), transparent);
+}
+
+/* ---- Torii accent lines ---- */
+.torii-accent { position: relative; }
+.torii-accent::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10%; bottom: 10%;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, #D9A136, transparent);
+  border-radius: 2px;
+}
+
+/* ---- Vertical decorative text ---- */
+.jp-vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}

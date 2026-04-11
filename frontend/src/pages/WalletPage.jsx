@@ -720,7 +720,7 @@ const WalletPage = () => {
       {!isMobile && (
         <div className="w-full shrink-0 relative border-b bg-gradient-to-r from-dark-800 via-dark-900 to-dark-800 border-gray-800">
           <div className="flex items-center justify-between px-6 py-3">
-            <img src={logoImage} alt="Unicap" className="h-8 w-auto object-contain" />
+            <img src={logoImage} alt="BULL4X" className="h-8 w-auto object-contain" />
             <UserHeader />
           </div>
         </div>
@@ -1000,7 +1000,7 @@ const WalletPage = () => {
             {/* Crypto Logo - Full Width */}
             {!cryptoPaymentData && (
               <div className="mb-4">
-                <img src={cryptoLogo} alt="Unicap Crypto" className="w-full h-32 object-cover rounded-lg" />
+                <img src={cryptoLogo} alt="BULL4X Crypto" className="w-full h-32 object-cover rounded-lg" />
               </div>
             )}
 

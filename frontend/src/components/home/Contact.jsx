@@ -46,7 +46,7 @@ export default function Contact() {
               Ready to Start Trading?
             </h2>
             <p className="text-lg text-white/80 max-w-2xl mx-auto mb-8">
-              Join thousands of traders who trust Unicap for their trading journey. Get started in minutes.
+              Join thousands of traders who trust BULL4X for their trading journey. Get started in minutes.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
@@ -74,8 +74,8 @@ export default function Contact() {
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">Email Support</h3>
             <p className="text-white/50 mb-4">Get help via email within 24 hours</p>
-            <a href="mailto:support@unicapmarkets.com" className="text-blue-400 hover:text-blue-300 transition-colors">
-              support@unicapmarkets.com
+            <a href="mailto:support@bull4x.com" className="text-blue-400 hover:text-blue-300 transition-colors">
+              support@bull4x.com
             </a>
           </div>
 

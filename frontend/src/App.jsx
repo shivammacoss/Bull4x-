@@ -41,7 +41,21 @@ import BrandedSignup from './pages/BrandedSignup'
 import AdminEmailTemplates from './pages/AdminEmailTemplates'
 import AdminBonusManagement from './pages/AdminBonusManagement'
 import AdminBannerManagement from './pages/AdminBannerManagement'
-import WebsiteLandingPage from './pages/WebsiteLandingPage'
+import Bull4xWebsiteLayout from './components/Bull4xWebsiteLayout'
+import Bull4xHome from './bull4xLanding/pages/Home'
+import Bull4xTrading from './bull4xLanding/pages/Trading'
+import Bull4xPlatforms from './bull4xLanding/pages/Platforms'
+import Bull4xAccounts from './bull4xLanding/pages/Accounts'
+import Bull4xPricing from './bull4xLanding/pages/Pricing'
+import Bull4xToolsResearch from './bull4xLanding/pages/ToolsResearch'
+import Bull4xEducation from './bull4xLanding/pages/Education'
+import Bull4xAbout from './bull4xLanding/pages/About'
+import Bull4xContact from './bull4xLanding/pages/Contact'
+import Bull4xDemoAccount from './bull4xLanding/pages/DemoAccount'
+import Bull4xPrivacyPolicy from './bull4xLanding/pages/legal/PrivacyPolicy'
+import Bull4xTermsConditions from './bull4xLanding/pages/legal/TermsConditions'
+import Bull4xRiskDisclosure from './bull4xLanding/pages/legal/RiskDisclosure'
+import Bull4xAmlPolicy from './bull4xLanding/pages/legal/AmlPolicy'
 import AdminProfile from './pages/AdminProfile'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
@@ -69,7 +83,22 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<WebsiteLandingPage />} />
+        <Route element={<Bull4xWebsiteLayout />}>
+          <Route path="/" element={<Bull4xHome />} />
+          <Route path="/trading" element={<Bull4xTrading />} />
+          <Route path="/platforms" element={<Bull4xPlatforms />} />
+          <Route path="/accounts" element={<Bull4xAccounts />} />
+          <Route path="/pricing" element={<Bull4xPricing />} />
+          <Route path="/tools-research" element={<Bull4xToolsResearch />} />
+          <Route path="/education" element={<Bull4xEducation />} />
+          <Route path="/about" element={<Bull4xAbout />} />
+          <Route path="/contact" element={<Bull4xContact />} />
+          <Route path="/demo-account" element={<Bull4xDemoAccount />} />
+          <Route path="/legal/privacy-policy" element={<Bull4xPrivacyPolicy />} />
+          <Route path="/legal/terms-and-conditions" element={<Bull4xTermsConditions />} />
+          <Route path="/legal/risk-disclosure" element={<Bull4xRiskDisclosure />} />
+          <Route path="/legal/aml-policy" element={<Bull4xAmlPolicy />} />
+        </Route>
         <Route path="/login" element={<Navigate to="/user/login" replace />} />
         <Route path="/signup" element={<Navigate to="/user/signup" replace />} />
         <Route path="/user/signup" element={<Signup />} />
@@ -119,16 +148,12 @@ function App() {
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/account-deletion" element={<AccountDeletion />} />
         {/* Website Sub-Pages - temporarily redirect to buy-challenge */}
-        <Route path="/accounts/*" element={<Navigate to="/buy-challenge" replace />} />
         <Route path="/funding/*" element={<Navigate to="/buy-challenge" replace />} />
         <Route path="/ib-program" element={<Navigate to="/ib" replace />} />
         <Route path="/copy-trading" element={<Navigate to="/copytrade" replace />} />
         <Route path="/fundings" element={<Navigate to="/buy-challenge" replace />} />
         <Route path="/cart" element={<FundingCartPage />} />
-        {/* Legal Pages - redirect to existing pages */}
-        <Route path="/legal/terms-and-conditions" element={<Navigate to="/terms-of-service" replace />} />
-        <Route path="/legal/privacy-policy" element={<Navigate to="/privacy-policy" replace />} />
-        <Route path="/legal/risk-disclosure" element={<Navigate to="/terms-of-service" replace />} />
+        {/* Legal Pages — bull4x layout serves /legal/* for marketing; keep app-only redirects */}
         <Route path="/legal/ib-agreement" element={<Navigate to="/terms-of-service" replace />} />
         <Route path="/legal/funding-rules" element={<Navigate to="/terms-of-service" replace />} />
         <Route path="/:slug/login" element={<BrandedLogin />} />

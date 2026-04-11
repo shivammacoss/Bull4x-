@@ -12,7 +12,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <img src={logoImage} alt="Unicap" className="h-10 w-auto mb-6" />
+            <img src={logoImage} alt="BULL4X" className="h-10 w-auto mb-6" />
             <p className="text-white/50 mb-6 max-w-sm leading-relaxed">
               Your trusted partner in global trading. Access forex, crypto, indices, and commodities with professional tools and funded accounts.
             </p>
@@ -62,7 +62,7 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-center gap-3 text-white/50">
                 <Mail className="w-5 h-5 text-blue-400" />
-                <span>support@unicapmarkets.com</span>
+                <span>support@bull4x.com</span>
               </li>
               <li className="flex items-center gap-3 text-white/50">
                 <Phone className="w-5 h-5 text-blue-400" />
@@ -82,7 +82,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-white/30 text-sm">
-              © {new Date().getFullYear()} Unicap Markets. All rights reserved.
+              © {new Date().getFullYear()} BULL4X. All rights reserved.
             </p>
             <p className="text-white/30 text-xs text-center md:text-right max-w-2xl">
               Trading involves significant risk. Past performance is not indicative of future results. Only trade with capital you can afford to lose.

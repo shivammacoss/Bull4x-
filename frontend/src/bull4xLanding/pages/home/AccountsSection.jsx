@@ -1,0 +1,159 @@
+// ============================================
+// BULL4X - Accounts Section
+// ============================================
+
+import React from 'react'
+import { Link } from 'react-router-dom'
+import { FiCheck, FiArrowRight } from 'react-icons/fi'
+import { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
+import SectionHeader from '../../components/SectionHeader'
+import { accounts } from '../HomeData'
+
+function Watermark({ char, className = '' }) {
+  return (
+    <span
+      className={`select-none pointer-events-none ${className}`}
+      style={{ fontFamily: "'Inter', sans-serif", fontWeight: 900, lineHeight: 1, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+      aria-hidden="true"
+    >
+      {char}
+    </span>
+  )
+}
+
+export default function AccountsSection() {
+  return (
+    <section
+      className="section-padding relative overflow-hidden"
+      style={{ background: 'linear-gradient(180deg, #111820 0%, #0d1117 100%)' }}
+    >
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <Watermark char="Account" className="absolute -right-4 top-1/2 -translate-y-1/2 text-[180px] text-white/[0.018] font-black" />
+      </div>
+
+      <div className="section-container relative z-10">
+        <SectionHeader
+          badge="Accounts"
+          title="Account Types"
+          highlight="Account Types"
+          subtitle="Choose the account that matches your trading style and experience level."
+        />
+
+        <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mt-14">
+          {accounts.map((acc) => (
+            <StaggerItem key={acc.name}>
+              <div
+                className={`relative rounded-2xl p-6 h-full flex flex-col transition-all duration-300 hover:-translate-y-2 ${
+                  acc.highlight
+                    ? 'border border-[#D9A136]/40'
+                    : 'border border-white/8 hover:border-white/20'
+                }`}
+                style={
+                  acc.highlight
+                    ? {
+                        background: 'linear-gradient(145deg, rgba(217,161,54,0.12) 0%, rgba(5,7,10,0.9) 100%)',
+                        backdropFilter: 'blur(12px)',
+                        boxShadow: '0 8px 40px rgba(217,161,54,0.15)',
+                      }
+                    : {
+                        background: 'rgba(255,255,255,0.04)',
+                        backdropFilter: 'blur(12px)',
+                      }
+                }
+              >
+                {/* Popular badge */}
+                {acc.highlight && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span
+                      className="px-4 py-1 text-white text-xs font-bold rounded-full uppercase tracking-wider"
+                      style={{
+                        background: '#D9A136',
+                        boxShadow: '0 0 14px rgba(217,161,54,0.5)',
+                        fontFamily: "'Inter', sans-serif",
+                      }}
+                    >
+                      Popular
+                    </span>
+                  </div>
+                )}
+
+                {/* Mon decoration */}
+                <div className="absolute top-3 right-3 w-6 h-6 rounded-full border border-white/10 flex items-center justify-center">
+                  <div className="w-3 h-3 rounded-full border border-white/10" />
+                </div>
+
+                <span className={`badge mb-4 w-fit text-xs ${acc.highlight ? 'bg-white/15 text-white' : acc.badgeColor}`}>
+                  {acc.badge}
+                </span>
+
+                <h3
+                  className="text-xl font-bold mb-1 text-white"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                >
+                  {acc.name}
+                </h3>
+
+                <div
+                  className="text-2xl font-bold mb-1"
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    color: acc.highlight ? '#ffffff' : '#D9A136',
+                    textShadow: acc.highlight ? 'none' : '0 0 10px rgba(217,161,54,0.4)',
+                  }}
+                >
+                  {acc.minDeposit}
+                </div>
+
+                <div className={`text-xs mb-2 ${acc.highlight ? 'text-white/60' : 'text-slate-500'}`}>
+                  Minimum Deposit
+                </div>
+
+                <div className={`text-sm mb-1 ${acc.highlight ? 'text-white/80' : 'text-slate-400'}`}>
+                  Spreads: <span className="font-semibold text-white">{acc.spreads}</span>
+                </div>
+
+                <div
+                  className={`text-xs mb-4 pb-4 border-b ${
+                    acc.highlight ? 'border-white/15 text-white/60' : 'border-white/5 text-slate-500'
+                  }`}
+                >
+                  Commission: {acc.commission}
+                </div>
+
+                <p className={`text-xs leading-relaxed mb-4 flex-1 ${acc.highlight ? 'text-white/75' : 'text-slate-400'}`}>
+                  {acc.desc}
+                </p>
+
+                <ul className="space-y-2 mb-6">
+                  {acc.features.map((f) => (
+                    <li key={f} className={`flex items-center gap-2 text-xs ${acc.highlight ? 'text-white/85' : 'text-slate-400'}`}>
+                      <FiCheck size={11} className={acc.highlight ? 'text-white' : 'text-[#D9A136]'} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  to="/accounts"
+                  className={`w-full text-center py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                    acc.highlight
+                      ? 'bg-white text-[#D9A136] hover:bg-white/90'
+                      : 'border border-[#D9A136]/30 text-[#D9A136] hover:bg-[#D9A136]/10'
+                  }`}
+                >
+                  {acc.cta}
+                </Link>
+              </div>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+
+        <div className="text-center mt-8">
+          <Link to="/accounts" className="b4x-btn-outline gap-2">
+            Compare All Accounts <FiArrowRight size={16} />
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}

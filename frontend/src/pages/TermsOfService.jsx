@@ -1,10 +1,10 @@
 const TermsOfService = () => {
   return (
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", maxWidth: 800, margin: '0 auto', padding: 20, lineHeight: 1.6, color: '#e0e0e0', backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
-      <h1 style={{ color: '#fff', borderBottom: '2px solid #2563eb', paddingBottom: 10 }}>Terms of Service - Unicap</h1>
+      <h1 style={{ color: '#fff', borderBottom: '2px solid #2563eb', paddingBottom: 10 }}>Terms of Service - BULL4X</h1>
       <p style={{ color: '#999', fontStyle: 'italic' }}>Last Updated: February 8, 2026</p>
 
-      <p>Welcome to Unicap. These Terms of Service ("Terms") govern your access to and use of the Unicap mobile application ("App") and related services. By downloading, installing, or using the App, you agree to be bound by these Terms.</p>
+      <p>Welcome to BULL4X. These Terms of Service ("Terms") govern your access to and use of the BULL4X mobile application ("App") and related services. By downloading, installing, or using the App, you agree to be bound by these Terms.</p>
 
       <h2 style={{ color: '#fff', marginTop: 30 }}>1. Eligibility</h2>
       <ul>
@@ -25,7 +25,7 @@ const TermsOfService = () => {
       <p>You are solely responsible for all activities that occur under your account. You must notify us immediately of any unauthorized use of your account.</p>
 
       <h2 style={{ color: '#fff', marginTop: 30 }}>3. Services Provided</h2>
-      <p>Unicap provides a trading platform that allows users to:</p>
+      <p>BULL4X provides a trading platform that allows users to:</p>
       <ul>
         <li>View real-time market data and price quotes for various financial instruments including Forex, Commodities, Indices, and Cryptocurrencies.</li>
         <li>Execute simulated or live trades based on market conditions.</li>
@@ -65,7 +65,7 @@ const TermsOfService = () => {
       </ul>
 
       <h2 style={{ color: '#fff', marginTop: 30 }}>7. Intellectual Property</h2>
-      <p>All content, features, and functionality of the App, including but not limited to text, graphics, logos, icons, images, and software, are the exclusive property of Unicap and are protected by intellectual property laws. You may not reproduce, distribute, modify, or create derivative works without our prior written consent.</p>
+      <p>All content, features, and functionality of the App, including but not limited to text, graphics, logos, icons, images, and software, are the exclusive property of BULL4X and are protected by intellectual property laws. You may not reproduce, distribute, modify, or create derivative works without our prior written consent.</p>
 
       <h2 style={{ color: '#fff', marginTop: 30 }}>8. Account Suspension and Termination</h2>
       <p>We reserve the right to suspend or terminate your account at any time if:</p>
@@ -79,7 +79,7 @@ const TermsOfService = () => {
       <h2 style={{ color: '#fff', marginTop: 30 }}>9. Limitation of Liability</h2>
       <p>To the maximum extent permitted by law:</p>
       <ul>
-        <li>Unicap shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the App.</li>
+        <li>BULL4X shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the App.</li>
         <li>We are not responsible for any trading losses incurred through the use of the App.</li>
         <li>We do not guarantee uninterrupted or error-free operation of the App.</li>
         <li>We are not liable for any losses resulting from system failures, network issues, or force majeure events.</li>
@@ -97,8 +97,8 @@ const TermsOfService = () => {
       <h2 style={{ color: '#fff', marginTop: 30 }}>13. Contact Us</h2>
       <p>If you have any questions about these Terms, please contact us at:</p>
       <ul>
-        <li><strong>Email:</strong> support@Unicap.com</li>
-        <li><strong>Website:</strong> <a href="https://Unicap.com" style={{ color: '#2563eb' }}>https://Unicap.com</a></li>
+        <li><strong>Email:</strong> support@bull4x.com</li>
+        <li><strong>Website:</strong> <a href="https://bull4x.com" style={{ color: '#2563eb' }}>https://bull4x.com</a></li>
       </ul>
     </div>
   )

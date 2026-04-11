@@ -26,8 +26,8 @@ async function createAdmin() {
     await mongoose.connect(process.env.MONGODB_URI)
     console.log('Connected to MongoDB')
 
-    const email = 'unicap@support.com'
-    const password = 'unicap@8954'
+    const email = 'bull4x@support.com'
+    const password = 'bull4x@8954'
     
     // Check if admin exists
     const existing = await Admin.findOne({ email })
@@ -43,11 +43,11 @@ async function createAdmin() {
       const admin = new Admin({
         email,
         password: hashedPassword,
-        firstName: 'Unicap',
+        firstName: 'BULL4X',
         lastName: 'Admin',
         role: 'SUPER_ADMIN',
-        urlSlug: 'unicap-main',
-        brandName: 'Unicap Markets',
+        urlSlug: 'bull4x-main',
+        brandName: 'BULL4X',
         status: 'ACTIVE',
         sidebarPermissions: {}
       })

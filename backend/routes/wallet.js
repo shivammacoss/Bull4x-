@@ -47,8 +47,8 @@ router.post('/send-withdrawal-otp', async (req, res) => {
       expiresAt
     })
 
-    const platformName = settings?.fromName || 'Unicap'
-    const supportEmail = settings?.fromEmail || 'support@unicapmarkets.com'
+    const platformName = settings?.fromName || 'BULL4X'
+    const supportEmail = settings?.fromEmail || 'support@bull4x.com'
     const emailResult = await sendTemplateEmail('email_verification', user.email, {
       otp,
       firstName: user.firstName || user.email.split('@')[0],
@@ -229,8 +229,8 @@ router.post('/deposit', async (req, res) => {
           transactionId: transaction._id.toString(),
           paymentMethod: paymentMethod || 'Bank Transfer',
           date: new Date().toLocaleString(),
-          platformName: settings?.platformName || 'Unicap',
-          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
+          platformName: settings?.platformName || 'BULL4X',
+          supportEmail: settings?.supportEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
       }
@@ -304,8 +304,8 @@ router.post('/withdraw', async (req, res) => {
             ? (typeof bankAccountDetails === 'string' ? bankAccountDetails : JSON.stringify(bankAccountDetails))
             : '—',
           date: new Date().toLocaleString(),
-          platformName: settings?.platformName || 'Unicap',
-          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
+          platformName: settings?.platformName || 'BULL4X',
+          supportEmail: settings?.supportEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
       }
@@ -507,7 +507,7 @@ router.put('/admin/approve/:id', async (req, res) => {
       if (user && user.email) {
         const settings = await EmailSettings.findOne()
         const templateSlug = transaction.type === 'Deposit' ? 'deposit_success' : 'withdrawal_success'
-        const appOrigin = process.env.CORS_ORIGIN || 'https://unicapmarkets.com'
+        const appOrigin = process.env.CORS_ORIGIN || 'https://bull4x.com'
         await sendTemplateEmail(templateSlug, user.email, {
           firstName: user.firstName || user.email.split('@')[0],
           amount: transaction.amount.toFixed(2),
@@ -517,8 +517,8 @@ router.put('/admin/approve/:id', async (req, res) => {
           date: new Date().toLocaleString(),
           newBalance: wallet.balance.toFixed(2),
           dashboardUrl: `${appOrigin}/dashboard`,
-          platformName: settings?.platformName || 'Unicap',
-          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
+          platformName: settings?.platformName || 'BULL4X',
+          supportEmail: settings?.supportEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
       }
@@ -634,7 +634,7 @@ router.put('/transaction/:id/approve', async (req, res) => {
       if (user && user.email) {
         const settings = await EmailSettings.findOne()
         const templateSlug = transaction.type === 'Deposit' ? 'deposit_success' : 'withdrawal_success'
-        const appOrigin = process.env.CORS_ORIGIN || 'https://unicapmarkets.com'
+        const appOrigin = process.env.CORS_ORIGIN || 'https://bull4x.com'
         await sendTemplateEmail(templateSlug, user.email, {
           firstName: user.firstName || user.email.split('@')[0],
           amount: transaction.amount.toFixed(2),
@@ -644,8 +644,8 @@ router.put('/transaction/:id/approve', async (req, res) => {
           date: new Date().toLocaleString(),
           newBalance: wallet.balance.toFixed(2),
           dashboardUrl: `${appOrigin}/dashboard`,
-          platformName: settings?.platformName || 'Unicap',
-          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
+          platformName: settings?.platformName || 'BULL4X',
+          supportEmail: settings?.supportEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
       }

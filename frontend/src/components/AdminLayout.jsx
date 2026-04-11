@@ -140,7 +140,7 @@ const AdminLayout = ({ children, title, subtitle }) => {
         {/* Logo — min-height matches main header so border-b aligns across columns */}
         <div className="flex shrink-0 items-center justify-between border-b border-gray-800 px-4 py-4 lg:min-h-[5.5rem]">
           <div className="flex items-center gap-2">
-            {sidebarExpanded && <img src={logoImage} alt="Unicap" className="h-8 w-auto object-contain flex-shrink-0" />}
+            {sidebarExpanded && <img src={logoImage} alt="BULL4X" className="h-8 w-auto object-contain flex-shrink-0" />}
           </div>
           <button 
             onClick={() => setSidebarExpanded(!sidebarExpanded)}

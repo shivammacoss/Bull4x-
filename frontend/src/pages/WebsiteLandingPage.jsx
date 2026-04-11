@@ -1,3 +1,5 @@
+// Replaced by bull4x landing: see App.jsx (Bull4xWebsiteLayout) and src/bull4xLanding/.
+// Kept for reference; not mounted on "/" anymore.
 import { useEffect, useState } from 'react'
 import { 
   Hero, 

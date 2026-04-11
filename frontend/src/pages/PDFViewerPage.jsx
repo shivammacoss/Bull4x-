@@ -82,7 +82,7 @@ export default function PDFViewerPage() {
               <ArrowLeft className="w-5 h-5 text-white" />
             </button>
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="Unicap" className="h-8" />
+              <img src="/logo.png" alt="BULL4X" className="h-8" />
               <span className="text-white/50">|</span>
               <h1 className="text-white font-semibold">{config.title}</h1>
             </div>

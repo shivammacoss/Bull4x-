@@ -29,7 +29,7 @@ export default function About() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Why Choose <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Unicap</span>
+            Why Choose <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">BULL4X</span>
           </h2>
           <p className="text-white/60 max-w-2xl mx-auto">
             Experience the next generation of trading with our comprehensive platform designed for traders of all levels.

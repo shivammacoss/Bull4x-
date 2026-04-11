@@ -108,15 +108,15 @@ router.post('/verify-otp', async (req, res) => {
 
     // Send welcome email after successful OTP verification
     const emailSettings = await EmailSettings.findOne()
-    const baseUrl = process.env.CORS_ORIGIN || 'https://unicapmarkets.com'
+    const baseUrl = process.env.CORS_ORIGIN || 'https://bull4x.com'
     sendTemplateEmail('welcome', email, {
       firstName: firstName || email.split('@')[0],
       email: email,
       accountId: '—',
       accountType: 'Client',
-      platformName: 'Unicap',
+      platformName: 'BULL4X',
       loginUrl: `${baseUrl}/user/login`,
-      supportEmail: emailSettings?.fromEmail || 'support@unicapmarkets.com',
+      supportEmail: emailSettings?.fromEmail || 'support@bull4x.com',
       year: new Date().getFullYear().toString()
     })
 
@@ -213,15 +213,15 @@ router.post('/signup', async (req, res) => {
     // (If OTP is enabled, welcome email is sent after OTP verification)
     if (!otpEnabled) {
       const emailSettings = await EmailSettings.findOne()
-      const baseUrl = process.env.CORS_ORIGIN || 'https://unicapmarkets.com'
+      const baseUrl = process.env.CORS_ORIGIN || 'https://bull4x.com'
       sendTemplateEmail('welcome', email, {
         firstName: user.firstName,
         email: user.email,
         accountId: '—',
         accountType: 'Client',
-        platformName: 'Unicap',
+        platformName: 'BULL4X',
         loginUrl: `${baseUrl}/user/login`,
-        supportEmail: emailSettings?.fromEmail || 'support@unicapmarkets.com',
+        supportEmail: emailSettings?.fromEmail || 'support@bull4x.com',
         year: new Date().getFullYear().toString()
       })
     }
@@ -472,8 +472,8 @@ router.post('/forgot-password', async (req, res) => {
           email: user.email,
           otp,
           expiryMinutes,
-          platformName: 'Unicap',
-          supportEmail: emailSettings?.fromEmail || 'support@unicapmarkets.com',
+          platformName: 'BULL4X',
+          supportEmail: emailSettings?.fromEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
 

@@ -34,6 +34,7 @@ import employeeRoutes from './routes/employee.js'
 import employeeManagementRoutes from './routes/employeeManagement.js'
 import oxapayRoutes from './routes/oxapay.js'
 import path from 'path'
+import { existsSync } from 'fs'
 import { fileURLToPath } from 'url'
 import copyTradingEngine from './services/copyTradingEngine.js'
 import tradeEngine from './services/tradeEngine.js'
@@ -251,20 +252,31 @@ app.use('/api/oxapay', oxapayRoutes)
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
-// Serve APK download
-app.get('/downloads/Unicap.apk', (req, res) => {
-  const apkPath = path.join(__dirname, 'apk', 'Unicap.apk')
-  res.download(apkPath, 'Unicap.apk', (err) => {
+// Serve APK download (URL uses Bull4X; file on disk may be Bull4X.apk or legacy Unicap.apk)
+function resolveApkPath() {
+  const dir = path.join(__dirname, 'apk')
+  for (const name of ['Bull4X.apk', 'Unicap.apk']) {
+    const p = path.join(dir, name)
+    if (existsSync(p)) return p
+  }
+  return null
+}
+const sendApkDownload = (req, res) => {
+  const apkPath = resolveApkPath()
+  if (!apkPath) return res.status(404).json({ error: 'APK not found' })
+  res.download(apkPath, 'Bull4X.apk', (err) => {
     if (err) {
       console.error('APK download error:', err)
-      res.status(404).json({ error: 'APK not found' })
+      if (!res.headersSent) res.status(404).json({ error: 'APK not found' })
     }
   })
-})
+}
+app.get('/downloads/Bull4X.apk', sendApkDownload)
+app.get('/downloads/Unicap.apk', sendApkDownload)
 
 // Health check
 app.get('/', (req, res) => {
-  res.json({ message: 'Unicap API is running' })
+  res.json({ message: 'BULL4X API is running' })
 })
 
 const PORT = process.env.PORT || 5000

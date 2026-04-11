@@ -19,11 +19,11 @@ import AdminWallet from '../models/AdminWallet.js'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.join(__dirname, '..', '.env') })
 
-const ADMIN_EMAIL = (process.env.SEED_ADMIN_EMAIL || 'unicap@support.com').toLowerCase()
-const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'UnicapAdmin@123'
-const ADMIN_URL_SLUG = (process.env.SEED_ADMIN_URL_SLUG || 'unicap-main').toLowerCase()
+const ADMIN_EMAIL = (process.env.SEED_ADMIN_EMAIL || 'bull4x@support.com').toLowerCase()
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'BULL4XAdmin@123'
+const ADMIN_URL_SLUG = (process.env.SEED_ADMIN_URL_SLUG || 'bull4x-main').toLowerCase()
 
-const USER_EMAIL = (process.env.SEED_USER_EMAIL || 'demo@unicapmarkets.com').toLowerCase()
+const USER_EMAIL = (process.env.SEED_USER_EMAIL || 'demo@bull4x.com').toLowerCase()
 const USER_PASSWORD = process.env.SEED_USER_PASSWORD || 'User@123456'
 
 async function seed() {
@@ -43,9 +43,9 @@ async function seed() {
     admin.password = adminHash
     admin.role = 'SUPER_ADMIN'
     admin.status = 'ACTIVE'
-    admin.firstName = admin.firstName || 'Unicap'
+    admin.firstName = admin.firstName || 'BULL4X'
     admin.lastName = admin.lastName || 'Admin'
-    admin.brandName = admin.brandName || 'Unicap Markets'
+    admin.brandName = admin.brandName || 'BULL4X'
     const slugOwner = await Admin.findOne({ urlSlug: ADMIN_URL_SLUG, _id: { $ne: admin._id } })
     if (!slugOwner) {
       admin.urlSlug = ADMIN_URL_SLUG
@@ -61,11 +61,11 @@ async function seed() {
     admin = await Admin.create({
       email: ADMIN_EMAIL,
       password: adminHash,
-      firstName: 'Unicap',
+      firstName: 'BULL4X',
       lastName: 'Admin',
       role: 'SUPER_ADMIN',
       urlSlug,
-      brandName: 'Unicap Markets',
+      brandName: 'BULL4X',
       status: 'ACTIVE',
       sidebarPermissions: {}
     })
@@ -91,13 +91,13 @@ async function seed() {
       clientTwin.password = ADMIN_PASSWORD
       clientTwin.isBlocked = false
       clientTwin.isBanned = false
-      clientTwin.firstName = clientTwin.firstName || 'Unicap'
+      clientTwin.firstName = clientTwin.firstName || 'BULL4X'
       clientTwin.address = clientTwin.address || 'Dev account (matches admin email)'
       await clientTwin.save()
       console.log('\nClient user (same as admin email): updated')
     } else {
       await User.create({
-        firstName: 'Unicap',
+        firstName: 'BULL4X',
         email: ADMIN_EMAIL,
         phone: '9999999999',
         countryCode: '+91',

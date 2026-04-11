@@ -1,10 +1,10 @@
 const PrivacyPolicy = () => {
   return (
     <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", maxWidth: 800, margin: '0 auto', padding: 20, lineHeight: 1.6, color: '#e0e0e0', backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
-      <h1 style={{ color: '#fff', borderBottom: '2px solid #2563eb', paddingBottom: 10 }}>Privacy Policy for Unicap</h1>
+      <h1 style={{ color: '#fff', borderBottom: '2px solid #2563eb', paddingBottom: 10 }}>Privacy Policy for BULL4X</h1>
       <p style={{ color: '#999', fontStyle: 'italic' }}>Last Updated: February 8, 2026</p>
 
-      <p>Unicap ("we," "our," or "us") operates the Unicap mobile application (the "App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App. Please read this Privacy Policy carefully. By using the App, you agree to the collection and use of information in accordance with this policy.</p>
+      <p>BULL4X ("we," "our," or "us") operates the BULL4X mobile application (the "App"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our App. Please read this Privacy Policy carefully. By using the App, you agree to the collection and use of information in accordance with this policy.</p>
 
       <h2 style={{ color: '#fff', marginTop: 30 }}>1. Information We Collect</h2>
 
@@ -58,7 +58,7 @@ const PrivacyPolicy = () => {
       <ul>
         <li><strong>Legal Requirements:</strong> When required by law, regulation, or legal process.</li>
         <li><strong>Service Providers:</strong> With trusted third-party service providers who assist us in operating the App (e.g., payment processors, cloud hosting providers), subject to confidentiality agreements.</li>
-        <li><strong>Safety:</strong> To protect the rights, property, or safety of Unicap, our users, or the public.</li>
+        <li><strong>Safety:</strong> To protect the rights, property, or safety of BULL4X, our users, or the public.</li>
         <li><strong>Consent:</strong> With your explicit consent for any other purpose.</li>
       </ul>
 
@@ -94,8 +94,8 @@ const PrivacyPolicy = () => {
       <h2 style={{ color: '#fff', marginTop: 30 }}>10. Contact Us</h2>
       <p>If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at:</p>
       <ul>
-        <li><strong>Email:</strong> support@Unicap.com</li>
-        <li><strong>Website:</strong> <a href="https://Unicap.com" style={{ color: '#2563eb' }}>https://Unicap.com</a></li>
+        <li><strong>Email:</strong> support@bull4x.com</li>
+        <li><strong>Website:</strong> <a href="https://bull4x.com" style={{ color: '#2563eb' }}>https://bull4x.com</a></li>
       </ul>
     </div>
   )

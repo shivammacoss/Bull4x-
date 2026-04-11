@@ -325,9 +325,9 @@ router.put('/users/:id/ban', async (req, res) => {
           email: user.email,
           reason: reason || 'Policy violation',
           date: new Date().toLocaleString(),
-          platformName: settings?.platformName || 'Unicap',
-          loginUrl: settings?.loginUrl || 'https://unicapmarkets.com/login',
-          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
+          platformName: settings?.platformName || 'BULL4X',
+          loginUrl: settings?.loginUrl || 'https://bull4x.com/login',
+          supportEmail: settings?.supportEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
       }

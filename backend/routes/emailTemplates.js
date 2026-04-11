@@ -9,7 +9,7 @@ const router = express.Router()
 const getEmailFooter = () => `
     <!-- App Download Section -->
     <div style="text-align: center; margin: 30px 0 20px 0;">
-      <p style="color: #aaa; font-size: 14px; margin: 0 0 15px 0;">Trade via our <span style="color: #3b82f6; font-weight: bold;">Unicap</span> iOS or Android App</p>
+      <p style="color: #aaa; font-size: 14px; margin: 0 0 15px 0;">Trade via our <span style="color: #3b82f6; font-weight: bold;">BULL4X</span> iOS or Android App</p>
       <table align="center" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td style="padding: 0 8px;">
@@ -28,16 +28,16 @@ const getEmailFooter = () => `
 
     <!-- Social Media Icons -->
     <div style="text-align: center; margin: 20px 0; padding: 15px 0;">
-      <a href="https://facebook.com/unicapmarkets" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+      <a href="https://facebook.com/bull4x" style="display: inline-block; margin: 0 8px; text-decoration: none;">
         <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook" style="width: 36px; height: 36px; border: 0;">
       </a>
-      <a href="https://t.me/unicapmarkets" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+      <a href="https://t.me/bull4x" style="display: inline-block; margin: 0 8px; text-decoration: none;">
         <img src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram" style="width: 36px; height: 36px; border: 0;">
       </a>
-      <a href="https://instagram.com/unicapmarkets" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+      <a href="https://instagram.com/bull4x" style="display: inline-block; margin: 0 8px; text-decoration: none;">
         <img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram" style="width: 36px; height: 36px; border: 0;">
       </a>
-      <a href="https://youtube.com/unicapmarkets" style="display: inline-block; margin: 0 8px; text-decoration: none;">
+      <a href="https://youtube.com/bull4x" style="display: inline-block; margin: 0 8px; text-decoration: none;">
         <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube" style="width: 36px; height: 36px; border: 0;">
       </a>
     </div>
@@ -48,15 +48,15 @@ const getEmailFooter = () => `
         CFDs on <span style="color: #ffffff;">INDICES</span> | <span style="color: #ffffff;">SHARES</span> | <span style="color: #ffffff;">FOREX</span> | <span style="color: #ffffff;">COMMODITIES</span>
       </p>
       <p style="color: #ffffff; font-size: 12px; margin: 5px 0 0 0;">
-        <a href="https://unicapmarkets.com/legal" style="color: #ffffff; text-decoration: none;">Legal Documents</a> | 
-        <a href="https://unicapmarkets.com/privacy-policy" style="color: #ffffff; text-decoration: none;">Privacy Policy</a>
+        <a href="https://bull4x.com/legal" style="color: #ffffff; text-decoration: none;">Legal Documents</a> | 
+        <a href="https://bull4x.com/privacy-policy" style="color: #ffffff; text-decoration: none;">Privacy Policy</a>
       </p>
     </div>
 
     <!-- Banner Section with Email Banner Image -->
     <div style="text-align: center; margin: 25px 0;">
-      <a href="https://unicapmarkets.com" style="display: block; text-decoration: none;">
-        <img src="https://unicapmarkets.com/email_banner.png" alt="Unicap Markets" style="max-width: 100%; width: 100%; height: auto; border-radius: 8px; display: block; border: 0;">
+      <a href="https://bull4x.com" style="display: block; text-decoration: none;">
+        <img src="https://bull4x.com/email_banner.png" alt="BULL4X" style="max-width: 100%; width: 100%; height: auto; border-radius: 8px; display: block; border: 0;">
       </a>
     </div>
 
@@ -67,11 +67,11 @@ const getEmailFooter = () => `
       </p>
       
       <p style="color: #888; font-size: 11px; line-height: 1.6; margin: 0 0 15px 0; text-align: justify;">
-        <strong style="color: #aaa;">Disclaimer:</strong> The information on this website is provided for general informational purposes only and does not take into account your investment objectives or financial situation. Access to this website is at your own initiative. Unicap Markets Ltd makes no representations or warranties as to the accuracy or completeness of the content and accepts no liability for any reliance placed on it.
+        <strong style="color: #aaa;">Disclaimer:</strong> The information on this website is provided for general informational purposes only and does not take into account your investment objectives or financial situation. Access to this website is at your own initiative. BULL4X Ltd makes no representations or warranties as to the accuracy or completeness of the content and accepts no liability for any reliance placed on it.
       </p>
       
       <p style="color: #888; font-size: 11px; line-height: 1.6; margin: 0; text-align: justify;">
-        <strong style="color: #aaa;">Regulatory Notice:</strong> Unicap Markets Ltd is a trading name of Unicap Markets and Unicap Markets Cyprus Limited. Unicap Markets Europe Limited is authorised and regulated as an Investment Firm by the Cyprus Securities and Exchange Commission (licence number Z157892L).
+        <strong style="color: #aaa;">Regulatory Notice:</strong> Services are offered by BULL4X and related group entities as disclosed in your jurisdiction. Where applicable, BULL4X Europe Limited is authorised and regulated as an Investment Firm by the Cyprus Securities and Exchange Commission (licence number Z157892L).
       </p>
     </div>
 `
@@ -82,7 +82,7 @@ const wrapEmailContent = (content) => `<!DOCTYPE html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Unicap Markets</title>
+  <title>BULL4X</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a14; font-family: Arial, Helvetica, sans-serif;">
   <!-- Outer wrapper for full background -->
@@ -94,7 +94,7 @@ const wrapEmailContent = (content) => `<!DOCTYPE html>
           <!-- Header with Logo -->
           <tr>
             <td style="text-align: center; padding: 30px 20px; border-bottom: 1px solid #333;">
-              <img src="https://unicapmarkets.com/logo.png" alt="Unicap Markets" style="max-width: 200px; height: auto;">
+              <img src="https://bull4x.com/logo.png" alt="BULL4X" style="max-width: 200px; height: auto;">
             </td>
           </tr>
           
@@ -123,14 +123,14 @@ const defaultTemplates = [
   {
     name: 'Admin/Employee Login OTP',
     slug: 'admin_login_otp',
-    subject: 'Your Login OTP Code - Unicap Markets',
+    subject: 'Your Login OTP Code - BULL4X',
     description: 'Sent when admin or employee logs in to verify with OTP',
     category: 'verification',
     variables: ['otp', 'firstName', 'email', 'expiryMinutes', 'year'],
     htmlContent: wrapEmailContent(`
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        We received a request to log in to your Unicap Markets admin account.
+        We received a request to log in to your BULL4X admin account.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 8px 0;">
         For your security, please use the One-Time Password (OTP) below:
@@ -140,20 +140,20 @@ const defaultTemplates = [
       <p style="color: #9ca3af; font-size: 14px; margin: 0 0 24px 0;">This OTP will expire in {{expiryMinutes}} minutes.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you did not request this login, please ignore this email or contact support.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets, Security Team</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X, Security Team</p>
     `)
   },
   {
     name: 'Email Verification OTP',
     slug: 'email_verification',
-    subject: 'Verify Your Email - Unicap Markets',
+    subject: 'Verify Your Email - BULL4X',
     description: 'Sent when a user registers to verify their email with OTP',
     category: 'verification',
     variables: ['otp', 'firstName', 'email', 'expiryMinutes', 'year'],
     htmlContent: wrapEmailContent(`
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Thank you for registering with Unicap Markets.
+        Thank you for registering with BULL4X.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
         To activate your account, please verify your email address using the verification code below.
@@ -163,13 +163,13 @@ const defaultTemplates = [
       <p style="color: #9ca3af; font-size: 14px; margin: 0 0 20px 0;">This code will expire in {{expiryMinutes}} minutes.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you did not create an account with us, please ignore this email.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets, Security Team</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X, Security Team</p>
     `)
   },
   {
     name: 'Challenge Completed',
     slug: 'challenge_completed',
-    subject: 'Congratulations - Challenge Passed - Unicap Markets',
+    subject: 'Congratulations - Challenge Passed - BULL4X',
     description: 'Sent when a user successfully completes a trading challenge',
     category: 'challenge',
     variables: ['firstName', 'challengeName', 'fundSize', 'accountId', 'completionDate', 'loginUrl', 'year'],
@@ -177,7 +177,7 @@ const defaultTemplates = [
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;"><strong style="color:#e5e7eb;">Congratulations!</strong></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        We are pleased to inform you that you have successfully progressed in your Funded Trading Challenge on Unicap Markets (<strong>{{challengeName}}</strong>).
+        We are pleased to inform you that you have successfully progressed in your Funded Trading Challenge on BULL4X (<strong>{{challengeName}}</strong>).
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
         Your trading performance has met the required evaluation criteria, and your account is under review for the next stage.
@@ -201,21 +201,21 @@ const defaultTemplates = [
         Our team will complete the verification process shortly and notify you once your funded stage is updated.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
-        Thank you for your dedication and disciplined trading. We look forward to your continued success with Unicap Markets.
+        Thank you for your dedication and disciplined trading. We look forward to your continued success with BULL4X.
       </p>
       <p style="text-align: center; margin: 20px 0;">
         <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Login here</a>
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X</p>
       <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Funding Evaluation Team</p>
-      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@unicapmarkets.com</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@bull4x.com</p>
     `)
   },
   {
     name: 'Challenge Failed',
     slug: 'challenge_failed',
-    subject: 'Challenge Result - Unicap Markets',
+    subject: 'Challenge Result - BULL4X',
     description: 'Sent when a user fails a trading challenge',
     category: 'challenge',
     variables: ['firstName', 'challengeName', 'fundSize', 'accountId', 'failureReason', 'failureDate', 'loginUrl', 'year'],
@@ -249,21 +249,21 @@ const defaultTemplates = [
       <p style="margin: 0 0 20px 0;"><a href="{{loginUrl}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{loginUrl}}</a></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you have any questions, please contact our support team.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X</p>
       <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Support Team</p>
     `)
   },
   {
     name: 'Password Reset',
     slug: 'password_reset',
-    subject: 'Password Reset OTP - Unicap Markets',
+    subject: 'Password Reset OTP - BULL4X',
     description: 'Sent when user requests password reset',
     category: 'security',
     variables: ['firstName', 'email', 'otp', 'expiryMinutes', 'year'],
     htmlContent: wrapEmailContent(`
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        We have received a request to reset the password for your Unicap Markets account
+        We have received a request to reset the password for your BULL4X account
         (<a href="mailto:{{email}}" style="color: #60a5fa; text-decoration: none;">{{email}}</a>).
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;">Your One Time Password (OTP) is:</p>
@@ -274,20 +274,20 @@ const defaultTemplates = [
         If you did not request this change, please contact our support team immediately.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets, Security Team</p>
-      <p style="color: #6b7280; font-size: 13px; margin: 6px 0 0 0;">support@unicapmarkets.com</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X, Security Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 6px 0 0 0;">support@bull4x.com</p>
     `)
   },
   {
     name: 'Welcome Email',
     slug: 'welcome',
-    subject: 'Welcome to Unicap Markets - Your Trading Account is Ready',
+    subject: 'Welcome to BULL4X - Your Trading Account is Ready',
     description: 'Sent after successful email verification',
     category: 'account',
     variables: ['firstName', 'email', 'accountId', 'accountType', 'loginUrl', 'year'],
     htmlContent: wrapEmailContent(`
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;">Welcome to Unicap Markets.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;">Welcome to BULL4X.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
         Your trading account has been successfully created on our platform. We are excited to have you joined in our global trading community.
       </p>
@@ -315,15 +315,15 @@ const defaultTemplates = [
         If you need any assistance, our support team is always ready to help.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets, Support Team</p>
-      <p style="color: #6b7280; font-size: 13px; margin: 8px 0 0 0;">Email: support@unicapmarkets.com</p>
-      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">Website: www.unicapmarkets.com</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X, Support Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 8px 0 0 0;">Email: support@bull4x.com</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">Website: www.bull4x.com</p>
     `)
   },
   {
     name: 'Deposit Pending',
     slug: 'deposit_pending',
-    subject: 'Deposit Request Submitted - Unicap Markets',
+    subject: 'Deposit Request Submitted - BULL4X',
     description: 'Sent when a deposit is pending admin approval',
     category: 'transaction',
     variables: ['firstName', 'amount', 'transactionId', 'paymentMethod', 'date', 'year'],
@@ -354,10 +354,10 @@ const defaultTemplates = [
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
         Our finance team will verify the transaction shortly. Once confirmed, the funds will be credited to your trading account.
       </p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for choosing Unicap Markets.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for choosing BULL4X.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
       <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Finance Department</p>
-      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">Unicap Markets</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">BULL4X</p>
     `)
   },
   {
@@ -371,7 +371,7 @@ const defaultTemplates = [
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 8px 0;"><strong style="color:#e5e7eb;">Good news!</strong></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Your deposit has been successfully credited to your Unicap Markets trading account.
+        Your deposit has been successfully credited to your BULL4X trading account.
       </p>
       <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 24px 0 12px 0; border-bottom: 1px solid #374151; padding-bottom: 8px;">Transaction details</p>
       <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px 0;">
@@ -397,13 +397,13 @@ const defaultTemplates = [
       <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 16px 0 8px 0;">Login here</p>
       <p style="margin: 0 0 24px 0;"><a href="{{dashboardUrl}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{dashboardUrl}}</a></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets, Finance Team</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X, Finance Team</p>
     `)
   },
   {
     name: 'Withdrawal Pending',
     slug: 'withdrawal_pending',
-    subject: 'Withdrawal Request Received - Unicap Markets',
+    subject: 'Withdrawal Request Received - BULL4X',
     description: 'Sent when a withdrawal request is submitted',
     category: 'transaction',
     variables: ['firstName', 'amount', 'transactionId', 'paymentMethod', 'walletAddress', 'date', 'year'],
@@ -440,13 +440,13 @@ const defaultTemplates = [
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
       <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Finance Team</p>
-      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">Unicap Markets</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">BULL4X</p>
     `)
   },
   {
     name: 'Withdrawal Success',
     slug: 'withdrawal_success',
-    subject: 'Withdrawal Successful - Unicap Markets',
+    subject: 'Withdrawal Successful - BULL4X',
     description: 'Sent when a withdrawal is successfully processed',
     category: 'transaction',
     variables: ['firstName', 'amount', 'transactionId', 'date', 'year'],
@@ -473,10 +473,10 @@ const defaultTemplates = [
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
         The funds should reflect in your payment account shortly depending on the payment method used.
       </p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for trading with Unicap Markets.</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for trading with BULL4X.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
       <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Finance Team</p>
-      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">Unicap Markets</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">BULL4X</p>
     `)
   },
   {
@@ -506,11 +506,11 @@ const defaultTemplates = [
       </div>
       
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        If you believe this is an error, please contact our support team at <a href="mailto:support@unicapmarkets.com" style="color: #1e40af; text-decoration: none;">support@unicapmarkets.com</a>.
+        If you believe this is an error, please contact our support team at <a href="mailto:support@bull4x.com" style="color: #1e40af; text-decoration: none;">support@bull4x.com</a>.
       </p>
       
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Unicap Markets</p>
+      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">BULL4X</p>
     `)
   },
   {
@@ -538,7 +538,7 @@ const defaultTemplates = [
       </div>
       
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 30px 0 5px 0;">Kind regards,</p>
-      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">Unicap Markets</p>
+      <p style="color: #1e40af; font-size: 15px; font-weight: bold; margin: 0;">BULL4X</p>
     `)
   },
   {
@@ -563,7 +563,7 @@ const defaultTemplates = [
       <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Upload / profile</p>
       <p style="margin: 0 0 24px 0;"><a href="{{kycLink}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{kycLink}}</a></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for your cooperation.</p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Unicap Markets Compliance Team</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">BULL4X Compliance Team</p>
     `)
   },
   {
@@ -599,7 +599,7 @@ const defaultTemplates = [
       <p style="text-align: center; margin: 24px 0;">
         <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Login</a>
       </p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Unicap Markets, Compliance Team</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">BULL4X, Compliance Team</p>
     `)
   },
   {
@@ -633,7 +633,7 @@ const defaultTemplates = [
         <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Resubmit documents</a>
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets, Compliance Team</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X, Compliance Team</p>
     `)
   },
   {
@@ -652,7 +652,7 @@ const defaultTemplates = [
       <p style="color: #f3f4f6; font-size: 16px; font-weight: 600; margin: 0 0 20px 0;">{{accountId}}</p>
       <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 16px 0 8px 0;">Login</p>
       <p style="margin: 0 0 24px 0;"><a href="{{loginUrl}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{loginUrl}}</a></p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Unicap Markets</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">BULL4X</p>
       <p style="color: #9ca3af; font-size: 14px; margin: 0;">Admin Team</p>
     `)
   },
@@ -676,20 +676,20 @@ const defaultTemplates = [
       <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Upload here</p>
       <p style="margin: 0 0 24px 0;"><a href="{{kycLink}}" style="color: #38bdf8; font-weight: 600; word-break: break-all;">{{kycLink}}</a></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for your cooperation.</p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Unicap Markets Compliance Team</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">BULL4X Compliance Team</p>
     `)
   },
   {
     name: 'User Login OTP',
     slug: 'user_login_otp',
-    subject: 'Your Login OTP Code - Unicap Markets',
+    subject: 'Your Login OTP Code - BULL4X',
     description: 'OTP for client user login (matches email_template.txt)',
     category: 'security',
     variables: ['firstName', 'otp', 'expiryMinutes', 'year'],
     htmlContent: wrapEmailContent(`
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        We received a request to log in to your Unicap Markets account.
+        We received a request to log in to your BULL4X account.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 8px 0;">
         For your security, please use the One-Time Password (OTP) below:
@@ -699,7 +699,7 @@ const defaultTemplates = [
       <p style="color: #9ca3af; font-size: 14px; margin: 0 0 24px 0;">This OTP will expire in {{expiryMinutes}} minutes.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you did not request this login, please ignore this email.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets, Security Team</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X, Security Team</p>
     `)
   },
   {
@@ -718,14 +718,14 @@ const defaultTemplates = [
         If you did not perform this action, please contact support immediately.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets, Security Team</p>
-      <p style="color: #6b7280; font-size: 13px; margin: 6px 0 0 0;">support@unicapmarkets.com</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X, Security Team</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 6px 0 0 0;">support@bull4x.com</p>
     `)
   },
   {
     name: 'Forgot Password — Reset Link',
     slug: 'password_reset_link',
-    subject: 'Reset Your Password - Unicap Markets',
+    subject: 'Reset Your Password - BULL4X',
     description: 'Password reset via link (matches email_template.txt; use when link flow is enabled)',
     category: 'security',
     variables: ['firstName', 'resetLink', 'year'],
@@ -740,7 +740,7 @@ const defaultTemplates = [
       <p style="color: #9ca3af; font-size: 14px; margin: 0 0 20px 0;">This link will expire in 30 minutes for security reasons.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you did not request a password reset, please ignore this email.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets, Security Team</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X, Security Team</p>
     `)
   },
   {
@@ -761,7 +761,7 @@ const defaultTemplates = [
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
       <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Finance Team</p>
-      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">Unicap Markets</p>
+      <p style="color: #9ca3af; font-size: 14px; margin: 4px 0 0 0;">BULL4X</p>
     `)
   },
   {
@@ -789,9 +789,9 @@ const defaultTemplates = [
       </table>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Good luck with your trading challenge.</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X</p>
       <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Funding Evaluation Team</p>
-      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@unicapmarkets.com</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@bull4x.com</p>
     `)
   },
   {
@@ -805,7 +805,7 @@ const defaultTemplates = [
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;"><strong style="color:#e5e7eb;">Congratulations!</strong></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        We are pleased to inform you that you have successfully passed the Phase 1 Funded Trading Challenge on Unicap Markets.
+        We are pleased to inform you that you have successfully passed the Phase 1 Funded Trading Challenge on BULL4X.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
         Your trading performance has met all the required evaluation criteria, and your account is now under review for the Funded Trader stage.
@@ -829,15 +829,15 @@ const defaultTemplates = [
         Our team will complete the verification process shortly and notify you once your Funded Trading Account is activated.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Thank you for your dedication and disciplined trading. We look forward to seeing your continued success with Unicap Markets.
+        Thank you for your dedication and disciplined trading. We look forward to seeing your continued success with BULL4X.
       </p>
       <p style="text-align: center; margin: 20px 0;">
         <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Login here</a>
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X</p>
       <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Funding Evaluation Team</p>
-      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@unicapmarkets.com</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@bull4x.com</p>
     `)
   },
   {
@@ -851,7 +851,7 @@ const defaultTemplates = [
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 16px 0;">Dear {{firstName}},</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 12px 0;"><strong style="color:#e5e7eb;">Congratulations!</strong></p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        We are pleased to inform you that you have successfully passed the Phase 2 Funded Trading Challenge on Unicap Markets.
+        We are pleased to inform you that you have successfully passed the Phase 2 Funded Trading Challenge on BULL4X.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
         Your trading performance has met all the required evaluation criteria, and your account is now under review for the Funded Trader stage.
@@ -875,15 +875,15 @@ const defaultTemplates = [
         Our team will complete the verification process shortly and notify you once your Funded Trading Account is activated.
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
-        Thank you for your dedication and disciplined trading. We look forward to seeing your continued success with Unicap Markets.
+        Thank you for your dedication and disciplined trading. We look forward to seeing your continued success with BULL4X.
       </p>
       <p style="text-align: center; margin: 20px 0;">
         <a href="{{loginUrl}}" style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%); color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;">Login here</a>
       </p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Best Regards,</p>
-      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">Unicap Markets</p>
+      <p style="color: #93c5fd; font-size: 15px; font-weight: 700; margin: 0;">BULL4X</p>
       <p style="color: #9ca3af; font-size: 14px; margin: 6px 0 0 0;">Funding Evaluation Team</p>
-      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@unicapmarkets.com</p>
+      <p style="color: #6b7280; font-size: 13px; margin: 4px 0 0 0;">support@bull4x.com</p>
     `)
   },
   {
@@ -899,7 +899,7 @@ const defaultTemplates = [
       <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Ticket ID</p>
       <p style="color: #38bdf8; font-size: 18px; font-weight: 700; margin: 0 0 24px 0; font-family: monospace;">{{ticketId}}</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Our support team will respond shortly.</p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Unicap Markets, Support Team</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">BULL4X, Support Team</p>
     `)
   },
   {
@@ -915,7 +915,7 @@ const defaultTemplates = [
       <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Ticket ID</p>
       <p style="color: #4ade80; font-size: 18px; font-weight: 700; margin: 0 0 24px 0; font-family: monospace;">{{ticketId}}</p>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">If you need further assistance, feel free to contact us.</p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Unicap Markets, Support Team</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">BULL4X, Support Team</p>
     `)
   },
   {
@@ -939,7 +939,7 @@ const defaultTemplates = [
         </tr>
       </table>
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Thank you for being a valued partner.</p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Unicap Markets, Partner Program</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">BULL4X, Partner Program</p>
     `)
   },
   {
@@ -955,7 +955,7 @@ const defaultTemplates = [
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">Your Introducing Broker account has been approved.</p>
       <p style="color: #e5e7eb; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin: 20px 0 10px 0;">Partner ID</p>
       <p style="color: #f3f4f6; font-size: 16px; font-weight: 600; margin: 0 0 24px 0;">{{partnerId}}</p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Unicap Markets, Partner Program</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">BULL4X, Partner Program</p>
     `)
   },
   {
@@ -981,7 +981,7 @@ const defaultTemplates = [
       <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
         Your account will automatically copy trades from the selected strategy.
       </p>
-      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">Unicap Markets, Compliance Team</p>
+      <p style="color: #aaa; font-size: 15px; line-height: 1.6; margin: 28px 0 4px 0;">BULL4X, Compliance Team</p>
     `)
   },
   {

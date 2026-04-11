@@ -1,5 +1,5 @@
 {
-  "name": "unicap-frontend",
+  "name": "bull4x-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,12 +13,16 @@
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "clsx": "^2.1.1",
+    "framer-motion": "^11.18.2",
     "gsap": "^3.14.2",
     "i18next": "^25.8.6",
     "lucide-react": "^0.460.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-countup": "^6.5.3",
     "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.5.0",
+    "react-intersection-observer": "^9.16.0",
     "react-i18next": "^16.5.4",
     "react-router-dom": "^6.28.0",
     "recharts": "^2.13.3",

@@ -113,15 +113,15 @@ router.post('/submit-files', kycUpload.fields([
       const user = await User.findById(userId)
       if (user && user.email) {
         const settings = await EmailSettings.findOne()
-        const appOrigin = process.env.CORS_ORIGIN || 'https://unicapmarkets.com'
+        const appOrigin = process.env.CORS_ORIGIN || 'https://bull4x.com'
         await sendTemplateEmail('kyc_submitted', user.email, {
           firstName: user.firstName || user.email.split('@')[0],
           email: user.email,
           documentType: documentType,
           submittedAt: new Date().toLocaleString(),
           kycLink: `${appOrigin}/profile`,
-          platformName: settings?.platformName || 'Unicap',
-          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
+          platformName: settings?.platformName || 'BULL4X',
+          supportEmail: settings?.supportEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
       }
@@ -197,15 +197,15 @@ router.post('/submit', async (req, res) => {
       const user = await User.findById(userId)
       if (user && user.email) {
         const settings = await EmailSettings.findOne()
-        const appOrigin = process.env.CORS_ORIGIN || 'https://unicapmarkets.com'
+        const appOrigin = process.env.CORS_ORIGIN || 'https://bull4x.com'
         await sendTemplateEmail('kyc_submitted', user.email, {
           firstName: user.firstName || user.email.split('@')[0],
           email: user.email,
           documentType: documentType,
           submittedAt: new Date().toLocaleString(),
           kycLink: `${appOrigin}/profile`,
-          platformName: settings?.platformName || 'Unicap',
-          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
+          platformName: settings?.platformName || 'BULL4X',
+          supportEmail: settings?.supportEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
       }
@@ -362,9 +362,9 @@ router.put('/approve/:kycId', async (req, res) => {
           accountId: user.email,
           documentType: kyc.documentType,
           approvedAt: new Date().toLocaleString(),
-          platformName: settings?.platformName || 'Unicap',
-          loginUrl: settings?.loginUrl || 'https://unicapmarkets.com/login',
-          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
+          platformName: settings?.platformName || 'BULL4X',
+          loginUrl: settings?.loginUrl || 'https://bull4x.com/login',
+          supportEmail: settings?.supportEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
         console.log('KYC approved email result:', emailResult)
@@ -426,9 +426,9 @@ router.put('/reject/:kycId', async (req, res) => {
           documentType: kyc.documentType,
           rejectionReason: kyc.rejectionReason,
           rejectedAt: new Date().toLocaleString(),
-          platformName: settings?.platformName || 'Unicap',
-          loginUrl: settings?.loginUrl || 'https://unicapmarkets.com/login',
-          supportEmail: settings?.supportEmail || 'support@unicapmarkets.com',
+          platformName: settings?.platformName || 'BULL4X',
+          loginUrl: settings?.loginUrl || 'https://bull4x.com/login',
+          supportEmail: settings?.supportEmail || 'support@bull4x.com',
           year: new Date().getFullYear().toString()
         })
       }
