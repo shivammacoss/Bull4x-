@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
@@ -79,6 +79,19 @@ import PDFViewerPage from './pages/PDFViewerPage'
 // import WebsiteLayout from './components/WebsiteLayout'
 // import { TermsAndConditionsPage, PrivacyPolicyPage, RiskDisclosurePage, IBagreementPage, FundingRulesPage } from './website/src/pages/legal'
 
+/** Admin UI only on admin subdomain (e.g. admin.bull4x.com); block /admin* on main domain. Dev: allow localhost. */
+function AdminHostGate() {
+  const host = typeof window !== 'undefined' ? window.location.hostname : ''
+  const adminOnly =
+    host === 'admin.bull4x.com' ||
+    host === 'www.admin.bull4x.com' ||
+    (import.meta.env.DEV && (host === 'localhost' || host === '127.0.0.1'))
+  if (!adminOnly) {
+    return <Navigate to="/" replace />
+  }
+  return <Outlet />
+}
+
 function App() {
   return (
     <Router>
@@ -115,33 +128,35 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/instructions" element={<InstructionsPage />} />
-        <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminOverview />} />
-        <Route path="/admin/users" element={<AdminUserManagement />} />
-        <Route path="/admin/accounts" element={<AdminAccounts />} />
-        <Route path="/admin/account-types" element={<AdminAccountTypes />} />
-        <Route path="/admin/transactions" element={<AdminTransactions />} />
-        <Route path="/admin/payment-methods" element={<AdminPaymentMethods />} />
-        <Route path="/admin/trades" element={<AdminTradeManagement />} />
-        <Route path="/admin/funds" element={<AdminFundManagement />} />
-        <Route path="/admin/bank-settings" element={<AdminBankSettings />} />
-        <Route path="/admin/ib-management" element={<AdminIBManagement />} />
-        <Route path="/admin/forex-charges" element={<AdminForexCharges />} />
-        <Route path="/admin/indian-charges" element={<AdminIndianCharges />} />
-        <Route path="/admin/copy-trade" element={<AdminCopyTrade />} />
-        <Route path="/admin/prop-firm" element={<AdminPropFirm />} />
-        <Route path="/admin/admin-management" element={<AdminManagement />} />
-        <Route path="/admin/kyc" element={<AdminKYC />} />
-        <Route path="/admin/support" element={<AdminSupport />} />
-        <Route path="/admin/prop-trading" element={<AdminPropTrading />} />
-        <Route path="/admin/earnings" element={<AdminEarnings />} />
-        <Route path="/admin/theme" element={<AdminThemeSettings />} />
-        <Route path="/admin/email-templates" element={<AdminEmailTemplates />} />
-        <Route path="/admin/bonus-management" element={<AdminBonusManagement />} />
-        <Route path="/admin/banners" element={<AdminBannerManagement />} />
-        <Route path="/admin/profile" element={<AdminProfile />} />
-        <Route path="/admin-employee" element={<AdminLogin />} />
-        <Route path="/employee/login" element={<AdminLogin />} />
+        <Route element={<AdminHostGate />}>
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminOverview />} />
+          <Route path="/admin/users" element={<AdminUserManagement />} />
+          <Route path="/admin/accounts" element={<AdminAccounts />} />
+          <Route path="/admin/account-types" element={<AdminAccountTypes />} />
+          <Route path="/admin/transactions" element={<AdminTransactions />} />
+          <Route path="/admin/payment-methods" element={<AdminPaymentMethods />} />
+          <Route path="/admin/trades" element={<AdminTradeManagement />} />
+          <Route path="/admin/funds" element={<AdminFundManagement />} />
+          <Route path="/admin/bank-settings" element={<AdminBankSettings />} />
+          <Route path="/admin/ib-management" element={<AdminIBManagement />} />
+          <Route path="/admin/forex-charges" element={<AdminForexCharges />} />
+          <Route path="/admin/indian-charges" element={<AdminIndianCharges />} />
+          <Route path="/admin/copy-trade" element={<AdminCopyTrade />} />
+          <Route path="/admin/prop-firm" element={<AdminPropFirm />} />
+          <Route path="/admin/admin-management" element={<AdminManagement />} />
+          <Route path="/admin/kyc" element={<AdminKYC />} />
+          <Route path="/admin/support" element={<AdminSupport />} />
+          <Route path="/admin/prop-trading" element={<AdminPropTrading />} />
+          <Route path="/admin/earnings" element={<AdminEarnings />} />
+          <Route path="/admin/theme" element={<AdminThemeSettings />} />
+          <Route path="/admin/email-templates" element={<AdminEmailTemplates />} />
+          <Route path="/admin/bonus-management" element={<AdminBonusManagement />} />
+          <Route path="/admin/banners" element={<AdminBannerManagement />} />
+          <Route path="/admin/profile" element={<AdminProfile />} />
+          <Route path="/admin-employee" element={<AdminLogin />} />
+          <Route path="/employee/login" element={<AdminLogin />} />
+        </Route>
         <Route path="/buy-challenge" element={<BuyChallengePage />} />
         <Route path="/challenge-dashboard" element={<ChallengeDashboardPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
