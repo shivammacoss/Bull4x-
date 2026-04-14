@@ -52,6 +52,51 @@ dotenv.config()
 const app = express()
 const httpServer = createServer(app)
 
+/** Comma-separated. Use * to reflect any Origin (dev only). */
+const DEFAULT_CORS_ORIGINS = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'https://bull4x.com',
+  'https://www.bull4x.com',
+  'https://admin.bull4x.com'
+]
+
+function getCorsOriginOption() {
+  if ((process.env.CORS_ORIGINS || '').trim() === '*') {
+    return { origin: true }
+  }
+
+  const fromPlural = (process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+  const fromSingular = (process.env.CORS_ORIGIN || '').trim()
+  const list = [...fromPlural, ...(fromSingular ? [fromSingular] : [])]
+  const merged =
+    list.length > 0
+      ? [...new Set([...list, ...DEFAULT_CORS_ORIGINS])]
+      : [...DEFAULT_CORS_ORIGINS]
+
+  return {
+    origin: (requestOrigin, callback) => {
+      if (!requestOrigin) return callback(null, true)
+      if (merged.includes(requestOrigin)) return callback(null, true)
+      console.warn(`[CORS] blocked origin: ${requestOrigin}`)
+      return callback(null, false)
+    }
+  }
+}
+
+const corsOriginConfig = getCorsOriginOption()
+const corsMiddleware = cors({
+  origin: corsOriginConfig.origin,
+  credentials: true,
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  optionsSuccessStatus: 204
+})
+
 // Socket.IO for real-time updates
 const io = new Server(httpServer, {
   cors: {
@@ -198,7 +243,8 @@ ibEvents.on('IB_COMMISSION_DISTRIBUTED', (payload) => {
 
 // Middleware
 app.use(compression())
-app.use(cors())
+app.use(corsMiddleware)
+app.options('*', corsMiddleware)
 app.use(express.json({ limit: '50mb' }))
 app.use(express.urlencoded({ limit: '50mb', extended: true }))
 
@@ -208,6 +254,11 @@ mongoose.connect(process.env.MONGODB_URI)
     console.log('Connected to MongoDB')
     // Auto-seed/sync email templates on startup
     await seedEmailTemplates()
+    if (process.env.AUTO_SEED_CREDENTIALS_ON_START === '1') {
+      const { seedCredentials } = await import('./scripts/seedCredentials.js')
+      await seedCredentials({ disconnectAfter: false })
+      console.log('[AUTO_SEED_CREDENTIALS_ON_START] synced default admin + demo users')
+    }
   })
   .catch((err) => console.error('MongoDB connection error:', err))
 

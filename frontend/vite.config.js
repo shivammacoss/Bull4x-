@@ -4,7 +4,8 @@ import path from 'path'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const backendTarget = env.VITE_BACKEND_PROXY_TARGET || 'http://localhost:8000'
+  // 127.0.0.1 avoids some Windows setups where "localhost" hits ::1 first while Node listens on IPv4 only
+  const backendTarget = env.VITE_BACKEND_PROXY_TARGET || 'http://127.0.0.1:8000'
 
   return {
     plugins: [react()],
