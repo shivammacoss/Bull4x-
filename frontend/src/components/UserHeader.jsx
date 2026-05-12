@@ -277,7 +277,7 @@ const UserHeader = () => {
           
           {/* Dropdown Menu */}
           {showWalletDropdown && (
-            <div className={`absolute right-0 top-full mt-2 w-72 rounded-xl shadow-xl border z-50 ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <div className={`absolute right-0 top-full mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-xl shadow-xl border z-50 ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-200'}`}>
               <div className="p-4">
                 {/* Main Wallet */}
                 <div className={`pb-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
@@ -440,7 +440,7 @@ const UserHeader = () => {
       {/* Transfer Modal (Main Wallet → Trading Account) */}
       {showTransferModal && selectedAccount && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-xl p-6 w-full max-w-md border ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-300'}`}>
+          <div className={`rounded-xl p-6 w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto border ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-300'}`}>
             <div className="flex items-center justify-between mb-6">
               <h3 className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Transfer to Account</h3>
               <button 
@@ -529,7 +529,7 @@ const UserHeader = () => {
       {/* Withdraw Modal (Trading Account → Main Wallet) */}
       {showWithdrawModal && selectedAccount && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-xl p-6 w-full max-w-md border ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-300'}`}>
+          <div className={`rounded-xl p-6 w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto border ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-300'}`}>
             <div className="flex items-center justify-between mb-6">
               <h3 className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Withdraw to Main Wallet</h3>
               <button 

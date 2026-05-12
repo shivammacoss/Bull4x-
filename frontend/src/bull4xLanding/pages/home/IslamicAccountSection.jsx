@@ -53,7 +53,7 @@ function IslamicAccountSection() {
 
                 <div className="flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-6xl mb-4">??</div>
+                    <div className="text-4xl sm:text-5xl md:text-6xl mb-4">??</div>
                     <h3 className="text-white font-bold text-xl mb-4">Shariah Compliant</h3>
                     <Link to="/accounts" className="b4x-btn-primary">
                       Open Islamic Account
