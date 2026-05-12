@@ -208,7 +208,7 @@ export default function HeroSection() {
         >
           {/* Primary — Crimson Neon */}
           <Link
-            to="/accounts"
+            to="/user/login"
             className="inline-flex items-center gap-2 px-8 py-4 text-white font-bold text-sm rounded-lg transition-all duration-300 hover:-translate-y-0.5 uppercase tracking-wider"
             style={{
               fontFamily: "'Inter', sans-serif",

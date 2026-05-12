@@ -2,11 +2,16 @@
 // BULL4X - Risk Disclosure Page
 // ============================================
 
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { FiAlertTriangle, FiArrowRight, FiShield } from 'react-icons/fi'
-import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../../components/AnimatedSection'
+import {
+  FiAlertTriangle, FiAlertOctagon, FiBookOpen, FiBarChart2,
+  FiLayers, FiSliders, FiDroplet, FiWifi, FiDollarSign,
+  FiMessageCircle, FiClock, FiUserCheck, FiCheckCircle,
+} from 'react-icons/fi'
 import MarketTicker from '../../components/MarketTicker'
+import {
+  LegalPageShell, LegalHero, LegalBody, SectionCard, Bullet,
+  HighlightBanner, FeatureGrid, ContactCard,
+} from '../../../components/LegalAtoms'
 
 const riskFactors = [
   {
@@ -35,136 +40,110 @@ const riskFactors = [
   },
 ]
 
+const sections = [
+  { id: 'intro',          no: '01', title: 'Introduction' },
+  { id: 'risk-factors',   no: '02', title: 'Key Risk Factors' },
+  { id: 'no-advice',      no: '03', title: 'No Investment Advice' },
+  { id: 'past',           no: '04', title: 'Past Performance' },
+  { id: 'suitability',    no: '05', title: 'Suitability' },
+  { id: 'acknowledgement',no: '06', title: 'Acknowledgement' },
+  { id: 'contact',        no: '07', title: 'Contact Us' },
+]
+
 function RiskDisclosure() {
   return (
-    <PageTransition>
+    <LegalPageShell>
+      {/* Marketing site ticker stays at top */}
       <div className="pt-16 md:pt-18">
         <MarketTicker />
       </div>
 
-      {/* Hero */}
-      <section className="relative py-16 hero-bg grid-bg overflow-hidden">
-        <div className="section-container relative z-10">
-          <AnimatedSection animation="slideUp" className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiAlertTriangle size={14} className="text-red-accent" />
-              <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Legal</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Risk Disclosure</h1>
-            <p className="text-gray-400 text-lg">
-              Trading leveraged financial products carries a high level of risk and may not be suitable for all investors. Please read this disclosure carefully before trading.
-            </p>
-          </AnimatedSection>
-        </div>
-      </section>
+      <LegalHero
+        icon={FiAlertTriangle}
+        badge="Legal · Risk"
+        title="Risk"
+        highlight="Disclosure"
+        subtitle="Trading leveraged financial products carries a high level of risk and may not be suitable for all investors. Please read this disclosure carefully before trading."
+        updated="January 2025"
+        effective="Read in full before opening an account"
+      />
 
-      {/* Main Content */}
-      <section className="section-padding bg-bull-900">
-        <div className="section-container max-w-4xl">
+      <LegalBody sections={sections}>
+        <HighlightBanner icon={FiAlertOctagon} tone="warn" title="Important risk warning">
+          Trading leveraged financial products carries a high level of risk and may not
+          be suitable for all investors. <span className="text-white font-semibold">You
+          may lose more than your initial investment.</span> BULL4X does not guarantee
+          profits and does not provide investment advice. Before trading, ensure you
+          fully understand the risks involved.
+        </HighlightBanner>
 
-          {/* Warning Banner */}
-          <AnimatedSection animation="slideUp">
-            <div className="flex items-start gap-4 p-6 rounded-2xl bg-red-accent/5 border border-red-accent/20 mb-12">
-              <FiAlertTriangle className="text-red-accent flex-shrink-0 mt-1" size={20} />
-              <div>
-                <h3 className="text-white font-bold text-lg mb-2">Important Risk Warning</h3>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  Trading leveraged financial products carries a high level of risk and may not be suitable for all investors.
-                  You may lose more than your initial investment. BULL4X does not guarantee profits and does not provide
-                  investment advice. Before trading, ensure you fully understand the risks involved.
-                </p>
-              </div>
-            </div>
-          </AnimatedSection>
+        <SectionCard id="intro" no="01" icon={FiBookOpen} title="Introduction">
+          <p>
+            This Risk Disclosure Statement is provided to you by BULL4X in accordance
+            with our regulatory obligations. It is intended to inform you of the risks
+            associated with trading leveraged financial instruments including but not
+            limited to Forex, CFDs, indices, commodities, stocks, and cryptocurrencies.
+          </p>
+          <p>
+            This document does not disclose all risks associated with trading. You
+            should not trade unless you understand the nature of the products you are
+            trading and the extent of your exposure to risk.
+          </p>
+        </SectionCard>
 
-          {/* Introduction */}
-          <AnimatedSection animation="slideUp" delay={0.1}>
-            <div className="prose-dark mb-10">
-              <h2 className="text-2xl font-bold text-white mb-4">1. Introduction</h2>
-              <p className="text-gray-400 leading-relaxed mb-4">
-                This Risk Disclosure Statement is provided to you by BULL4X in accordance with our regulatory obligations.
-                It is intended to inform you of the risks associated with trading leveraged financial instruments including but not
-                limited to Forex, CFDs, indices, commodities, stocks, and cryptocurrencies.
-              </p>
-              <p className="text-gray-400 leading-relaxed">
-                This document does not disclose all risks associated with trading. You should not trade unless you understand the
-                nature of the products you are trading and the extent of your exposure to risk.
-              </p>
-            </div>
-          </AnimatedSection>
+        <SectionCard id="risk-factors" no="02" icon={FiBarChart2} title="Key Risk Factors">
+          <p>
+            Trading involves numerous risk factors. The most significant ones are
+            outlined below — but this is not an exhaustive list.
+          </p>
+          <FeatureGrid items={riskFactors} />
+        </SectionCard>
 
-          {/* Risk Factors */}
-          <AnimatedSection animation="slideUp" delay={0.15}>
-            <h2 className="text-2xl font-bold text-white mb-6">2. Key Risk Factors</h2>
-          </AnimatedSection>
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-            {riskFactors.map((risk, i) => (
-              <StaggerItem key={risk.title}>
-                <div className="p-5 rounded-xl bg-bull-600 border border-white/5 hover:border-red-accent/20 transition-all duration-300 h-full">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-red-accent flex-shrink-0"></div>
-                    <h4 className="text-white font-semibold text-sm">{risk.title}</h4>
-                  </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">{risk.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+        <SectionCard id="no-advice" no="03" icon={FiMessageCircle} title="No Investment Advice">
+          <p>
+            BULL4X does not provide investment advice. Any information, analysis, or
+            trading signals provided through our platforms or communications are for
+            informational purposes only and should not be construed as investment
+            advice. You are solely responsible for your trading decisions.
+          </p>
+        </SectionCard>
 
-          {/* Additional Sections */}
-          <AnimatedSection animation="slideUp" delay={0.2}>
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">3. No Investment Advice</h2>
-                <p className="text-gray-400 leading-relaxed">
-                  BULL4X does not provide investment advice. Any information, analysis, or trading signals provided
-                  through our platforms or communications are for informational purposes only and should not be construed as
-                  investment advice. You are solely responsible for your trading decisions.
-                </p>
-              </div>
+        <SectionCard id="past" no="04" icon={FiClock} title="Past Performance">
+          <p>
+            Past performance of any financial instrument is not indicative of future
+            results. Historical data and performance records should not be relied upon
+            as a guarantee of future performance.
+          </p>
+        </SectionCard>
 
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">4. Past Performance</h2>
-                <p className="text-gray-400 leading-relaxed">
-                  Past performance of any financial instrument is not indicative of future results. Historical data and
-                  performance records should not be relied upon as a guarantee of future performance.
-                </p>
-              </div>
+        <SectionCard id="suitability" no="05" icon={FiUserCheck} title="Suitability">
+          <p>
+            Before trading, you should carefully consider your investment objectives,
+            level of experience, and risk appetite. If you are unsure whether trading is
+            appropriate for you, we recommend seeking independent financial advice from
+            a qualified professional.
+          </p>
+        </SectionCard>
 
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">5. Suitability</h2>
-                <p className="text-gray-400 leading-relaxed">
-                  Before trading, you should carefully consider your investment objectives, level of experience, and risk
-                  appetite. If you are unsure whether trading is appropriate for you, we recommend seeking independent
-                  financial advice from a qualified professional.
-                </p>
-              </div>
+        <SectionCard id="acknowledgement" no="06" icon={FiCheckCircle} title="Acknowledgement">
+          <p>
+            By opening an account with BULL4X, you acknowledge that you have read,
+            understood, and accepted this Risk Disclosure Statement. You confirm that
+            you are aware of the risks involved in trading leveraged financial products.
+          </p>
+        </SectionCard>
 
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">6. Acknowledgement</h2>
-                <p className="text-gray-400 leading-relaxed">
-                  By opening an account with BULL4X, you acknowledge that you have read, understood, and accepted
-                  this Risk Disclosure Statement. You confirm that you are aware of the risks involved in trading leveraged
-                  financial products.
-                </p>
-              </div>
-            </div>
-          </AnimatedSection>
-
-          {/* CTA */}
-          <AnimatedSection animation="slideUp" delay={0.3} className="mt-12">
-            <div className="flex flex-wrap gap-4">
-              <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Open Account <FiArrowRight size={16} />
-              </Link>
-              <Link to="/contact" className="b4x-btn-secondary gap-2">
-                Contact Us
-              </Link>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-    </PageTransition>
+        <ContactCard
+          sectionNo="07"
+          title="Need to know more?"
+          description="Our team can answer questions about trading risk, leverage, margin, or our risk-management tools."
+          primaryLabel="Open Account"
+          primaryLink="/accounts"
+          secondaryLabel="Contact Us"
+          secondaryLink="/contact"
+        />
+      </LegalBody>
+    </LegalPageShell>
   )
 }
 

@@ -59,6 +59,7 @@ import Bull4xAmlPolicy from './bull4xLanding/pages/legal/AmlPolicy'
 import AdminProfile from './pages/AdminProfile'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
+import CookiePolicy from './pages/CookiePolicy'
 import AccountDeletion from './pages/AccountDeletion'
 // Website pages temporarily disabled - using simplified homepage
 // import StandardAccountPage from './website/src/pages/StandardAccountPage'
@@ -161,6 +162,7 @@ function App() {
         <Route path="/challenge-dashboard" element={<ChallengeDashboardPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/cookie-policy" element={<CookiePolicy />} />
         <Route path="/account-deletion" element={<AccountDeletion />} />
         {/* Website Sub-Pages - temporarily redirect to buy-challenge */}
         <Route path="/funding/*" element={<Navigate to="/buy-challenge" replace />} />

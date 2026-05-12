@@ -253,10 +253,11 @@ router.post('/follow', async (req, res) => {
       status: 'ACTIVE'
     })
 
-    // Update master stats
-    master.stats.totalFollowers += 1
-    master.stats.activeFollowers += 1
-    await master.save()
+    // Update master stats atomically
+    await MasterTrader.updateOne(
+      { _id: masterId },
+      { $inc: { 'stats.totalFollowers': 1, 'stats.activeFollowers': 1 } }
+    )
 
     res.status(201).json({
       message: 'Successfully following master trader',
@@ -283,15 +284,18 @@ router.put('/follow/:id/pause', async (req, res) => {
       return res.status(404).json({ message: 'Subscription not found' })
     }
 
+    const wasActive = follower.status === 'ACTIVE'
+
     follower.status = 'PAUSED'
     follower.pausedAt = new Date()
     await follower.save()
 
-    // Update master stats
-    const master = await MasterTrader.findById(follower.masterId)
-    if (master) {
-      master.stats.activeFollowers -= 1
-      await master.save()
+    // Only decrement activeFollowers if we actually transitioned away from ACTIVE
+    if (wasActive) {
+      await MasterTrader.updateOne(
+        { _id: follower.masterId },
+        { $inc: { 'stats.activeFollowers': -1 } }
+      )
     }
 
     res.json({ message: 'Following paused', follower })
@@ -308,16 +312,19 @@ router.put('/follow/:id/resume', async (req, res) => {
       return res.status(404).json({ message: 'Subscription not found' })
     }
 
+    const wasActive = follower.status === 'ACTIVE'
+
     follower.status = 'ACTIVE'
     follower.pausedAt = null
     follower.stoppedAt = null
     await follower.save()
 
-    // Update master stats
-    const master = await MasterTrader.findById(follower.masterId)
-    if (master) {
-      master.stats.activeFollowers += 1
-      await master.save()
+    // Only increment activeFollowers if we actually transitioned to ACTIVE
+    if (!wasActive) {
+      await MasterTrader.updateOne(
+        { _id: follower.masterId },
+        { $inc: { 'stats.activeFollowers': 1 } }
+      )
     }
 
     res.json({ message: 'Following resumed', follower })
@@ -334,15 +341,19 @@ router.put('/follow/:id/stop', async (req, res) => {
       return res.status(404).json({ message: 'Subscription not found' })
     }
 
+    // Capture prior status BEFORE mutating — earlier code checked status after the
+    // mutation, which always evaluated false and never decremented activeFollowers.
+    const wasActive = follower.status === 'ACTIVE'
+
     follower.status = 'STOPPED'
     follower.stoppedAt = new Date()
     await follower.save()
 
-    // Update master stats
-    const master = await MasterTrader.findById(follower.masterId)
-    if (master && follower.status === 'ACTIVE') {
-      master.stats.activeFollowers -= 1
-      await master.save()
+    if (wasActive) {
+      await MasterTrader.updateOne(
+        { _id: follower.masterId },
+        { $inc: { 'stats.activeFollowers': -1 } }
+      )
     }
 
     res.json({ message: 'Following stopped', follower })
@@ -409,27 +420,36 @@ router.put('/follow/:id/update', async (req, res) => {
 router.delete('/follow/:id/unfollow', async (req, res) => {
   try {
     const follower = await CopyFollower.findById(req.params.id)
-    
+
     if (!follower) {
       return res.status(404).json({ message: 'Subscription not found' })
     }
 
     const masterId = follower.masterId
+    const wasActive = follower.status === 'ACTIVE'
 
     // Delete the follower record
     await CopyFollower.findByIdAndDelete(req.params.id)
 
-    // Update master stats
-    const master = await MasterTrader.findById(masterId)
-    if (master) {
-      master.stats.totalFollowers = Math.max(0, (master.stats.totalFollowers || 1) - 1)
-      master.stats.activeFollowers = Math.max(0, (master.stats.activeFollowers || 1) - 1)
-      await master.save()
-    }
+    // Update master stats atomically. Decrement activeFollowers only when this
+    // record was still ACTIVE (PAUSED/STOPPED already decremented previously).
+    const inc = { 'stats.totalFollowers': -1 }
+    if (wasActive) inc['stats.activeFollowers'] = -1
+    await MasterTrader.updateOne({ _id: masterId }, { $inc: inc })
 
-    res.json({ 
-      success: true, 
-      message: 'Successfully unfollowed master' 
+    // Floor stats at zero in case of historical drift
+    await MasterTrader.updateOne(
+      { _id: masterId, 'stats.totalFollowers': { $lt: 0 } },
+      { $set: { 'stats.totalFollowers': 0 } }
+    )
+    await MasterTrader.updateOne(
+      { _id: masterId, 'stats.activeFollowers': { $lt: 0 } },
+      { $set: { 'stats.activeFollowers': 0 } }
+    )
+
+    res.json({
+      success: true,
+      message: 'Successfully unfollowed master'
     })
   } catch (error) {
     res.status(500).json({ message: 'Error unfollowing', error: error.message })

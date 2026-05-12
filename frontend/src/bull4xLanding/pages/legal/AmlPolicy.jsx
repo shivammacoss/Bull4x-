@@ -2,177 +2,147 @@
 // BULL4X - AML Policy Page
 // ============================================
 
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { FiShield, FiArrowRight } from 'react-icons/fi'
-import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../../components/AnimatedSection'
+import {
+  FiShield, FiBookOpen, FiUserCheck, FiActivity, FiFlag,
+  FiFileText, FiLock, FiAward,
+} from 'react-icons/fi'
 import MarketTicker from '../../components/MarketTicker'
+import {
+  LegalPageShell, LegalHero, LegalBody, SectionCard, Bullet,
+  HighlightBanner, FeatureGrid, FlagList, ContactCard,
+} from '../../../components/LegalAtoms'
 
 const kycRequirements = [
-  { title: 'Government-Issued Photo ID', desc: 'Valid passport, national identity card, or driver\'s license.' },
-  { title: 'Proof of Address', desc: 'Utility bill, bank statement, or official document dated within 3 months.' },
-  { title: 'Source of Funds', desc: 'Documentation confirming the legitimate origin of funds used for trading.' },
-  { title: 'Enhanced Due Diligence', desc: 'Additional documentation may be required for high-risk clients or large transactions.' },
+  { title: 'Government-Issued Photo ID', desc: 'Valid passport, national identity card, or driver\'s license — clear photo of both sides where applicable.' },
+  { title: 'Proof of Address', desc: 'Utility bill, bank statement, or official document dated within the last 3 months.' },
+  { title: 'Source of Funds', desc: 'Documentation confirming the legitimate origin of funds used for trading (e.g. salary slip, business records).' },
+  { title: 'Enhanced Due Diligence', desc: 'Additional documentation may be required for high-risk clients or large transactions, including business activity verification.' },
 ]
 
 const redFlags = [
-  'Unusually large cash deposits or withdrawals',
-  'Transactions inconsistent with the client\'s stated profile',
-  'Requests to transfer funds to unrelated third parties',
-  'Reluctance to provide required identification documents',
-  'Multiple accounts with similar trading patterns',
-  'Transactions from high-risk jurisdictions',
+  'Unusually large cash deposits or withdrawals.',
+  "Transactions inconsistent with the client's stated profile.",
+  'Requests to transfer funds to unrelated third parties.',
+  'Reluctance to provide required identification documents.',
+  'Multiple accounts with similar trading patterns.',
+  'Transactions from high-risk jurisdictions.',
+]
+
+const sections = [
+  { id: 'intro',         no: '01', title: 'Introduction' },
+  { id: 'kyc',           no: '02', title: 'Know Your Customer (KYC)' },
+  { id: 'monitoring',    no: '03', title: 'Transaction Monitoring' },
+  { id: 'red-flags',     no: '04', title: 'Suspicious Activity Indicators' },
+  { id: 'reporting',     no: '05', title: 'Reporting Obligations' },
+  { id: 'restrictions',  no: '06', title: 'Account Restrictions' },
+  { id: 'training',      no: '07', title: 'Employee Training' },
+  { id: 'contact',       no: '08', title: 'Contact Us' },
 ]
 
 function AmlPolicy() {
   return (
-    <PageTransition>
+    <LegalPageShell>
+      {/* Marketing site ticker stays at top */}
       <div className="pt-16 md:pt-18">
         <MarketTicker />
       </div>
 
-      {/* Hero */}
-      <section className="relative py-16 hero-bg grid-bg overflow-hidden">
-        <div className="section-container relative z-10">
-          <AnimatedSection animation="slideUp" className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiShield size={14} className="text-red-accent" />
-              <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Legal</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">AML Policy</h1>
-            <p className="text-gray-400 text-lg">
-              BULL4X strictly follows Anti-Money Laundering (AML) regulations and is committed to preventing financial crime across all operations.
-            </p>
-            <p className="text-gray-500 text-sm mt-3">Last updated: January 2025</p>
-          </AnimatedSection>
-        </div>
-      </section>
+      <LegalHero
+        icon={FiShield}
+        badge="Legal · AML"
+        title="AML"
+        highlight="Policy"
+        subtitle="BULL4X strictly follows Anti-Money Laundering (AML) regulations and is committed to preventing financial crime across all operations."
+        updated="January 2025"
+      />
 
-      {/* Main Content */}
-      <section className="section-padding bg-bull-900">
-        <div className="section-container max-w-4xl">
+      <LegalBody sections={sections}>
+        <HighlightBanner icon={FiShield} title="Zero tolerance for financial crime">
+          BULL4X maintains a <span className="text-white font-semibold">zero-tolerance
+          policy</span> toward money laundering, terrorist financing, and other financial
+          crimes. We are committed to full compliance with all applicable AML laws and
+          regulations. Any suspicious activity will be reported to relevant authorities
+          in accordance with applicable laws.
+        </HighlightBanner>
 
-          {/* Commitment Banner */}
-          <AnimatedSection animation="slideUp">
-            <div className="flex items-start gap-4 p-6 rounded-2xl bg-red-accent/5 border border-red-accent/20 mb-12">
-              <FiShield className="text-red-accent flex-shrink-0 mt-1" size={20} />
-              <div>
-                <h3 className="text-white font-bold text-lg mb-2">Our AML Commitment</h3>
-                <p className="text-gray-300 text-sm leading-relaxed">
-                  BULL4X maintains a zero-tolerance policy toward money laundering, terrorist financing, and
-                  other financial crimes. We are committed to full compliance with all applicable AML laws and regulations.
-                  Any suspicious activity will be reported to relevant authorities in accordance with applicable laws.
-                </p>
-              </div>
-            </div>
-          </AnimatedSection>
+        <SectionCard id="intro" no="01" icon={FiBookOpen} title="Introduction">
+          <p>
+            This Anti-Money Laundering (AML) Policy outlines the procedures and controls
+            implemented by BULL4X to prevent, detect, and report money laundering and
+            terrorist financing activities. This policy applies to all clients,
+            employees, and business relationships.
+          </p>
+        </SectionCard>
 
-          {/* Introduction */}
-          <AnimatedSection animation="slideUp" delay={0.1}>
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">1. Introduction</h2>
-                <p className="text-gray-400 leading-relaxed">
-                  This Anti-Money Laundering (AML) Policy outlines the procedures and controls implemented by BULL4X
-                  to prevent, detect, and report money laundering and terrorist financing activities. This policy applies to
-                  all clients, employees, and business relationships.
-                </p>
-              </div>
+        <SectionCard id="kyc" no="02" icon={FiUserCheck} title="Know Your Customer (KYC)">
+          <p>
+            All clients are required to complete our KYC verification process before
+            trading. We require the following documentation:
+          </p>
+          <FeatureGrid items={kycRequirements} />
+        </SectionCard>
 
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">2. Know Your Customer (KYC)</h2>
-                <p className="text-gray-400 leading-relaxed mb-6">
-                  All clients are required to complete our KYC verification process before trading. We require the following documentation:
-                </p>
-              </div>
-            </div>
-          </AnimatedSection>
+        <SectionCard id="monitoring" no="03" icon={FiActivity} title="Transaction Monitoring">
+          <p>
+            We continuously monitor all client transactions for suspicious activity. Our
+            compliance team reviews transactions that deviate from normal patterns or
+            that exceed defined thresholds. Automated systems flag unusual activity for
+            manual review by our compliance officers.
+          </p>
+        </SectionCard>
 
-          <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-            {kycRequirements.map((item) => (
-              <StaggerItem key={item.title}>
-                <div className="p-5 rounded-xl bg-bull-600 border border-white/5 hover:border-red-accent/20 transition-all duration-300 h-full">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-red-accent flex-shrink-0"></div>
-                    <h4 className="text-white font-semibold text-sm">{item.title}</h4>
-                  </div>
-                  <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
+        <SectionCard id="red-flags" no="04" icon={FiFlag} title="Suspicious Activity Indicators">
+          <p>
+            The following are examples of activities that may trigger enhanced scrutiny
+            or reporting:
+          </p>
+          <FlagList items={redFlags} />
+        </SectionCard>
 
-          <AnimatedSection animation="slideUp" delay={0.2}>
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">3. Transaction Monitoring</h2>
-                <p className="text-gray-400 leading-relaxed">
-                  We continuously monitor all client transactions for suspicious activity. Our compliance team reviews
-                  transactions that deviate from normal patterns or that exceed defined thresholds. Automated systems
-                  flag unusual activity for manual review by our compliance officers.
-                </p>
-              </div>
+        <SectionCard id="reporting" no="05" icon={FiFileText} title="Reporting Obligations">
+          <p>
+            Where we have reasonable grounds to suspect money laundering or terrorist
+            financing, we are legally obligated to file a Suspicious Activity Report
+            (SAR) with the relevant financial intelligence unit. We are prohibited by
+            law from disclosing to the client that a report has been made ("tipping
+            off").
+          </p>
+        </SectionCard>
 
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">4. Suspicious Activity Indicators</h2>
-                <p className="text-gray-400 leading-relaxed mb-4">
-                  The following are examples of activities that may trigger enhanced scrutiny or reporting:
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {redFlags.map((item, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-bull-600 border border-white/5">
-                      <div className="w-5 h-5 rounded-full bg-red-accent/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-accent"></div>
-                      </div>
-                      <span className="text-gray-300 text-sm">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <SectionCard id="restrictions" no="06" icon={FiLock} title="Account Restrictions">
+          <p>
+            We reserve the right to restrict, suspend, or terminate any account where we
+            have concerns about AML compliance. In such cases, we may freeze funds
+            pending investigation and cooperate fully with law enforcement and
+            regulatory authorities.
+          </p>
+          <ul className="space-y-2">
+            <Bullet>Suspending trading or withdrawals pending review.</Bullet>
+            <Bullet>Requesting additional KYC or source-of-funds documentation.</Bullet>
+            <Bullet>Terminating the relationship in line with regulatory guidance.</Bullet>
+          </ul>
+        </SectionCard>
 
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">5. Reporting Obligations</h2>
-                <p className="text-gray-400 leading-relaxed">
-                  Where we have reasonable grounds to suspect money laundering or terrorist financing, we are legally
-                  obligated to file a Suspicious Activity Report (SAR) with the relevant financial intelligence unit.
-                  We are prohibited by law from disclosing to the client that a report has been made (tipping off).
-                </p>
-              </div>
+        <SectionCard id="training" no="07" icon={FiAward} title="Employee Training">
+          <p>
+            All BULL4X employees receive regular AML training to ensure they can
+            identify and report suspicious activity. Our compliance team undergoes
+            specialized training and stays current with evolving AML regulations and
+            best practices.
+          </p>
+        </SectionCard>
 
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">6. Account Restrictions</h2>
-                <p className="text-gray-400 leading-relaxed">
-                  We reserve the right to restrict, suspend, or terminate any account where we have concerns about
-                  AML compliance. In such cases, we may freeze funds pending investigation and cooperate fully with
-                  law enforcement and regulatory authorities.
-                </p>
-              </div>
-
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-4">7. Employee Training</h2>
-                <p className="text-gray-400 leading-relaxed">
-                  All BULL4X employees receive regular AML training to ensure they can identify and report
-                  suspicious activity. Our compliance team undergoes specialized training and stays current with
-                  evolving AML regulations and best practices.
-                </p>
-              </div>
-            </div>
-          </AnimatedSection>
-
-          {/* CTA */}
-          <AnimatedSection animation="slideUp" delay={0.3} className="mt-12">
-            <div className="flex flex-wrap gap-4">
-              <Link to="/contact" className="b4x-btn-primary gap-2">
-                Contact Compliance <FiArrowRight size={16} />
-              </Link>
-              <Link to="/accounts" className="b4x-btn-secondary gap-2">
-                Open Account
-              </Link>
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
-    </PageTransition>
+        <ContactCard
+          sectionNo="08"
+          title="Compliance & AML enquiries"
+          description="Our compliance team handles all AML-related queries. Reach out for clarification on KYC, source-of-funds requirements, or to report a concern."
+          primaryLabel="Contact Compliance"
+          primaryLink="/contact"
+          secondaryLabel="Open Account"
+          secondaryLink="/accounts"
+        />
+      </LegalBody>
+    </LegalPageShell>
   )
 }
 

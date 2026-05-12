@@ -727,6 +727,22 @@ class TradeEngine {
           })
 
           console.log(`Pending order ${trade.tradeId} executed at ${trade.openPrice}`)
+
+          // If the filled order belongs to a master trader, mirror to followers now
+          // (copy-on-fill — not when the pending order was first placed).
+          try {
+            const MasterTrader = (await import('../models/MasterTrader.js')).default
+            const master = await MasterTrader.findOne({
+              tradingAccountId: trade.tradingAccountId,
+              status: 'ACTIVE'
+            })
+            if (master) {
+              const copyTradingEngine = (await import('./copyTradingEngine.js')).default
+              await copyTradingEngine.copyTradeToFollowers(trade, master._id)
+            }
+          } catch (copyErr) {
+            console.error(`Error mirroring filled pending order ${trade.tradeId} to followers:`, copyErr)
+          }
         } catch (error) {
           console.error(`Error executing pending order ${trade.tradeId}:`, error)
         }

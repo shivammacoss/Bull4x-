@@ -39,7 +39,7 @@ const footerLinks = {
     { label: 'Privacy Policy',     path: '/privacy-policy' },
     { label: 'Terms & Conditions', path: '/terms-of-service' },
     { label: 'AML Policy',         path: '/legal/aml-policy' },
-    { label: 'Cookie Policy',      path: '/privacy-policy' },
+    { label: 'Cookie Policy',      path: '/cookie-policy' },
   ],
 }
 

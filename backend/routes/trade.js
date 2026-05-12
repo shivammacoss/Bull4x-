@@ -167,14 +167,16 @@ router.post('/open', async (req, res) => {
       leverage // Pass user-selected leverage
     )
 
-    // Check if this is a master trader and copy to followers
-    const master = await MasterTrader.findOne({ 
-      tradingAccountId, 
-      status: 'ACTIVE' 
+    // Check if this is a master trader and copy to followers.
+    // Pending orders are NOT copied here — they're mirrored when they fill
+    // (see tradeEngine.checkPendingOrders).
+    const master = await MasterTrader.findOne({
+      tradingAccountId,
+      status: 'ACTIVE'
     })
-    
+
     let copyResults = []
-    if (master) {
+    if (master && trade.status === 'OPEN') {
       try {
         copyResults = await copyTradingEngine.copyTradeToFollowers(trade, master._id)
         console.log(`Copied trade to ${copyResults.filter(r => r.status === 'SUCCESS').length} followers`)

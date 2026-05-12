@@ -8,6 +8,7 @@ import Trade from '../models/Trade.js'
 import TradingAccount from '../models/TradingAccount.js'
 import Wallet from '../models/Wallet.js'
 import tradeEngine from './tradeEngine.js'
+import infowayService from './infowayService.js'
 
 class CopyTradingEngine {
   constructor() {
@@ -39,8 +40,54 @@ class CopyTradingEngine {
     return masterLotSize
   }
 
+  // Sum of live floating PnL for all open trades on an account (uses live infoway prices)
+  async getAccountFloatingPnl(tradingAccountId) {
+    const openTrades = await Trade.find({ tradingAccountId, status: 'OPEN' })
+    let floating = 0
+    for (const t of openTrades) {
+      const px = infowayService.getPrice(t.symbol)
+      if (px && Number(px.bid) > 0 && Number(px.ask) > 0) {
+        floating += tradeEngine.calculateFloatingPnl(t, px.bid, px.ask)
+      }
+    }
+    return floating
+  }
+
+  // Determine follower lot size from copy mode + master/follower account state.
+  // Returns a finite, rounded, clamped lot >= 0.01 (and <= maxLotSize when set).
+  computeFollowerLot(copyMode, masterQty, follower, masterBalance, masterEquity, followerBalance, followerEquity) {
+    const round2 = (n) => Math.max(0.01, Math.round(n * 100) / 100)
+    const clampMax = (n) => (follower.maxLotSize && follower.maxLotSize > 0 ? Math.min(n, follower.maxLotSize) : n)
+
+    if (copyMode === 'FIXED_LOT') {
+      return clampMax(round2(Number(follower.copyValue) || masterQty))
+    }
+    if (copyMode === 'MULTIPLIER' || copyMode === 'LOT_MULTIPLIER') {
+      const m = Number(follower.multiplier) || Number(follower.copyValue) || 1
+      return clampMax(round2(masterQty * m))
+    }
+    if (copyMode === 'BALANCE_BASED') {
+      const lot = masterBalance > 0 ? masterQty * (followerBalance / masterBalance) : masterQty
+      return clampMax(round2(lot))
+    }
+    // EQUITY_BASED and AUTO share the same formula
+    if (copyMode === 'EQUITY_BASED' || copyMode === 'AUTO') {
+      const lot = masterEquity > 0 ? masterQty * (followerEquity / masterEquity) : masterQty
+      return clampMax(round2(lot))
+    }
+    // Unknown mode — fall back to master qty (already clamped/rounded)
+    return clampMax(round2(masterQty))
+  }
+
   // Copy master trade to all active followers
   async copyTradeToFollowers(masterTrade, masterId) {
+    // Only mirror trades that are actually open. Pending master orders are mirrored
+    // when they fill (see tradeEngine.checkPendingOrders), not at placement time.
+    if (masterTrade.status && masterTrade.status !== 'OPEN') {
+      console.log(`[CopyTrade] Master trade ${masterTrade._id} status=${masterTrade.status}, skipping copy until fill`)
+      return []
+    }
+
     const master = await MasterTrader.findById(masterId)
     if (!master || master.status !== 'ACTIVE') {
       console.log(`Master ${masterId} not active, skipping copy`)
@@ -51,7 +98,7 @@ class CopyTradingEngine {
     const followers = await CopyFollower.find({
       masterId: masterId,
       status: 'ACTIVE'
-    }).populate('followerAccountId')
+    })
 
     console.log(`[CopyTrade] Found ${followers.length} active followers for master ${masterId}`)
 
@@ -62,17 +109,27 @@ class CopyTradingEngine {
 
     const tradingDay = this.getTradingDay()
 
+    // Compute master balance + equity ONCE (shared across all followers).
+    const masterAccount = await TradingAccount.findById(master.tradingAccountId)
+    const masterBalance = masterAccount ? masterAccount.balance : 0
+    const masterFloatingPnl = masterAccount
+      ? await this.getAccountFloatingPnl(masterAccount._id)
+      : 0
+    const masterEquity = masterAccount
+      ? masterAccount.balance + (masterAccount.credit || 0) + masterFloatingPnl
+      : 0
+
     // Process ALL followers in parallel for faster execution
     const copyPromises = followers.map(async (follower) => {
       try {
         console.log(`[CopyTrade] Processing follower ${follower._id}: copyMode=${follower.copyMode}, copyValue=${follower.copyValue}, maxLotSize=${follower.maxLotSize}`)
-        
+
         // Check if already copied for this specific follower (prevent duplicates per follower)
         const existingFollowerCopy = await CopyTrade.findOne({
           masterTradeId: masterTrade._id,
           followerId: follower._id
         })
-        
+
         if (existingFollowerCopy) {
           console.log(`[CopyTrade] Trade already copied for follower ${follower._id}, skipping`)
           return {
@@ -81,15 +138,6 @@ class CopyTradingEngine {
             reason: 'Already copied'
           }
         }
-
-        // Calculate follower lot size based on copy mode
-        let followerLotSize = this.calculateFollowerLotSize(
-          masterTrade.quantity,
-          follower.copyMode,
-          follower.copyValue,
-          follower.maxLotSize
-        )
-        console.log(`[CopyTrade] Initial lot size from calculateFollowerLotSize: ${followerLotSize}`)
 
         // Validate follower account
         const followerAccount = await TradingAccount.findById(follower.followerAccountId)
@@ -101,141 +149,90 @@ class CopyTradingEngine {
           }
         }
 
-        // Get master's account for balance/equity comparison
-        const masterAccount = await TradingAccount.findById(master.tradingAccountId)
-        const masterBalance = masterAccount ? masterAccount.balance : 0
-        
-        // Calculate master's true equity (balance + credit + unrealized P/L)
-        let masterFloatingPnl = 0
-        const masterOpenTrades = await Trade.find({ 
-          tradingAccountId: master.tradingAccountId, 
-          status: 'OPEN' 
-        })
-        for (const trade of masterOpenTrades) {
-          // Use master trade's open price as approximation for current price
-          // In real scenario, you'd get live prices
-          masterFloatingPnl += trade.currentPnl || 0
-        }
-        const masterEquity = masterAccount ? (masterAccount.balance + (masterAccount.credit || 0) + masterFloatingPnl) : 0
-        
-        // Get follower's balance and calculate true equity (balance + credit + unrealized P/L)
+        // Follower equity = balance + credit + live floating PnL
         const followerBalance = followerAccount.balance
-        let followerFloatingPnl = 0
-        const followerOpenTrades = await Trade.find({ 
-          tradingAccountId: followerAccount._id, 
-          status: 'OPEN' 
-        })
-        for (const trade of followerOpenTrades) {
-          followerFloatingPnl += trade.currentPnl || 0
-        }
-        const followerEquity = followerAccount.balance + (followerAccount.credit || 0) + followerFloatingPnl
+        const followerFloatingPnl = await this.getAccountFloatingPnl(followerAccount._id)
+        const followerEquity = followerBalance + (followerAccount.credit || 0) + followerFloatingPnl
 
-        // BALANCE_BASED MODE: Lot = Master Lot × (Follower Balance / Master Balance)
-        if (follower.copyMode === 'BALANCE_BASED') {
-          if (masterBalance > 0) {
-            const ratio = followerBalance / masterBalance
-            followerLotSize = masterTrade.quantity * ratio
-            // Round to 2 decimal places and ensure minimum 0.01
-            followerLotSize = Math.max(0.01, Math.round(followerLotSize * 100) / 100)
-          } else {
-            followerLotSize = masterTrade.quantity
-          }
-          
-          // Apply max lot size limit if set by user
-          if (follower.maxLotSize && follower.maxLotSize > 0) {
-            followerLotSize = Math.min(followerLotSize, follower.maxLotSize)
-          }
-          
-          console.log(`[CopyTrade] BALANCE_BASED: MasterBalance=$${masterBalance.toFixed(2)}, FollowerBalance=$${followerBalance.toFixed(2)}, Ratio=${(followerBalance/masterBalance).toFixed(2)}, MasterLot=${masterTrade.quantity}, FinalLot=${followerLotSize}`)
-        }
-
-        // EQUITY_BASED MODE: Lot = Master Lot × (Follower Equity / Master Equity)
-        if (follower.copyMode === 'EQUITY_BASED') {
-          if (masterEquity > 0) {
-            const ratio = followerEquity / masterEquity
-            const calculatedLot = masterTrade.quantity * ratio
-            // Round to 2 decimal places and ensure minimum 0.01
-            followerLotSize = Math.max(0.01, Math.round(calculatedLot * 100) / 100)
-            
-            console.log(`[CopyTrade] EQUITY_BASED CALCULATION: MasterEquity=$${masterEquity.toFixed(2)}, FollowerEquity=$${followerEquity.toFixed(2)}, Ratio=${ratio.toFixed(4)}, MasterLot=${masterTrade.quantity}, CalculatedLot=${calculatedLot.toFixed(4)}, RoundedLot=${followerLotSize}`)
-          } else {
-            followerLotSize = masterTrade.quantity
-            console.log(`[CopyTrade] EQUITY_BASED: Master equity is 0, using master lot size: ${followerLotSize}`)
-          }
-          
-          // Apply max lot size limit ONLY if explicitly set by user (not default)
-          const beforeMaxLimit = followerLotSize
-          if (follower.maxLotSize && follower.maxLotSize > 0) {
-            followerLotSize = Math.min(followerLotSize, follower.maxLotSize)
-          }
-          
-          console.log(`[CopyTrade] EQUITY_BASED FINAL: BeforeMaxLimit=${beforeMaxLimit}, MaxLotSize=${follower.maxLotSize || 'not set'}, FinalLot=${followerLotSize}`)
-        }
-
-        // MULTIPLIER MODE (also handles LOT_MULTIPLIER for backward compatibility): Lot = Master Lot × Multiplier
-        if (follower.copyMode === 'MULTIPLIER' || follower.copyMode === 'LOT_MULTIPLIER') {
-          const multiplier = follower.multiplier || follower.copyValue || 1
-          followerLotSize = masterTrade.quantity * multiplier
-          // Round to 2 decimal places and ensure minimum 0.01
-          followerLotSize = Math.max(0.01, Math.round(followerLotSize * 100) / 100)
-          
-          // Apply max lot size limit if set by user
-          if (follower.maxLotSize && follower.maxLotSize > 0) {
-            followerLotSize = Math.min(followerLotSize, follower.maxLotSize)
-          }
-          
-          console.log(`[CopyTrade] MULTIPLIER: Multiplier=${multiplier}, MasterLot=${masterTrade.quantity}, FinalLot=${followerLotSize}`)
-        }
-
-        // AUTO MODE: Same as EQUITY_BASED - Lot = Master Lot × (Follower Equity / Master Equity)
-        if (follower.copyMode === 'AUTO') {
-          if (masterEquity > 0) {
-            const ratio = followerEquity / masterEquity
-            const calculatedLot = masterTrade.quantity * ratio
-            // Round to 2 decimal places and ensure minimum 0.01
-            followerLotSize = Math.max(0.01, Math.round(calculatedLot * 100) / 100)
-            
-            console.log(`[CopyTrade] AUTO (EQUITY_BASED): MasterEquity=$${masterEquity.toFixed(2)}, FollowerEquity=$${followerEquity.toFixed(2)}, Ratio=${ratio.toFixed(4)}, MasterLot=${masterTrade.quantity}, CalculatedLot=${calculatedLot.toFixed(4)}, RoundedLot=${followerLotSize}`)
-          } else {
-            followerLotSize = masterTrade.quantity
-            console.log(`[CopyTrade] AUTO: Master equity is 0, using master lot size: ${followerLotSize}`)
-          }
-          
-          // Apply max lot size limit if set by user
-          const beforeMaxLimit = followerLotSize
-          if (follower.maxLotSize && follower.maxLotSize > 0) {
-            followerLotSize = Math.min(followerLotSize, follower.maxLotSize)
-          }
-          
-          console.log(`[CopyTrade] AUTO FINAL: BeforeMaxLimit=${beforeMaxLimit}, MaxLotSize=${follower.maxLotSize || 'not set'}, FinalLot=${followerLotSize}`)
-        }
-
-        // Check margin
-        const contractSize = tradeEngine.getContractSize(masterTrade.symbol)
-        const marginRequired = tradeEngine.calculateMargin(
-          followerLotSize,
-          masterTrade.openPrice,
-          followerAccount.leverage,
-          contractSize
+        const followerLotSize = this.computeFollowerLot(
+          follower.copyMode,
+          masterTrade.quantity,
+          follower,
+          masterBalance,
+          masterEquity,
+          followerBalance,
+          followerEquity
         )
 
-        // Calculate used margin from existing open trades
-        const existingTrades = await Trade.find({ 
-          tradingAccountId: followerAccount._id, 
-          status: 'OPEN' 
-        })
-        const usedMargin = existingTrades.reduce((sum, t) => sum + (t.marginUsed || 0), 0)
-        const freeMargin = followerAccount.balance + (followerAccount.credit || 0) - usedMargin
-        
-        if (marginRequired > freeMargin) {
-          // Record failed copy trade
+        console.log(
+          `[CopyTrade] follower=${follower._id} mode=${follower.copyMode} ` +
+          `masterBal=${masterBalance.toFixed(2)} masterEq=${masterEquity.toFixed(2)} ` +
+          `followerBal=${followerBalance.toFixed(2)} followerEq=${followerEquity.toFixed(2)} ` +
+          `masterLot=${masterTrade.quantity} -> followerLot=${followerLotSize}`
+        )
+
+        // Fetch live prices for the follower so the follower opens at their own spread,
+        // not at master's already-spread-adjusted price (which would double-charge spread).
+        const live = infowayService.getPrice(masterTrade.symbol)
+        const liveBid = live && Number(live.bid) > 0 ? Number(live.bid) : null
+        const liveAsk = live && Number(live.ask) > 0 ? Number(live.ask) : null
+        // Fallback: if no live price, use master's openPrice for both sides (single-tick mirror).
+        const openBid = liveBid ?? masterTrade.openPrice
+        const openAsk = liveAsk ?? masterTrade.openPrice
+
+        // Strip SL/TP that would be invalid on the follower's side (their openPrice
+        // can differ from master's due to spread). Only strip the offending one.
+        // Approximate follower openPrice for validation: ask for BUY, bid for SELL.
+        const approxFollowerOpen = masterTrade.side === 'BUY' ? openAsk : openBid
+        let sl = masterTrade.stopLoss ?? null
+        let tp = masterTrade.takeProfit ?? null
+        if (sl != null) {
+          const slInvalid =
+            (masterTrade.side === 'BUY' && sl >= approxFollowerOpen) ||
+            (masterTrade.side === 'SELL' && sl <= approxFollowerOpen)
+          if (slInvalid) {
+            console.warn(`[CopyTrade] Dropping invalid SL ${sl} for follower ${follower._id} (open~${approxFollowerOpen})`)
+            sl = null
+          }
+        }
+        if (tp != null) {
+          const tpInvalid =
+            (masterTrade.side === 'BUY' && tp <= approxFollowerOpen) ||
+            (masterTrade.side === 'SELL' && tp >= approxFollowerOpen)
+          if (tpInvalid) {
+            console.warn(`[CopyTrade] Dropping invalid TP ${tp} for follower ${follower._id} (open~${approxFollowerOpen})`)
+            tp = null
+          }
+        }
+
+        // Execute trade for follower — tradeEngine.openTrade handles spread, margin,
+        // commission, and validation. We don't pre-check margin here to avoid
+        // disagreeing with the authoritative check.
+        console.log(`[CopyTrade] Opening trade for follower ${follower._id}: ${followerLotSize} lots ${masterTrade.symbol}`)
+        let followerTrade
+        try {
+          followerTrade = await tradeEngine.openTrade(
+            follower.followerId,
+            followerAccount._id,
+            masterTrade.symbol,
+            masterTrade.segment,
+            masterTrade.side,
+            'MARKET',
+            followerLotSize,
+            openBid,
+            openAsk,
+            sl,
+            tp
+          )
+        } catch (openErr) {
+          // Record failed copy trade (e.g. insufficient margin, invalid SL/TP, market closed)
           await CopyTrade.create({
             masterTradeId: masterTrade._id,
             masterId: masterId,
             followerTradeId: null,
             followerId: follower._id,
             followerUserId: follower.followerId,
-            followerAccountId: follower.followerAccountId,
+            followerAccountId: followerAccount._id,
             symbol: masterTrade.symbol,
             side: masterTrade.side,
             masterLotSize: masterTrade.quantity,
@@ -245,32 +242,15 @@ class CopyTradingEngine {
             masterOpenPrice: masterTrade.openPrice,
             followerOpenPrice: 0,
             status: 'FAILED',
-            failureReason: `Insufficient margin`,
+            failureReason: openErr.message,
             tradingDay
           })
-          
           return {
             followerId: follower._id,
             status: 'FAILED',
-            reason: `Insufficient margin. Required: $${marginRequired.toFixed(2)}, Available: $${freeMargin.toFixed(2)}`
+            reason: openErr.message
           }
         }
-
-        // Execute trade for follower
-        console.log(`[CopyTrade] Opening trade for follower ${follower._id}: ${followerLotSize} lots ${masterTrade.symbol}`)
-        const followerTrade = await tradeEngine.openTrade(
-          follower.followerId,
-          follower.followerAccountId._id || follower.followerAccountId,
-          masterTrade.symbol,
-          masterTrade.segment,
-          masterTrade.side,
-          'MARKET',
-          followerLotSize,
-          masterTrade.openPrice, // Use master's price as bid
-          masterTrade.openPrice, // Use master's price as ask
-          masterTrade.stopLoss,
-          masterTrade.takeProfit
-        )
 
         // Record successful copy trade
         await CopyTrade.create({
@@ -279,7 +259,7 @@ class CopyTradingEngine {
           followerTradeId: followerTrade._id,
           followerId: follower._id,
           followerUserId: follower.followerId,
-          followerAccountId: follower.followerAccountId._id || follower.followerAccountId,
+          followerAccountId: followerAccount._id,
           symbol: masterTrade.symbol,
           side: masterTrade.side,
           masterLotSize: masterTrade.quantity,
@@ -292,17 +272,20 @@ class CopyTradingEngine {
           tradingDay
         })
 
-        // Update follower stats
-        follower.stats.totalCopiedTrades += 1
-        follower.stats.activeCopiedTrades += 1
-        await follower.save()
+        // Update follower stats atomically (avoid races with parallel master trades)
+        await CopyFollower.updateOne(
+          { _id: follower._id },
+          { $inc: { 'stats.totalCopiedTrades': 1, 'stats.activeCopiedTrades': 1 } }
+        )
 
-        // Update master stats
-        master.stats.totalCopiedVolume += followerLotSize
-        await master.save()
+        // Update master stats atomically (avoid races across parallel followers)
+        await MasterTrader.updateOne(
+          { _id: masterId },
+          { $inc: { 'stats.totalCopiedVolume': followerLotSize } }
+        )
 
         console.log(`[CopyTrade] SUCCESS: Copied trade to follower ${follower._id}, lot size: ${followerLotSize}`)
-        
+
         return {
           followerId: follower._id,
           status: 'SUCCESS',
@@ -322,10 +305,10 @@ class CopyTradingEngine {
 
     // Wait for all copy operations to complete
     const copyResults = await Promise.all(copyPromises)
-    
+
     const successCount = copyResults.filter(r => r.status === 'SUCCESS').length
     console.log(`[CopyTrade] Completed: ${successCount}/${followers.length} followers copied successfully`)
-    
+
     return copyResults
   }
 
@@ -429,19 +412,22 @@ class CopyTradingEngine {
         copyTrade.closedAt = new Date()
         await copyTrade.save()
 
-        // Update follower stats
-        const follower = await CopyFollower.findById(copyTrade.followerId)
-        if (follower) {
-          follower.stats.activeCopiedTrades -= 1
-          if (result.realizedPnl >= 0) {
-            follower.stats.totalProfit += result.realizedPnl
-            follower.dailyProfit += result.realizedPnl
-          } else {
-            follower.stats.totalLoss += Math.abs(result.realizedPnl)
-            follower.dailyLoss += Math.abs(result.realizedPnl)
+        // Update follower stats atomically (avoid races with parallel master closes)
+        const pnl = result.realizedPnl
+        const profitInc = pnl >= 0 ? pnl : 0
+        const lossInc = pnl < 0 ? Math.abs(pnl) : 0
+        await CopyFollower.updateOne(
+          { _id: copyTrade.followerId },
+          {
+            $inc: {
+              'stats.activeCopiedTrades': -1,
+              'stats.totalProfit': profitInc,
+              'stats.totalLoss': lossInc,
+              dailyProfit: profitInc,
+              dailyLoss: lossInc
+            }
           }
-          await follower.save()
-        }
+        )
 
         console.log(`[CopyTrade] Closed follower trade ${followerTradeId}, PnL: ${result.realizedPnl}`)
         return {
@@ -511,7 +497,15 @@ class CopyTradingEngine {
       try {
         // Get master's commission percentage
         const master = await MasterTrader.findById(group.masterId)
-        if (!master || !master.approvedCommissionPercentage) continue
+        if (!master || !master.approvedCommissionPercentage) {
+          // No commission to charge (e.g. master deleted, or 0% commission).
+          // Mark trades processed so we don't reprocess them on the next cron run.
+          await CopyTrade.updateMany(
+            { _id: { $in: group.trades.map(t => t._id) } },
+            { $set: { commissionApplied: true } }
+          )
+          continue
+        }
 
         const commissionPercentage = master.approvedCommissionPercentage
         const adminSharePercentage = master.adminSharePercentage || 30
@@ -521,14 +515,26 @@ class CopyTradingEngine {
         const adminShare = totalCommission * (adminSharePercentage / 100)
         const masterShare = totalCommission - adminShare
 
-        // Deduct from follower account
+        // Deduct from follower account (balance first, fall back to credit — matches
+        // tradeEngine.closeTrade loss-handling).
         const followerAccount = await TradingAccount.findById(group.followerAccountId)
-        if (followerAccount && followerAccount.balance >= totalCommission) {
-          followerAccount.balance -= totalCommission
+        const availableFunds = followerAccount
+          ? followerAccount.balance + (followerAccount.credit || 0)
+          : 0
+
+        if (followerAccount && availableFunds >= totalCommission) {
+          const loss = totalCommission
+          if (followerAccount.balance >= loss) {
+            followerAccount.balance -= loss
+          } else {
+            const remaining = loss - followerAccount.balance
+            followerAccount.balance = 0
+            followerAccount.credit = Math.max(0, (followerAccount.credit || 0) - remaining)
+          }
           await followerAccount.save()
 
           // Create commission record
-          const commission = await CopyCommission.create({
+          await CopyCommission.create({
             masterId: group.masterId,
             followerId: group.followerId,
             followerUserId: group.followerUserId,
@@ -544,28 +550,28 @@ class CopyTradingEngine {
             deductedAt: new Date()
           })
 
-          // Update master pending commission
-          master.pendingCommission += masterShare
-          master.totalCommissionEarned += masterShare
-          await master.save()
+          // Update master pending commission atomically
+          await MasterTrader.updateOne(
+            { _id: group.masterId },
+            { $inc: { pendingCommission: masterShare, totalCommissionEarned: masterShare } }
+          )
 
           // Update admin pool
           const settings = await CopySettings.getSettings()
           settings.adminCopyPool += adminShare
           await settings.save()
 
-          // Update follower stats
-          const follower = await CopyFollower.findById(group.followerId)
-          if (follower) {
-            follower.stats.totalCommissionPaid += totalCommission
-            await follower.save()
-          }
+          // Update follower stats atomically
+          await CopyFollower.updateOne(
+            { _id: group.followerId },
+            { $inc: { 'stats.totalCommissionPaid': totalCommission } }
+          )
 
           // Mark trades as processed
-          for (const trade of group.trades) {
-            trade.commissionApplied = true
-            await trade.save()
-          }
+          await CopyTrade.updateMany(
+            { _id: { $in: group.trades.map(t => t._id) } },
+            { $set: { commissionApplied: true } }
+          )
 
           commissionResults.push({
             masterId: group.masterId,
@@ -576,7 +582,8 @@ class CopyTradingEngine {
           })
 
         } else {
-          // Insufficient balance for commission
+          // Insufficient funds for commission. Record FAILED and mark trades
+          // as processed so we don't keep retrying the same day forever.
           await CopyCommission.create({
             masterId: group.masterId,
             followerId: group.followerId,
@@ -592,6 +599,11 @@ class CopyTradingEngine {
             status: 'FAILED',
             deductionError: 'Insufficient balance'
           })
+
+          await CopyTrade.updateMany(
+            { _id: { $in: group.trades.map(t => t._id) } },
+            { $set: { commissionApplied: true } }
+          )
 
           commissionResults.push({
             masterId: group.masterId,
@@ -651,8 +663,9 @@ class CopyTradingEngine {
     }
   }
 
-  // Close all follower trades when master is banned
-  async closeAllMasterFollowerTrades(masterId, currentPrices) {
+  // Close all follower trades when master is banned/suspended.
+  // Falls back to infowayService live prices when caller doesn't pass a price for a symbol.
+  async closeAllMasterFollowerTrades(masterId, currentPrices = {}) {
     const copyTrades = await CopyTrade.find({
       masterId,
       status: 'OPEN'
@@ -662,21 +675,63 @@ class CopyTradingEngine {
 
     for (const copyTrade of copyTrades) {
       try {
-        const price = currentPrices[copyTrade.symbol]
-        if (!price) continue
+        let price = currentPrices[copyTrade.symbol]
+        if (!price) {
+          const live = infowayService.getPrice(copyTrade.symbol)
+          if (live && Number(live.bid) > 0 && Number(live.ask) > 0) {
+            price = { bid: Number(live.bid), ask: Number(live.ask) }
+          }
+        }
+        if (!price) {
+          results.push({
+            copyTradeId: copyTrade._id,
+            status: 'FAILED',
+            reason: `No price available for ${copyTrade.symbol}`
+          })
+          continue
+        }
+
+        const followerTradeId = copyTrade.followerTradeId?._id ?? copyTrade.followerTradeId
+        if (!followerTradeId) {
+          results.push({
+            copyTradeId: copyTrade._id,
+            status: 'FAILED',
+            reason: 'No follower trade id'
+          })
+          continue
+        }
 
         const result = await tradeEngine.closeTrade(
-          copyTrade.followerTradeId,
+          followerTradeId,
           price.bid,
           price.ask,
           'ADMIN'
         )
 
-        copyTrade.status = 'CLOSED'
+        const masterClosePx = result.trade.side === 'BUY' ? price.bid : price.ask
+        copyTrade.masterClosePrice = masterClosePx
         copyTrade.followerClosePrice = result.trade.closePrice
         copyTrade.followerPnl = result.realizedPnl
+        copyTrade.status = 'CLOSED'
         copyTrade.closedAt = new Date()
         await copyTrade.save()
+
+        // Update follower stats atomically (parity with closeFollowerTrades)
+        const pnl = result.realizedPnl
+        const profitInc = pnl >= 0 ? pnl : 0
+        const lossInc = pnl < 0 ? Math.abs(pnl) : 0
+        await CopyFollower.updateOne(
+          { _id: copyTrade.followerId },
+          {
+            $inc: {
+              'stats.activeCopiedTrades': -1,
+              'stats.totalProfit': profitInc,
+              'stats.totalLoss': lossInc,
+              dailyProfit: profitInc,
+              dailyLoss: lossInc
+            }
+          }
+        )
 
         results.push({
           copyTradeId: copyTrade._id,

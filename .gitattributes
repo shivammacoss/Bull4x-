@@ -1,0 +1,61 @@
+# Normalize line endings across all platforms.
+# Repo stores LF; working copy gets LF on all OSes (no silent CRLF conversion).
+* text=auto eol=lf
+
+# Source code — explicit LF
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.ts     text eol=lf
+*.tsx    text eol=lf
+*.json   text eol=lf
+*.css    text eol=lf
+*.scss   text eol=lf
+*.html   text eol=lf
+*.md     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.svg    text eol=lf
+*.env    text eol=lf
+.env.*   text eol=lf
+
+# Windows-only scripts keep CRLF (otherwise they break)
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+*.ps1    text eol=crlf
+
+# Binary files — never touch
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.webp   binary
+*.avif   binary
+*.pdf    binary
+*.zip    binary
+*.gz     binary
+*.tar    binary
+*.7z     binary
+*.rar    binary
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.eot    binary
+*.otf    binary
+*.mp3    binary
+*.mp4    binary
+*.webm   binary
+*.mov    binary
+*.apk    binary
+*.aab    binary
+*.exe    binary
+*.dll    binary
+*.so     binary
+*.dylib  binary
+*.jar    binary
+*.class  binary
+
+# Lockfiles — text, exact diffs
+package-lock.json text eol=lf
+yarn.lock         text eol=lf
+pnpm-lock.yaml    text eol=lf
