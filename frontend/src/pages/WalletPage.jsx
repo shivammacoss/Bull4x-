@@ -869,19 +869,19 @@ const WalletPage = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-700">
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Type</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Amount</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Bonus</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Total</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Method</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Date</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Type</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Amount</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Bonus</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Total</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Method</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {transactions.map((tx) => (
                       <tr key={tx._id} className={`border-b ${isDarkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             {tx.type === 'Deposit' && <ArrowDownCircle size={18} className="text-green-500" />}
                             {tx.type === 'Withdrawal' && <ArrowUpCircle size={18} className="text-red-500" />}
@@ -928,7 +928,7 @@ const WalletPage = () => {
                         }`}>
                           {tx.type === 'Deposit' || tx.type === 'Transfer_From_Account' || tx.type === 'Account_Transfer_In' || tx.type === 'Admin_Fund_Add' || tx.type === 'Admin_Credit_Add' ? '+' : '-'}${tx.amount.toLocaleString()}
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           {tx.type === 'Deposit' ? (
                             tx.bonusAmount && tx.bonusAmount > 0 ? (
                               <span className="text-green-500 font-medium">+${tx.bonusAmount.toLocaleString()}</span>
@@ -939,7 +939,7 @@ const WalletPage = () => {
                             <span className="text-gray-500">-</span>
                           )}
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           {tx.type === 'Deposit' ? (
                             <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                               ${(tx.totalAmount || (tx.amount + (tx.bonusAmount || 0))).toLocaleString()}
@@ -948,10 +948,10 @@ const WalletPage = () => {
                             <span className="text-gray-500">-</span>
                           )}
                         </td>
-                        <td className="py-4 px-4 text-gray-400">
+                        <td className="py-4 px-4 text-gray-400 whitespace-nowrap">
                           {tx.type === 'Transfer_To_Account' || tx.type === 'Transfer_From_Account' || tx.type === 'Account_Transfer_Out' || tx.type === 'Account_Transfer_In' ? 'Internal' : tx.paymentMethod}
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             {getStatusIcon(tx.status)}
                             <span className={`${
@@ -963,7 +963,7 @@ const WalletPage = () => {
                             </span>
                           </div>
                         </td>
-                        <td className="py-4 px-4 text-gray-400 text-sm">{formatDate(tx.createdAt)}</td>
+                        <td className="py-4 px-4 text-gray-400 text-sm whitespace-nowrap">{formatDate(tx.createdAt)}</td>
                       </tr>
                     ))}
                   </tbody>

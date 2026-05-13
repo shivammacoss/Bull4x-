@@ -258,11 +258,11 @@ const AdminKYC = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-700">
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">User</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Document Type</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Submitted</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">User</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Document Type</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Submitted</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -273,7 +273,7 @@ const AdminKYC = () => {
               ) : (
                 filteredRequests.map((req) => (
                   <tr key={req._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
                           <User size={18} className="text-blue-500" />
@@ -284,15 +284,15 @@ const AdminKYC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="py-4 px-4 text-white">{formatDocType(req.documentType)}</td>
-                    <td className="py-4 px-4 text-gray-400">{new Date(req.submittedAt).toLocaleString()}</td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 text-white whitespace-nowrap">{formatDocType(req.documentType)}</td>
+                    <td className="py-4 px-4 text-gray-400 whitespace-nowrap">{new Date(req.submittedAt).toLocaleString()}</td>
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs w-fit ${getStatusColor(req.status)}`}>
                         {getStatusIcon(req.status)}
                         {req.status}
                       </span>
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         <button 
                           onClick={() => viewKycDetails(req)}

@@ -784,20 +784,20 @@ const AdminIBManagement = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-700">
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">IB Partner</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Referral Code</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Plan</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Direct refs</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Upline IB</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Earnings</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">IB Partner</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Referral Code</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Plan</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Direct refs</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Upline IB</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Earnings</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredIBs.map((ib) => (
                     <tr key={ib._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
                             <span className="text-blue-500 font-medium">{ib.firstName?.charAt(0) || '?'}</span>
@@ -814,16 +814,16 @@ const AdminIBManagement = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-white font-mono">{ib.referralCode || '-'}</td>
-                      <td className="py-4 px-4 text-white">{ib.ibPlanId?.name || 'Default'}</td>
-                      <td className="py-4 px-4 text-white">{ib.directReferralCount ?? ib.ibLevel ?? 0}</td>
-                      <td className="py-4 px-4 text-gray-400 text-sm">
+                      <td className="py-4 px-4 text-white font-mono whitespace-nowrap">{ib.referralCode || '-'}</td>
+                      <td className="py-4 px-4 text-white whitespace-nowrap">{ib.ibPlanId?.name || 'Default'}</td>
+                      <td className="py-4 px-4 text-white whitespace-nowrap">{ib.directReferralCount ?? ib.ibLevel ?? 0}</td>
+                      <td className="py-4 px-4 text-gray-400 text-sm whitespace-nowrap">
                         {ib.parentIBId
                           ? `${ib.parentIBId.firstName || ''} (${ib.parentIBId.referralCode || '—'})`
                           : '—'}
                       </td>
-                      <td className="py-4 px-4 text-green-500 font-medium">-</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-green-500 font-medium whitespace-nowrap">-</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           ib.ibStatus === 'ACTIVE' ? 'bg-green-500/20 text-green-500' : 
                           ib.ibStatus === 'PENDING' ? 'bg-yellow-500/20 text-yellow-500' :
@@ -833,7 +833,7 @@ const AdminIBManagement = () => {
                           {ib.ibStatus || 'N/A'}
                         </span>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           <button 
                             onClick={() => handleViewIB(ib)}
@@ -977,7 +977,7 @@ const AdminIBManagement = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-700">
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3 w-10">
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3 w-10 whitespace-nowrap">
                         <input
                           type="checkbox"
                           aria-label="Select all"
@@ -994,31 +994,31 @@ const AdminIBManagement = () => {
                           }}
                         />
                       </th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">User</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">Role</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3 whitespace-nowrap">User</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3 whitespace-nowrap">Role</th>
                       {filterIbId && networkScope === 'downline' && (
-                        <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">Depth</th>
+                        <th className="text-left text-gray-500 text-sm font-medium py-3 px-3 whitespace-nowrap">Depth</th>
                       )}
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">Parent / upline IB</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3">Ref code</th>
-                      <th className="text-right text-gray-500 text-sm font-medium py-3 px-3">Actions</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3 whitespace-nowrap">Parent / upline IB</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-3 whitespace-nowrap">Ref code</th>
+                      <th className="text-right text-gray-500 text-sm font-medium py-3 px-3 whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {networkUsers.map((u) => (
                       <tr key={u._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                        <td className="py-3 px-3">
+                        <td className="py-3 px-3 whitespace-nowrap">
                           <input
                             type="checkbox"
                             checked={selectedNetworkIds.includes(u._id)}
                             onChange={() => toggleNetworkSelect(u._id)}
                           />
                         </td>
-                        <td className="py-3 px-3">
+                        <td className="py-3 px-3 whitespace-nowrap">
                           <p className="text-white text-sm font-medium">{u.firstName}</p>
                           <p className="text-gray-500 text-xs">{u.email}</p>
                         </td>
-                        <td className="py-3 px-3">
+                        <td className="py-3 px-3 whitespace-nowrap">
                           {u.isIB ? (
                             <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">IB</span>
                           ) : (
@@ -1026,9 +1026,9 @@ const AdminIBManagement = () => {
                           )}
                         </td>
                         {filterIbId && networkScope === 'downline' && (
-                          <td className="py-3 px-3 text-gray-400 text-sm">{u.depth ?? '—'}</td>
+                          <td className="py-3 px-3 text-gray-400 text-sm whitespace-nowrap">{u.depth ?? '—'}</td>
                         )}
-                        <td className="py-3 px-3 text-sm">
+                        <td className="py-3 px-3 text-sm whitespace-nowrap">
                           {u.parentIB ? (
                             <span className="text-gray-300">
                               {u.parentIB.firstName} <span className="text-gray-500">{u.parentIB.referralCode}</span>
@@ -1042,8 +1042,8 @@ const AdminIBManagement = () => {
                             <span className="text-gray-600">—</span>
                           )}
                         </td>
-                        <td className="py-3 px-3 text-gray-500 font-mono text-xs">{u.referredBy || '—'}</td>
-                        <td className="py-3 px-3 text-right">
+                        <td className="py-3 px-3 text-gray-500 font-mono text-xs whitespace-nowrap">{u.referredBy || '—'}</td>
+                        <td className="py-3 px-3 text-right whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => handleDetachNetwork([u._id])}

@@ -323,12 +323,12 @@ const AdminEarnings = () => {
                 <table className="w-full">
                   <thead className="bg-dark-700">
                     <tr>
-                      <th className="text-left text-gray-400 text-xs font-medium px-4 py-3">Date</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Commission</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Swap</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Total</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Trades</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Volume</th>
+                      <th className="text-left text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Date</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Commission</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Swap</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Total</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Trades</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Volume</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -339,12 +339,12 @@ const AdminEarnings = () => {
                     ) : (
                       dailyEarnings.map((day, idx) => (
                         <tr key={idx} className="border-t border-gray-800 hover:bg-dark-700">
-                          <td className="px-4 py-3 text-white text-sm">{day.date}</td>
-                          <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(day.commission)}</td>
-                          <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(day.swap)}</td>
-                          <td className="px-4 py-3 text-right text-green-500 font-mono text-sm font-semibold">{formatCurrency(day.total)}</td>
-                          <td className="px-4 py-3 text-right text-gray-400 text-sm">{day.trades}</td>
-                          <td className="px-4 py-3 text-right text-gray-400 text-sm">{day.volume?.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-white text-sm whitespace-nowrap">{day.date}</td>
+                          <td className="px-4 py-3 text-right text-white font-mono text-sm whitespace-nowrap">{formatCurrency(day.commission)}</td>
+                          <td className="px-4 py-3 text-right text-white font-mono text-sm whitespace-nowrap">{formatCurrency(day.swap)}</td>
+                          <td className="px-4 py-3 text-right text-green-500 font-mono text-sm font-semibold whitespace-nowrap">{formatCurrency(day.total)}</td>
+                          <td className="px-4 py-3 text-right text-gray-400 text-sm whitespace-nowrap">{day.trades}</td>
+                          <td className="px-4 py-3 text-right text-gray-400 text-sm whitespace-nowrap">{day.volume?.toFixed(2)}</td>
                         </tr>
                       ))
                     )}
@@ -361,12 +361,12 @@ const AdminEarnings = () => {
                 <table className="w-full">
                   <thead className="bg-dark-700">
                     <tr>
-                      <th className="text-left text-gray-400 text-xs font-medium px-4 py-3">User</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Commission</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Swap</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Total</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Trades</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Volume</th>
+                      <th className="text-left text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">User</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Commission</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Swap</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Total</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Trades</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Volume</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -377,17 +377,17 @@ const AdminEarnings = () => {
                     ) : (
                       userEarnings.map((user, idx) => (
                         <tr key={idx} className="border-t border-gray-800 hover:bg-dark-700">
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <div>
                               <p className="text-white text-sm font-medium">{user.userName || 'Unknown'}</p>
                               <p className="text-gray-500 text-xs">{user.userEmail}</p>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(user.commission)}</td>
-                          <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(user.swap)}</td>
-                          <td className="px-4 py-3 text-right text-green-500 font-mono text-sm font-semibold">{formatCurrency(user.total)}</td>
-                          <td className="px-4 py-3 text-right text-gray-400 text-sm">{user.trades}</td>
-                          <td className="px-4 py-3 text-right text-gray-400 text-sm">{user.volume?.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right text-white font-mono text-sm whitespace-nowrap">{formatCurrency(user.commission)}</td>
+                          <td className="px-4 py-3 text-right text-white font-mono text-sm whitespace-nowrap">{formatCurrency(user.swap)}</td>
+                          <td className="px-4 py-3 text-right text-green-500 font-mono text-sm font-semibold whitespace-nowrap">{formatCurrency(user.total)}</td>
+                          <td className="px-4 py-3 text-right text-gray-400 text-sm whitespace-nowrap">{user.trades}</td>
+                          <td className="px-4 py-3 text-right text-gray-400 text-sm whitespace-nowrap">{user.volume?.toFixed(2)}</td>
                         </tr>
                       ))
                     )}
@@ -404,12 +404,12 @@ const AdminEarnings = () => {
                 <table className="w-full">
                   <thead className="bg-dark-700">
                     <tr>
-                      <th className="text-left text-gray-400 text-xs font-medium px-4 py-3">Symbol</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Commission</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Swap</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Total</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Trades</th>
-                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Volume</th>
+                      <th className="text-left text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Symbol</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Commission</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Swap</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Total</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Trades</th>
+                      <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Volume</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -420,12 +420,12 @@ const AdminEarnings = () => {
                     ) : (
                       symbolEarnings.map((sym, idx) => (
                         <tr key={idx} className="border-t border-gray-800 hover:bg-dark-700">
-                          <td className="px-4 py-3 text-white text-sm font-medium">{sym.symbol}</td>
-                          <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(sym.commission)}</td>
-                          <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(sym.swap)}</td>
-                          <td className="px-4 py-3 text-right text-green-500 font-mono text-sm font-semibold">{formatCurrency(sym.total)}</td>
-                          <td className="px-4 py-3 text-right text-gray-400 text-sm">{sym.trades}</td>
-                          <td className="px-4 py-3 text-right text-gray-400 text-sm">{sym.volume?.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-white text-sm font-medium whitespace-nowrap">{sym.symbol}</td>
+                          <td className="px-4 py-3 text-right text-white font-mono text-sm whitespace-nowrap">{formatCurrency(sym.commission)}</td>
+                          <td className="px-4 py-3 text-right text-white font-mono text-sm whitespace-nowrap">{formatCurrency(sym.swap)}</td>
+                          <td className="px-4 py-3 text-right text-green-500 font-mono text-sm font-semibold whitespace-nowrap">{formatCurrency(sym.total)}</td>
+                          <td className="px-4 py-3 text-right text-gray-400 text-sm whitespace-nowrap">{sym.trades}</td>
+                          <td className="px-4 py-3 text-right text-gray-400 text-sm whitespace-nowrap">{sym.volume?.toFixed(2)}</td>
                         </tr>
                       ))
                     )}
@@ -494,24 +494,24 @@ const AdminEarnings = () => {
                   <table className="w-full">
                     <thead className="bg-dark-700">
                       <tr>
-                        <th className="text-left text-gray-400 text-xs font-medium px-4 py-3">Copy master</th>
-                        <th className="text-left text-gray-400 text-xs font-medium px-4 py-3">Status</th>
-                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Commission</th>
+                        <th className="text-left text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Copy master</th>
+                        <th className="text-left text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Status</th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Commission</th>
                         <th
-                          className="text-right text-gray-400 text-xs font-medium px-4 py-3"
+                          className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap"
                           title="Admin share from copy-profit commission (DEDUCTED / SETTLED)"
                         >
                           Admin commission
                         </th>
-                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Swap</th>
-                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Total</th>
-                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3" title="Trades from copying followers">
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Swap</th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Total</th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap" title="Trades from copying followers">
                           F. trades
                         </th>
-                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3" title="Master account trades">
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap" title="Master account trades">
                           M. trades
                         </th>
-                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3">Volume</th>
+                        <th className="text-right text-gray-400 text-xs font-medium px-4 py-3 whitespace-nowrap">Volume</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -522,13 +522,13 @@ const AdminEarnings = () => {
                       ) : (
                         copyMasterEarnings.map((row) => (
                           <tr key={row.masterId} className="border-t border-gray-800 hover:bg-dark-700">
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-3 whitespace-nowrap">
                               <div>
                                 <p className="text-white text-sm font-medium">{row.displayName}</p>
                                 <p className="text-gray-500 text-xs">{row.masterEmail}</p>
                               </div>
                             </td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-3 whitespace-nowrap">
                               <span
                                 className={`text-xs font-medium px-2 py-0.5 rounded ${
                                   row.status === 'ACTIVE'
@@ -539,13 +539,13 @@ const AdminEarnings = () => {
                                 {row.status || '—'}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(row.commission)}</td>
-                            <td className="px-4 py-3 text-right text-amber-400/90 font-mono text-sm">{formatCurrency(row.adminCommission)}</td>
-                            <td className="px-4 py-3 text-right text-white font-mono text-sm">{formatCurrency(row.swap)}</td>
-                            <td className="px-4 py-3 text-right text-green-500 font-mono text-sm font-semibold">{formatCurrency(row.total)}</td>
-                            <td className="px-4 py-3 text-right text-gray-400 text-sm">{row.followerTrades}</td>
-                            <td className="px-4 py-3 text-right text-gray-400 text-sm">{row.masterTrades}</td>
-                            <td className="px-4 py-3 text-right text-gray-400 text-sm">{row.volume?.toFixed(2)}</td>
+                            <td className="px-4 py-3 text-right text-white font-mono text-sm whitespace-nowrap">{formatCurrency(row.commission)}</td>
+                            <td className="px-4 py-3 text-right text-amber-400/90 font-mono text-sm whitespace-nowrap">{formatCurrency(row.adminCommission)}</td>
+                            <td className="px-4 py-3 text-right text-white font-mono text-sm whitespace-nowrap">{formatCurrency(row.swap)}</td>
+                            <td className="px-4 py-3 text-right text-green-500 font-mono text-sm font-semibold whitespace-nowrap">{formatCurrency(row.total)}</td>
+                            <td className="px-4 py-3 text-right text-gray-400 text-sm whitespace-nowrap">{row.followerTrades}</td>
+                            <td className="px-4 py-3 text-right text-gray-400 text-sm whitespace-nowrap">{row.masterTrades}</td>
+                            <td className="px-4 py-3 text-right text-gray-400 text-sm whitespace-nowrap">{row.volume?.toFixed(2)}</td>
                           </tr>
                         ))
                       )}

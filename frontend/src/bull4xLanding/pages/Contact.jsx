@@ -5,17 +5,17 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  FiMail, FiMessageCircle, FiPhone, FiGlobe,
-  FiArrowRight, FiCheck, FiSend, FiUser,
-  FiMapPin, FiClock
-} from 'react-icons/fi'
+  Mail, MessageCircle, Phone, Globe,
+  ArrowRight, Check, Send, User,
+  MapPin, Clock
+} from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
 
 const contactMethods = [
   {
-    icon: <FiMail size={22} />,
+    icon: <Mail size={22} />,
     title: 'Email Support',
     value: 'support@bull4x.com',
     desc: 'We respond within 2 business hours',
@@ -26,7 +26,7 @@ const contactMethods = [
     actionLabel: 'Send Email',
   },
   {
-    icon: <FiMessageCircle size={22} />,
+    icon: <MessageCircle size={22} />,
     title: 'Live Chat',
     value: 'Available 24/5',
     desc: 'Instant support from our team',
@@ -37,7 +37,7 @@ const contactMethods = [
     actionLabel: 'Start Chat',
   },
   {
-    icon: <FiPhone size={22} />,
+    icon: <Phone size={22} />,
     title: 'Phone Support',
     value: '+1 (800) Bull4X-1',
     desc: 'Mon�Fri, 8:00 AM � 8:00 PM GMT',
@@ -117,7 +117,7 @@ function Contact() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold-500/10 border border-gold-500/20 mb-6">
-              <FiMail size={14} className="text-gold-400" />
+              <Mail size={14} className="text-gold-400" />
               <span className="text-gold-400 text-xs font-semibold uppercase tracking-wider">Contact Us</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
@@ -154,7 +154,7 @@ function Contact() {
                     href={method.action}
                     className={`inline-flex items-center gap-2 text-sm font-semibold ${method.color} hover:opacity-80 transition-opacity`}
                   >
-                    {method.actionLabel} <FiArrowRight size={14} />
+                    {method.actionLabel} <ArrowRight size={14} />
                   </a>
                 </div>
               </StaggerItem>
@@ -172,13 +172,13 @@ function Contact() {
               <div className="mb-8">
                 <h2 className="text-3xl font-bold text-white mb-2">Send Us a Message</h2>
                 <div className="w-12 h-1 bg-gold-gradient rounded-full mb-4"></div>
-                <p className="text-gray-400">Fill in the form below and our team will get back to you within 2 business hours.</p>
+                <p className="text-gray-400">ll in the form below and our team will get back to you within 2 business hours.</p>
               </div>
 
               {submitted ? (
                 <div className="p-6 rounded-2xl bg-green-accent/10 border border-green-accent/20 text-center">
                   <div className="w-14 h-14 rounded-full bg-green-accent/20 flex items-center justify-center mx-auto mb-4">
-                    <FiCheck size={24} className="text-green-accent" />
+                    <Check size={24} className="text-green-accent" />
                   </div>
                   <h3 className="text-white font-semibold text-lg mb-2">Message Sent!</h3>
                   <p className="text-gray-400 text-sm">Thank you for contacting us. We'll get back to you within 2 business hours.</p>
@@ -191,7 +191,7 @@ function Contact() {
                       Full Name <span className="text-red-accent">*</span>
                     </label>
                     <div className="relative">
-                      <FiUser size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                      <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
                       <input
                         type="text"
                         name="fullName"
@@ -199,7 +199,7 @@ function Contact() {
                         onChange={handleChange}
                         required
                         placeholder="John Smith"
-                        className="input-field pl-10"
+                        className="input-eld pl-10"
                       />
                     </div>
                   </div>
@@ -210,7 +210,7 @@ function Contact() {
                       Email Address <span className="text-red-accent">*</span>
                     </label>
                     <div className="relative">
-                      <FiMail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                      <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
                       <input
                         type="email"
                         name="email"
@@ -218,7 +218,7 @@ function Contact() {
                         onChange={handleChange}
                         required
                         placeholder="john@example.com"
-                        className="input-field pl-10"
+                        className="input-eld pl-10"
                       />
                     </div>
                   </div>
@@ -229,13 +229,13 @@ function Contact() {
                       Country <span className="text-red-accent">*</span>
                     </label>
                     <div className="relative">
-                      <FiGlobe size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
+                      <Globe size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
                       <select
                         name="country"
                         value={formData.country}
                         onChange={handleChange}
                         required
-                        className="input-field pl-10 appearance-none"
+                        className="input-eld pl-10 appearance-none"
                       >
                         <option value="">Select your country</option>
                         <option value="US">United States</option>
@@ -259,7 +259,7 @@ function Contact() {
                       name="subject"
                       value={formData.subject}
                       onChange={handleChange}
-                      className="input-field"
+                      className="input-eld"
                     >
                       <option value="">Select a subject</option>
                       <option value="account">Account Opening</option>
@@ -283,7 +283,7 @@ function Contact() {
                       required
                       rows={5}
                       placeholder="How can we help you today?"
-                      className="input-field resize-none"
+                      className="input-eld resize-none"
                     />
                   </div>
 
@@ -291,7 +291,7 @@ function Contact() {
                     type="submit"
                     className="b4x-btn-primary w-full gap-2 py-3.5 text-base"
                   >
-                    <FiSend size={16} />
+                    <Send size={16} />
                     Send Message
                   </button>
 
@@ -315,7 +315,7 @@ function Contact() {
                   ].map((item) => (
                     <div key={item.day} className="flex items-center justify-between p-3 rounded-lg bg-bull-600 border border-white/5">
                       <div className="flex items-center gap-2">
-                        <FiClock size={13} className="text-gold-400" />
+                        <Clock size={13} className="text-gold-400" />
                         <span className="text-gray-300 text-sm">{item.day}</span>
                       </div>
                       <div className="text-right">
@@ -340,7 +340,7 @@ function Contact() {
                           <span className="badge bg-gold-500/10 text-gold-400 text-xs">{office.type}</span>
                         </div>
                         <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                          <FiMapPin size={11} className="text-gold-500" />
+                          <MapPin size={11} className="text-gold-500" />
                           {office.address}
                         </div>
                       </div>

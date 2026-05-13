@@ -3,10 +3,10 @@
 // ============================================
 
 import {
-  FiAlertTriangle, FiAlertOctagon, FiBookOpen, FiBarChart2,
-  FiLayers, FiSliders, FiDroplet, FiWifi, FiDollarSign,
-  FiMessageCircle, FiClock, FiUserCheck, FiCheckCircle,
-} from 'react-icons/fi'
+  AlertTriangle, AlertOctagon, BookOpen, BarChart2,
+  Layers, Sliders, Droplet, Wifi, DollarSign,
+  MessageCircle, Clock, UserCheck, CheckCircle,
+} from 'lucide-react'
 import MarketTicker from '../../components/MarketTicker'
 import {
   LegalPageShell, LegalHero, LegalBody, SectionCard, Bullet,
@@ -16,7 +16,7 @@ import {
 const riskFactors = [
   {
     title: 'Market Volatility',
-    desc: 'Financial markets can be highly volatile. Prices can move rapidly and unpredictably, resulting in significant gains or losses within short periods.',
+    desc: 'nancial markets can be highly volatile. Prices can move rapidly and unpredictably, resulting in significant gains or losses within short periods.',
   },
   {
     title: 'Leverage Risks',
@@ -59,29 +59,29 @@ function RiskDisclosure() {
       </div>
 
       <LegalHero
-        icon={FiAlertTriangle}
+        icon={AlertTriangle}
         badge="Legal · Risk"
         title="Risk"
         highlight="Disclosure"
-        subtitle="Trading leveraged financial products carries a high level of risk and may not be suitable for all investors. Please read this disclosure carefully before trading."
+        subtitle="Trading leveraged nancial products carries a high level of risk and may not be suitable for all investors. Please read this disclosure carefully before trading."
         updated="January 2025"
         effective="Read in full before opening an account"
       />
 
       <LegalBody sections={sections}>
-        <HighlightBanner icon={FiAlertOctagon} tone="warn" title="Important risk warning">
-          Trading leveraged financial products carries a high level of risk and may not
+        <HighlightBanner icon={AlertOctagon} tone="warn" title="Important risk warning">
+          Trading leveraged nancial products carries a high level of risk and may not
           be suitable for all investors. <span className="text-white font-semibold">You
           may lose more than your initial investment.</span> BULL4X does not guarantee
           profits and does not provide investment advice. Before trading, ensure you
           fully understand the risks involved.
         </HighlightBanner>
 
-        <SectionCard id="intro" no="01" icon={FiBookOpen} title="Introduction">
+        <SectionCard id="intro" no="01" icon={BookOpen} title="Introduction">
           <p>
             This Risk Disclosure Statement is provided to you by BULL4X in accordance
             with our regulatory obligations. It is intended to inform you of the risks
-            associated with trading leveraged financial instruments including but not
+            associated with trading leveraged nancial instruments including but not
             limited to Forex, CFDs, indices, commodities, stocks, and cryptocurrencies.
           </p>
           <p>
@@ -91,7 +91,7 @@ function RiskDisclosure() {
           </p>
         </SectionCard>
 
-        <SectionCard id="risk-factors" no="02" icon={FiBarChart2} title="Key Risk Factors">
+        <SectionCard id="risk-factors" no="02" icon={BarChart2} title="Key Risk Factors">
           <p>
             Trading involves numerous risk factors. The most significant ones are
             outlined below — but this is not an exhaustive list.
@@ -99,7 +99,7 @@ function RiskDisclosure() {
           <FeatureGrid items={riskFactors} />
         </SectionCard>
 
-        <SectionCard id="no-advice" no="03" icon={FiMessageCircle} title="No Investment Advice">
+        <SectionCard id="no-advice" no="03" icon={MessageCircle} title="No Investment Advice">
           <p>
             BULL4X does not provide investment advice. Any information, analysis, or
             trading signals provided through our platforms or communications are for
@@ -108,28 +108,28 @@ function RiskDisclosure() {
           </p>
         </SectionCard>
 
-        <SectionCard id="past" no="04" icon={FiClock} title="Past Performance">
+        <SectionCard id="past" no="04" icon={Clock} title="Past Performance">
           <p>
-            Past performance of any financial instrument is not indicative of future
+            Past performance of any nancial instrument is not indicative of future
             results. Historical data and performance records should not be relied upon
             as a guarantee of future performance.
           </p>
         </SectionCard>
 
-        <SectionCard id="suitability" no="05" icon={FiUserCheck} title="Suitability">
+        <SectionCard id="suitability" no="05" icon={UserCheck} title="Suitability">
           <p>
             Before trading, you should carefully consider your investment objectives,
             level of experience, and risk appetite. If you are unsure whether trading is
-            appropriate for you, we recommend seeking independent financial advice from
+            appropriate for you, we recommend seeking independent nancial advice from
             a qualified professional.
           </p>
         </SectionCard>
 
-        <SectionCard id="acknowledgement" no="06" icon={FiCheckCircle} title="Acknowledgement">
+        <SectionCard id="acknowledgement" no="06" icon={CheckCircle} title="Acknowledgement">
           <p>
             By opening an account with BULL4X, you acknowledge that you have read,
             understood, and accepted this Risk Disclosure Statement. You confirm that
-            you are aware of the risks involved in trading leveraged financial products.
+            you are aware of the risks involved in trading leveraged nancial products.
           </p>
         </SectionCard>
 

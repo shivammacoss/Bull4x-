@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight, FiCheck, FiDollarSign, FiInfo } from 'react-icons/fi'
+import { ArrowRight, Check, DollarSign, Info } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
@@ -34,7 +34,7 @@ const pricingFeatures = [
   {
     icon: '??',
     title: 'Competitive Commission',
-    desc: 'ECN Raw accounts offer ultra-low fixed commissions per lot, making it ideal for high-volume traders and scalpers.',
+    desc: 'ECN Raw accounts offer ultra-low xed commissions per lot, making it ideal for high-volume traders and scalpers.',
   },
   {
     icon: '??',
@@ -80,7 +80,7 @@ function Pricing() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiDollarSign size={14} className="text-red-accent" />
+              <DollarSign size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Transparent Pricing</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
@@ -91,7 +91,7 @@ function Pricing() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Open Account <FiArrowRight size={16} />
+                Open Account <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-outline gap-2">
                 Compare Accounts
@@ -161,7 +161,7 @@ function Pricing() {
               </table>
             </div>
             <div className="flex items-start gap-2 mt-3 px-1">
-              <FiInfo size={13} className="text-gray-500 flex-shrink-0 mt-0.5" />
+              <Info size={13} className="text-gray-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-gray-500">Spreads are variable and may widen during low liquidity periods or major news events. Commission is per side per standard lot.</p>
             </div>
           </AnimatedSection>
@@ -232,7 +232,7 @@ function Pricing() {
               </table>
             </div>
             <div className="flex items-start gap-2 mt-3 px-1">
-              <FiInfo size={13} className="text-gray-500 flex-shrink-0 mt-0.5" />
+              <Info size={13} className="text-gray-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-gray-500">All spreads shown in pips. These are indicative values during normal market conditions.</p>
             </div>
           </AnimatedSection>
@@ -263,7 +263,7 @@ function Pricing() {
                   <AnimatedSection key={item} animation="slideLeft" delay={i * 0.07}>
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-bull-600/50 border border-white/5">
                       <div className="w-5 h-5 rounded-full bg-red-accent/20 flex items-center justify-center flex-shrink-0">
-                        <FiCheck size={11} className="text-red-accent" />
+                        <Check size={11} className="text-red-accent" />
                       </div>
                       <span className="text-gray-300 text-sm">{item}</span>
                     </div>
@@ -272,7 +272,7 @@ function Pricing() {
               </div>
               <AnimatedSection animation="slideUp" delay={0.5} className="mt-6">
                 <Link to="/contact" className="b4x-btn-primary gap-2">
-                  Request Swap-Free Account <FiArrowRight size={16} />
+                  Request Swap-Free Account <ArrowRight size={16} />
                 </Link>
               </AnimatedSection>
             </div>
@@ -298,7 +298,7 @@ function Pricing() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Open Account <FiArrowRight size={16} />
+                Open Account <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-secondary gap-2">
                 Try Demo Free

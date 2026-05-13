@@ -6,7 +6,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FiArrowRight, FiPlay, FiTrendingUp, FiTrendingDown } from 'react-icons/fi'
+import { ArrowRight, Play, TrendingUp, TrendingDown } from 'lucide-react'
 
 // Live data chips shown below the CTA
 const liveChips = [
@@ -167,7 +167,7 @@ export default function HeroSection() {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
-              filter: 'drop-shadow(0 0 30px rgba(217,161,54,0.5))',
+              lter: 'drop-shadow(0 0 30px rgba(217,161,54,0.5))',
             }}
           >
             MARKETS
@@ -219,7 +219,7 @@ export default function HeroSection() {
             onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 35px rgba(217,161,54,0.7), 0 0 80px rgba(217,161,54,0.25)'}
             onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 20px rgba(217,161,54,0.45), 0 0 60px rgba(217,161,54,0.15)'}
           >
-            Open Live Account <FiArrowRight size={15} />
+            Open Live Account <ArrowRight size={15} />
           </Link>
 
           {/* Ghost — White border */}
@@ -228,7 +228,7 @@ export default function HeroSection() {
             className="inline-flex items-center gap-2 px-8 py-4 text-white font-semibold text-sm rounded-lg transition-all duration-300 hover:bg-white/8 hover:-translate-y-0.5 uppercase tracking-wider border border-white/25 hover:border-white/50"
             style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '0.08em' }}
           >
-            <FiPlay size={13} /> Try Free Demo
+            <Play size={13} /> Try Free Demo
           </Link>
         </motion.div>
 
@@ -252,7 +252,7 @@ export default function HeroSection() {
                   chip.positive ? 'text-[#00d4aa]' : 'text-[#D9A136]'
                 }`}
               >
-                {chip.positive ? <FiTrendingUp size={9} /> : <FiTrendingDown size={9} />}
+                {chip.positive ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
                 {chip.change}
               </span>
             </div>

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight } from 'react-icons/fi'
+import { ArrowRight } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 import { toolsResearch } from '../HomeData'
@@ -38,7 +38,7 @@ export default function ToolsSection() {
               <div className="text-xl text-red-accent/40 mb-2 font-black uppercase tracking-wider" style={{ fontFamily: "'Inter', sans-serif" }}>Research</div>
               <p className="text-gray-400 text-xs mb-3">Explore all research tools</p>
               <Link to="/tools-research" className="b4x-btn-primary gap-1 text-xs px-4 py-2">
-                View All Tools <FiArrowRight size={12} />
+                View All Tools <ArrowRight size={12} />
               </Link>
             </div>
           </StaggerItem>

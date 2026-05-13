@@ -291,34 +291,34 @@ const AdminBonusManagement = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-700">
-                <th className="text-left py-3 px-4 text-gray-400">User</th>
-                <th className="text-left py-3 px-4 text-gray-400">Bonus</th>
-                <th className="text-left py-3 px-4 text-gray-400">Amount</th>
-                <th className="text-left py-3 px-4 text-gray-400">Wager Req</th>
-                <th className="text-left py-3 px-4 text-gray-400">Remaining</th>
-                <th className="text-left py-3 px-4 text-gray-400">Status</th>
-                <th className="text-left py-3 px-4 text-gray-400">Expires</th>
+                <th className="text-left py-3 px-4 text-gray-400 whitespace-nowrap">User</th>
+                <th className="text-left py-3 px-4 text-gray-400 whitespace-nowrap">Bonus</th>
+                <th className="text-left py-3 px-4 text-gray-400 whitespace-nowrap">Amount</th>
+                <th className="text-left py-3 px-4 text-gray-400 whitespace-nowrap">Wager Req</th>
+                <th className="text-left py-3 px-4 text-gray-400 whitespace-nowrap">Remaining</th>
+                <th className="text-left py-3 px-4 text-gray-400 whitespace-nowrap">Status</th>
+                <th className="text-left py-3 px-4 text-gray-400 whitespace-nowrap">Expires</th>
               </tr>
             </thead>
             <tbody>
               {userBonuses.map((userBonus) => (
                 <tr key={userBonus._id} className="border-b border-gray-700">
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-4 whitespace-nowrap">
                     <div>
                       <p className="text-white">{userBonus.userId?.firstName} {userBonus.userId?.lastName}</p>
                       <p className="text-gray-400 text-sm">{userBonus.userId?.email}</p>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-white">{userBonus.bonusId?.name}</td>
-                  <td className="py-3 px-4 text-green-500">${userBonus.bonusAmount}</td>
-                  <td className="py-3 px-4 text-gray-400">${userBonus.wagerRequirement}</td>
-                  <td className="py-3 px-4 text-yellow-500">${userBonus.remainingWager}</td>
-                  <td className="py-3 px-4">
+                  <td className="py-3 px-4 text-white whitespace-nowrap">{userBonus.bonusId?.name}</td>
+                  <td className="py-3 px-4 text-green-500 whitespace-nowrap">${userBonus.bonusAmount}</td>
+                  <td className="py-3 px-4 text-gray-400 whitespace-nowrap">${userBonus.wagerRequirement}</td>
+                  <td className="py-3 px-4 text-yellow-500 whitespace-nowrap">${userBonus.remainingWager}</td>
+                  <td className="py-3 px-4 whitespace-nowrap">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(userBonus.status)}`}>
                       {userBonus.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-gray-400">
+                  <td className="py-3 px-4 text-gray-400 whitespace-nowrap">
                     {userBonus.expiresAt ? new Date(userBonus.expiresAt).toLocaleDateString() : 'Never'}
                   </td>
                 </tr>

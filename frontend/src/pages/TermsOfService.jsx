@@ -1,8 +1,8 @@
 import {
-  FiFileText, FiUserCheck, FiUserPlus, FiActivity, FiAlertTriangle,
-  FiCreditCard, FiSlash, FiCpu, FiXCircle, FiAlertOctagon,
-  FiEye, FiEdit, FiGlobe,
-} from 'react-icons/fi'
+  FileText, UserCheck, UserPlus, Activity, AlertTriangle,
+  CreditCard, Slash, Cpu, XCircle, AlertOctagon,
+  Eye, Edit, Globe,
+} from 'lucide-react'
 import {
   LegalPageShell, LegalHero, LegalBody, SectionCard, Bullet,
   HighlightBanner, ContactCard,
@@ -27,7 +27,7 @@ const sections = [
 const TermsOfService = () => (
   <LegalPageShell standalone>
     <LegalHero
-      icon={FiFileText}
+      icon={FileText}
       badge="Legal · Terms"
       title="Terms of"
       highlight="Service"
@@ -36,14 +36,14 @@ const TermsOfService = () => (
     />
 
     <LegalBody sections={sections}>
-      <HighlightBanner icon={FiFileText} title="Welcome to BULL4X">
+      <HighlightBanner icon={FileText} title="Welcome to BULL4X">
         These Terms of Service ("Terms") govern your access to and use of the BULL4X
         mobile application ("App") and related services. By downloading, installing,
         or using the App, you agree to be bound by these Terms. If you do not agree,
         please do not use the App.
       </HighlightBanner>
 
-      <SectionCard id="eligibility" no="01" icon={FiUserCheck} title="Eligibility">
+      <SectionCard id="eligibility" no="01" icon={UserCheck} title="Eligibility">
         <ul className="space-y-2">
           <Bullet>You must be at least 18 years of age to use the App.</Bullet>
           <Bullet>You must provide accurate, complete, and current information during registration.</Bullet>
@@ -52,7 +52,7 @@ const TermsOfService = () => (
         </ul>
       </SectionCard>
 
-      <SectionCard id="registration" no="02" icon={FiUserPlus} title="Account Registration">
+      <SectionCard id="registration" no="02" icon={UserPlus} title="Account Registration">
         <p>To access the trading features of the App, you must create an account by providing:</p>
         <ul className="space-y-2">
           <Bullet>A valid email address.</Bullet>
@@ -66,21 +66,21 @@ const TermsOfService = () => (
         </p>
       </SectionCard>
 
-      <SectionCard id="services" no="03" icon={FiActivity} title="Services Provided">
+      <SectionCard id="services" no="03" icon={Activity} title="Services Provided">
         <p>BULL4X provides a trading platform that allows users to:</p>
         <ul className="space-y-2">
-          <Bullet>View real-time market data and price quotes for various financial instruments including Forex, Commodities, Indices, and Cryptocurrencies.</Bullet>
+          <Bullet>View real-time market data and price quotes for various nancial instruments including Forex, Commodities, Indices, and Cryptocurrencies.</Bullet>
           <Bullet>Execute simulated or live trades based on market conditions.</Bullet>
           <Bullet>Manage trading accounts, including deposits and withdrawals.</Bullet>
           <Bullet>Access trading history and portfolio information.</Bullet>
         </ul>
       </SectionCard>
 
-      <SectionCard id="risk" no="04" icon={FiAlertTriangle} title="Risk Disclosure">
-        <HighlightBanner icon={FiAlertOctagon} tone="warn" title="High-risk activity">
-          Trading in financial instruments involves substantial risk of loss and is not
+      <SectionCard id="risk" no="04" icon={AlertTriangle} title="Risk Disclosure">
+        <HighlightBanner icon={AlertOctagon} tone="warn" title="High-risk activity">
+          Trading in nancial instruments involves substantial risk of loss and is not
           suitable for all investors. You should carefully consider whether trading is
-          suitable for you in light of your financial condition.
+          suitable for you in light of your nancial condition.
         </HighlightBanner>
         <p className="mt-4">Key risks include:</p>
         <ul className="space-y-2">
@@ -91,11 +91,11 @@ const TermsOfService = () => (
         </ul>
         <p className="text-slate-400 text-sm">
           You acknowledge that you are fully aware of and accept the risks associated with
-          trading financial instruments.
+          trading nancial instruments.
         </p>
       </SectionCard>
 
-      <SectionCard id="deposits" no="05" icon={FiCreditCard} title="Deposits & Withdrawals">
+      <SectionCard id="deposits" no="05" icon={CreditCard} title="Deposits & Withdrawals">
         <ul className="space-y-2">
           <Bullet>Deposits and withdrawals are processed through the payment methods available in the App.</Bullet>
           <Bullet>All deposit requests are subject to verification and approval.</Bullet>
@@ -105,7 +105,7 @@ const TermsOfService = () => (
         </ul>
       </SectionCard>
 
-      <SectionCard id="prohibited" no="06" icon={FiSlash} title="Prohibited Activities">
+      <SectionCard id="prohibited" no="06" icon={Slash} title="Prohibited Activities">
         <p>You agree not to:</p>
         <ul className="space-y-2">
           <Bullet>Use the App for any illegal or unauthorized purpose.</Bullet>
@@ -114,11 +114,11 @@ const TermsOfService = () => (
           <Bullet>Provide false or misleading information during registration or KYC verification.</Bullet>
           <Bullet>Share your account credentials with any third party.</Bullet>
           <Bullet>Attempt to reverse-engineer, decompile, or disassemble the App.</Bullet>
-          <Bullet>Use the App to launder money or finance illegal activities.</Bullet>
+          <Bullet>Use the App to launder money or nance illegal activities.</Bullet>
         </ul>
       </SectionCard>
 
-      <SectionCard id="ip" no="07" icon={FiCpu} title="Intellectual Property">
+      <SectionCard id="ip" no="07" icon={Cpu} title="Intellectual Property">
         <p>
           All content, features, and functionality of the App, including but not limited
           to text, graphics, logos, icons, images, and software, are the exclusive
@@ -128,7 +128,7 @@ const TermsOfService = () => (
         </p>
       </SectionCard>
 
-      <SectionCard id="suspension" no="08" icon={FiXCircle} title="Account Suspension & Termination">
+      <SectionCard id="suspension" no="08" icon={XCircle} title="Account Suspension & Termination">
         <p>We reserve the right to suspend or terminate your account at any time if:</p>
         <ul className="space-y-2">
           <Bullet>You violate these Terms of Service.</Bullet>
@@ -138,7 +138,7 @@ const TermsOfService = () => (
         </ul>
       </SectionCard>
 
-      <SectionCard id="liability" no="09" icon={FiAlertOctagon} title="Limitation of Liability">
+      <SectionCard id="liability" no="09" icon={AlertOctagon} title="Limitation of Liability">
         <p>To the maximum extent permitted by law:</p>
         <ul className="space-y-2">
           <Bullet>BULL4X shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the App.</Bullet>
@@ -148,7 +148,7 @@ const TermsOfService = () => (
         </ul>
       </SectionCard>
 
-      <SectionCard id="warranties" no="10" icon={FiEye} title="Disclaimer of Warranties">
+      <SectionCard id="warranties" no="10" icon={Eye} title="Disclaimer of Warranties">
         <p>
           The App is provided "as is" and "as available" without warranties of any kind,
           either express or implied. We do not warrant that the App will be
@@ -156,7 +156,7 @@ const TermsOfService = () => (
         </p>
       </SectionCard>
 
-      <SectionCard id="modifications" no="11" icon={FiEdit} title="Modifications to Terms">
+      <SectionCard id="modifications" no="11" icon={Edit} title="Modifications to Terms">
         <p>
           We reserve the right to modify these Terms at any time. Changes will be
           effective immediately upon posting within the App. Your continued use of the
@@ -164,7 +164,7 @@ const TermsOfService = () => (
         </p>
       </SectionCard>
 
-      <SectionCard id="law" no="12" icon={FiGlobe} title="Governing Law">
+      <SectionCard id="law" no="12" icon={Globe} title="Governing Law">
         <p>
           These Terms shall be governed by and construed in accordance with the
           applicable laws. Any disputes arising from these Terms shall be resolved

@@ -11,17 +11,17 @@ export const useTheme = () => {
   return context
 }
 
-// Dark mode colors
+// Dark mode colors — Bull4X Cyber-Samurai (landing palette)
 const darkColors = {
-  bgPrimary: '#000000',
-  bgSecondary: '#0D0D0D',
-  bgCard: '#1A1A1A',
-  bgHover: '#262626',
+  bgPrimary: '#0d1117',   // bull-900
+  bgSecondary: '#111820', // bull-800
+  bgCard: '#1a232e',      // bull-600
+  bgHover: '#252f3c',     // bull-400
   textPrimary: '#FFFFFF',
   textSecondary: '#9CA3AF',
   textMuted: '#6B7280',
-  border: '#374151',
-  borderLight: '#4B5563',
+  border: '#1f2935',      // bull-500
+  borderLight: '#252f3c',
 }
 
 // Light mode colors
@@ -72,20 +72,21 @@ export const ThemeProvider = ({ children }) => {
     })
 
     // Also set some commonly used Tailwind-compatible classes
-    root.style.setProperty('--color-primary', colors.primary || '#3B82F6')
-    root.style.setProperty('--color-secondary', colors.secondary || '#10B981')
-    root.style.setProperty('--color-accent', colors.accent || '#F59E0B')
-    root.style.setProperty('--color-bg-primary', colors.bgPrimary || '#000000')
-    root.style.setProperty('--color-bg-secondary', colors.bgSecondary || '#0D0D0D')
-    root.style.setProperty('--color-bg-card', colors.bgCard || '#1A1A1A')
+    // (Defaults aligned with Bull4X Cyber-Samurai landing palette)
+    root.style.setProperty('--color-primary', colors.primary || '#D9A136')
+    root.style.setProperty('--color-secondary', colors.secondary || '#00d4aa')
+    root.style.setProperty('--color-accent', colors.accent || '#F0C96F')
+    root.style.setProperty('--color-bg-primary', colors.bgPrimary || '#0d1117')
+    root.style.setProperty('--color-bg-secondary', colors.bgSecondary || '#111820')
+    root.style.setProperty('--color-bg-card', colors.bgCard || '#1a232e')
     root.style.setProperty('--color-text-primary', colors.textPrimary || '#FFFFFF')
     root.style.setProperty('--color-text-secondary', colors.textSecondary || '#9CA3AF')
-    root.style.setProperty('--color-border', colors.border || '#374151')
-    root.style.setProperty('--color-success', colors.success || '#10B981')
+    root.style.setProperty('--color-border', colors.border || '#1f2935')
+    root.style.setProperty('--color-success', colors.success || '#00d4aa')
     root.style.setProperty('--color-error', colors.error || '#EF4444')
-    root.style.setProperty('--color-buy', colors.buyColor || '#3B82F6')
+    root.style.setProperty('--color-buy', colors.buyColor || '#00d4aa')
     root.style.setProperty('--color-sell', colors.sellColor || '#EF4444')
-    root.style.setProperty('--color-profit', colors.profitColor || '#10B981')
+    root.style.setProperty('--color-profit', colors.profitColor || '#00d4aa')
     root.style.setProperty('--color-loss', colors.lossColor || '#EF4444')
   }
 

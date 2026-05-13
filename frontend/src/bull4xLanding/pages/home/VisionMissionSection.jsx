@@ -3,27 +3,27 @@
 // ============================================
 
 import React from 'react'
-import { FiShield, FiTrendingUp, FiHeart } from 'react-icons/fi'
+import { Shield, TrendingUp, Heart } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 
 const values = [
   {
-    icon: <FiShield size={22} />,
+    icon: <Shield size={22} />,
     title: 'Transparency',
     desc: 'We believe in fair trading conditions and clear pricing with no hidden charges.',
     color: 'text-green-accent',
     bg: 'bg-green-accent/10',
   },
   {
-    icon: <FiTrendingUp size={22} />,
+    icon: <TrendingUp size={22} />,
     title: 'Innovation',
     desc: 'We continuously improve our trading technology to deliver the best performance.',
     color: 'text-blue-400',
     bg: 'bg-blue-400/10',
   },
   {
-    icon: <FiHeart size={22} />,
+    icon: <Heart size={22} />,
     title: 'Integrity',
     desc: 'We operate with honesty, professionalism, and strong ethical standards.',
     color: 'text-red-accent',

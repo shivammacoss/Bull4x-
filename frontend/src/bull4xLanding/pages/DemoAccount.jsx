@@ -4,35 +4,35 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight, FiPlay, FiCheck, FiMonitor, FiTrendingUp, FiShield } from 'react-icons/fi'
+import { ArrowRight, Play, Check, Monitor, TrendingUp, Shield } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
 
 const benefits = [
   {
-    icon: <FiMonitor size={22} />,
+    icon: <Monitor size={22} />,
     title: 'Real-Time Market Data',
     desc: 'Experience live market prices and conditions using virtual funds � identical to a live account.',
     color: 'text-blue-400',
     bg: 'bg-blue-400/10',
   },
   {
-    icon: <FiTrendingUp size={22} />,
+    icon: <TrendingUp size={22} />,
     title: 'Full Platform Access',
     desc: 'Access all trading tools, charts, indicators, and order types available on our live platform.',
     color: 'text-red-accent',
     bg: 'bg-red-accent/10',
   },
   {
-    icon: <FiShield size={22} />,
+    icon: <Shield size={22} />,
     title: 'Risk-Free Environment',
     desc: 'Practice trading strategies without risking real capital. Perfect for beginners and experienced traders testing new approaches.',
     color: 'text-green-accent',
     bg: 'bg-green-accent/10',
   },
   {
-    icon: <FiPlay size={22} />,
+    icon: <Play size={22} />,
     title: 'Instant Activation',
     desc: 'Your demo account is activated instantly. No deposit required � start trading in minutes.',
     color: 'text-purple-400',
@@ -41,7 +41,7 @@ const benefits = [
 ]
 
 const steps = [
-  { step: '01', title: 'Register', desc: 'Fill in your name and email to create your free demo account.' },
+  { step: '01', title: 'Register', desc: 'll in your name and email to create your free demo account.' },
   { step: '02', title: 'Activate', desc: 'Receive instant access � no verification or deposit required.' },
   { step: '03', title: 'Practice', desc: 'Trade with virtual funds across 60+ instruments in real market conditions.' },
   { step: '04', title: 'Go Live', desc: 'When ready, upgrade to a live account and start trading with real capital.' },
@@ -62,7 +62,7 @@ function DemoAccount() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiPlay size={14} className="text-red-accent" />
+              <Play size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Demo Account</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
@@ -73,7 +73,7 @@ function DemoAccount() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/contact" className="b4x-btn-primary gap-2">
-                Open Demo Account <FiArrowRight size={16} />
+                Open Demo Account <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-outline gap-2">
                 View Live Accounts
@@ -90,7 +90,7 @@ function DemoAccount() {
             badge="Benefits"
             title="Why Use a Demo Account?"
             highlight="Demo Account"
-            subtitle="Everything you need to practice trading without any financial risk."
+            subtitle="Everything you need to practice trading without any nancial risk."
           />
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-14">
             {benefits.map((item) => (
@@ -158,13 +158,13 @@ function DemoAccount() {
                   'All order types: Market, Limit, Stop, Trailing Stop',
                   'Risk management tools and calculators',
                   'Economic calendar and market news',
-                  'No financial risk involved',
+                  'No nancial risk involved',
                   'Ideal for beginners and strategy testing',
                 ].map((item, i) => (
                   <AnimatedSection key={i} animation="slideLeft" delay={i * 0.05}>
                     <div className="flex items-center gap-3 p-3 rounded-lg bg-bull-600/50 border border-white/5">
                       <div className="w-5 h-5 rounded-full bg-red-accent/20 flex items-center justify-center flex-shrink-0">
-                        <FiCheck size={11} className="text-red-accent" />
+                        <Check size={11} className="text-red-accent" />
                       </div>
                       <span className="text-gray-300 text-sm">{item}</span>
                     </div>
@@ -198,12 +198,12 @@ function DemoAccount() {
                     <span className="text-green-accent font-semibold text-sm">Instant</span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-400 text-sm">Financial Risk</span>
+                    <span className="text-gray-400 text-sm">nancial Risk</span>
                     <span className="text-green-accent font-semibold text-sm">Zero</span>
                   </div>
                 </div>
                 <Link to="/contact" className="b4x-btn-primary w-full text-center mt-6 gap-2 justify-center">
-                  Open Free Demo <FiArrowRight size={16} />
+                  Open Free Demo <ArrowRight size={16} />
                 </Link>
               </div>
             </AnimatedSection>
@@ -223,7 +223,7 @@ function DemoAccount() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/contact" className="b4x-btn-primary gap-2">
-                Open Demo Account <FiArrowRight size={16} />
+                Open Demo Account <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-secondary gap-2">
                 View Live Accounts

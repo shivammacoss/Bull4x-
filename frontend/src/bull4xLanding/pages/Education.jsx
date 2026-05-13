@@ -5,9 +5,9 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  FiArrowRight, FiBook, FiVideo, FiUsers,
-  FiFileText, FiPlay, FiCheck, FiStar, FiClock, FiCalendar
-} from 'react-icons/fi'
+  ArrowRight, Book, Video, Users,
+  FileText, Play, Check, Star, Clock, Calendar
+} from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
@@ -30,7 +30,7 @@ const courses = [
     lessons: 12,
     rating: 4.9,
     type: 'Video Course',
-    icon: <FiVideo size={16} />,
+    icon: <Video size={16} />,
     topics: ['What is Forex?', 'Currency pairs explained', 'How to read charts', 'Basic order types'],
   },
   {
@@ -42,7 +42,7 @@ const courses = [
     lessons: 18,
     rating: 4.8,
     type: 'Video Course',
-    icon: <FiVideo size={16} />,
+    icon: <Video size={16} />,
     topics: ['Chart patterns', 'Support & resistance', 'Trend lines', 'Moving averages'],
   },
   {
@@ -54,7 +54,7 @@ const courses = [
     lessons: 15,
     rating: 4.9,
     type: 'Video Course',
-    icon: <FiVideo size={16} />,
+    icon: <Video size={16} />,
     topics: ['Position sizing', 'Stop-loss strategies', 'Risk/reward ratios', 'Portfolio management'],
   },
   {
@@ -66,7 +66,7 @@ const courses = [
     lessons: 24,
     rating: 4.7,
     type: 'Video Course',
-    icon: <FiVideo size={16} />,
+    icon: <Video size={16} />,
     topics: ['Scalping techniques', 'Swing trading', 'Price action', 'Multi-timeframe analysis'],
   },
   {
@@ -78,8 +78,8 @@ const courses = [
     lessons: 8,
     rating: 4.8,
     type: 'E-Book',
-    icon: <FiBook size={16} />,
-    topics: ['Market basics', 'Trading psychology', 'Platform guide', 'First trade walkthrough'],
+    icon: <Book size={16} />,
+    topics: ['Market basics', 'Trading psychology', 'Platform guide', 'rst trade walkthrough'],
   },
   {
     title: 'Candlestick Pattern Bible',
@@ -90,7 +90,7 @@ const courses = [
     lessons: 10,
     rating: 4.9,
     type: 'E-Book',
-    icon: <FiBook size={16} />,
+    icon: <Book size={16} />,
     topics: ['All major patterns', 'Pattern reliability', 'Entry signals', 'Real examples'],
   },
   {
@@ -102,7 +102,7 @@ const courses = [
     lessons: 30,
     rating: 4.6,
     type: 'Video Course',
-    icon: <FiVideo size={16} />,
+    icon: <Video size={16} />,
     topics: ['EA development', 'Backtesting', 'Optimization', 'Live deployment'],
   },
   {
@@ -114,7 +114,7 @@ const courses = [
     lessons: 14,
     rating: 5.0,
     type: 'Video Course',
-    icon: <FiVideo size={16} />,
+    icon: <Video size={16} />,
     topics: ['Emotional control', 'Trading journal', 'Discipline habits', 'Mindset mastery'],
   },
 ]
@@ -146,9 +146,9 @@ const upcomingWebinars = [
 function Education() {
   const [activeCategory, setActiveCategory] = useState('all')
 
-  const filteredCourses = activeCategory === 'all'
+  const lteredCourses = activeCategory === 'all'
     ? courses
-    : courses.filter(c => c.category === activeCategory)
+    : courses.lter(c => c.category === activeCategory)
 
   return (
     <PageTransition>
@@ -164,7 +164,7 @@ function Education() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiBook size={14} className="text-red-accent" />
+              <Book size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Education Center</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
@@ -175,7 +175,7 @@ function Education() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Start Learning <FiArrowRight size={16} />
+                Start Learning <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-outline gap-2">
                 Open Demo Account
@@ -210,7 +210,7 @@ function Education() {
             subtitle="Structured learning paths for every experience level."
           />
 
-          {/* Category Filter */}
+          {/* Category lter */}
           <AnimatedSection animation="slideUp" delay={0.2} className="flex flex-wrap justify-center gap-2 mt-10 mb-12">
             {categories.map((cat) => (
               <button
@@ -228,7 +228,7 @@ function Education() {
           </AnimatedSection>
 
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredCourses.map((course) => (
+            {lteredCourses.map((course) => (
               <StaggerItem key={course.title}>
                 <div className="card group h-full flex flex-col hover:border-red-accent/30">
                   {/* Empty image container */}
@@ -239,7 +239,7 @@ function Education() {
                   <div className="flex items-center justify-between mb-3">
                     <span className={`badge text-xs ${course.levelColor}`}>{course.level}</span>
                     <div className="flex items-center gap-1 text-xs text-gray-400">
-                      <FiStar size={11} style={{ color: '#e63946', fill: '#e63946' }} />
+                      <Star size={11} style={{ color: '#e63946', ll: '#e63946' }} />
                       {course.rating}
                     </div>
                   </div>
@@ -254,7 +254,7 @@ function Education() {
                       {course.type}
                     </span>
                     <span className="flex items-center gap-1">
-                      <FiClock size={11} />
+                      <Clock size={11} />
                       {course.duration}
                     </span>
                   </div>
@@ -272,7 +272,7 @@ function Education() {
                     to="/accounts"
                     className="mt-auto flex items-center gap-1.5 text-red-accent text-xs font-semibold hover:text-red-light transition-colors"
                   >
-                    <FiPlay size={12} />
+                    <Play size={12} />
                     Start Course
                   </Link>
                 </div>
@@ -312,11 +312,11 @@ function Education() {
                     {webinar.title}
                   </h3>
                   <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-1">
-                    <FiCalendar size={11} className="text-red-accent" />
+                    <Calendar size={11} className="text-red-accent" />
                     {webinar.date}
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-4">
-                    <FiUsers size={11} className="text-red-accent" />
+                    <Users size={11} className="text-red-accent" />
                     {webinar.host}
                   </div>
 
@@ -324,7 +324,7 @@ function Education() {
                     to="/accounts"
                     className="flex items-center gap-1.5 text-red-accent text-xs font-semibold hover:text-red-light transition-colors"
                   >
-                    Register Free <FiArrowRight size={12} />
+                    Register Free <ArrowRight size={12} />
                   </Link>
                 </div>
               </AnimatedSection>
@@ -345,7 +345,7 @@ function Education() {
 
           <div className="max-w-3xl mx-auto mt-14 space-y-4">
             {[
-              { phase: 'Phase 1', title: 'Foundation', desc: 'Learn the basics of financial markets, trading terminology, and how to use the platform.', items: ['Market basics', 'Platform walkthrough', 'Order types', 'Basic charting'], color: 'border-blue-400/30 bg-blue-400/5' },
+              { phase: 'Phase 1', title: 'Foundation', desc: 'Learn the basics of nancial markets, trading terminology, and how to use the platform.', items: ['Market basics', 'Platform walkthrough', 'Order types', 'Basic charting'], color: 'border-blue-400/30 bg-blue-400/5' },
               { phase: 'Phase 2', title: 'Technical Skills', desc: 'Master technical analysis, chart patterns, and key indicators used by professional traders.', items: ['Technical analysis', 'Chart patterns', 'Key indicators', 'Multi-timeframe'], color: 'border-red-accent/30 bg-red-accent/5' },
               { phase: 'Phase 3', title: 'Strategy Development', desc: 'Build and test your own trading strategies with proper risk management rules.', items: ['Strategy building', 'Backtesting', 'Risk management', 'Trade journaling'], color: 'border-purple-400/30 bg-purple-400/5' },
               { phase: 'Phase 4', title: 'Live Trading', desc: 'Apply your skills in live markets with real capital and continuous improvement.', items: ['Live execution', 'Psychology mastery', 'Performance review', 'Scaling up'], color: 'border-green-accent/30 bg-green-accent/5' },
@@ -365,7 +365,7 @@ function Education() {
                       <div className="flex flex-wrap gap-2">
                         {phase.items.map((item) => (
                           <span key={item} className="flex items-center gap-1 text-xs text-gray-400 bg-bull-600/50 px-2 py-1 rounded-lg">
-                            <FiCheck size={10} className="text-red-accent" />
+                            <Check size={10} className="text-red-accent" />
                             {item}
                           </span>
                         ))}
@@ -391,7 +391,7 @@ function Education() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Open Free Account <FiArrowRight size={16} />
+                Open Free Account <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-secondary gap-2">
                 Browse All Courses

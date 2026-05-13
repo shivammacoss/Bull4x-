@@ -1853,18 +1853,18 @@ const TradingPage = () => {
               <table className="w-full text-sm">
                 <thead className={`text-gray-500 border-b sticky top-0 ${isDarkMode ? 'border-gray-800 bg-[#0d0d0d]' : 'border-gray-200 bg-white'}`}>
                   <tr>
-                    <th className="text-left py-2 px-3 font-normal">Time</th>
-                    <th className="text-left py-2 px-3 font-normal">Symbol</th>
-                    <th className="text-left py-2 px-3 font-normal">Side</th>
-                    <th className="text-left py-2 px-3 font-normal">Lots</th>
-                    <th className="text-left py-2 px-3 font-normal">Entry</th>
-                    <th className="text-left py-2 px-3 font-normal">Current</th>
-                    <th className="text-left py-2 px-3 font-normal">SL</th>
-                    <th className="text-left py-2 px-3 font-normal">TP</th>
-                    <th className="text-left py-2 px-3 font-normal">Charges</th>
-                    <th className="text-left py-2 px-3 font-normal">Swap</th>
-                    <th className="text-left py-2 px-3 font-normal">P/L</th>
-                    <th className="text-left py-2 px-3 font-normal">Action</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Time</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Symbol</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Side</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Lots</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Entry</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Current</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">SL</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">TP</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Charges</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Swap</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">P/L</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1909,7 +1909,7 @@ const TradingPage = () => {
                           <td className={`py-2 px-3 text-xs font-medium ${pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                             ${pnl.toFixed(2)}
                           </td>
-                          <td className="py-2 px-3">
+                          <td className="py-2 px-3 whitespace-nowrap">
                             <div className="flex items-center gap-1">
                               <button 
                                 onClick={() => openModifyModal(trade)}
@@ -2000,18 +2000,18 @@ const TradingPage = () => {
                 </div>
                 
                 {/* History Table */}
-                <table className="w-full text-sm">
+                <div className="overflow-x-auto"><table className="w-full text-sm">
                   <thead className={`text-gray-500 border-b sticky top-0 ${isDarkMode ? 'border-gray-800 bg-[#0d0d0d]' : 'border-gray-200 bg-white'}`}>
                     <tr>
-                      <th className="text-left py-2 px-3 font-normal">Closed</th>
-                      <th className="text-left py-2 px-3 font-normal">Symbol</th>
-                      <th className="text-left py-2 px-3 font-normal">Side</th>
-                      <th className="text-left py-2 px-3 font-normal">Lots</th>
-                      <th className="text-left py-2 px-3 font-normal">Entry</th>
-                      <th className="text-left py-2 px-3 font-normal">Close</th>
-                      <th className="text-left py-2 px-3 font-normal">Charges</th>
-                      <th className="text-left py-2 px-3 font-normal">Swap</th>
-                      <th className="text-left py-2 px-3 font-normal">P/L</th>
+                      <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Closed</th>
+                      <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Symbol</th>
+                      <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Side</th>
+                      <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Lots</th>
+                      <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Entry</th>
+                      <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Close</th>
+                      <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Charges</th>
+                      <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Swap</th>
+                      <th className="text-left py-2 px-3 font-normal whitespace-nowrap">P/L</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2047,7 +2047,7 @@ const TradingPage = () => {
                       })
                     )}
                   </tbody>
-                </table>
+                </table></div>
 
                 {/* History Pagination (20 per page) */}
                 {getFilteredHistory().length > historyPageSize && (
@@ -2080,17 +2080,17 @@ const TradingPage = () => {
               )}
 
               {activePositionTab === 'Pending' && (
-              <table className="w-full text-sm">
+              <div className="overflow-x-auto"><table className="w-full text-sm">
                 <thead className={`text-gray-500 border-b sticky top-0 ${isDarkMode ? 'border-gray-800 bg-[#0d0d0d]' : 'border-gray-200 bg-white'}`}>
                   <tr>
-                    <th className="text-left py-2 px-3 font-normal">Time</th>
-                    <th className="text-left py-2 px-3 font-normal">Symbol</th>
-                    <th className="text-left py-2 px-3 font-normal">Type</th>
-                    <th className="text-left py-2 px-3 font-normal">Lots</th>
-                    <th className="text-left py-2 px-3 font-normal">Price</th>
-                    <th className="text-left py-2 px-3 font-normal">SL</th>
-                    <th className="text-left py-2 px-3 font-normal">TP</th>
-                    <th className="text-left py-2 px-3 font-normal">Action</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Time</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Symbol</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Type</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Lots</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Price</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">SL</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">TP</th>
+                    <th className="text-left py-2 px-3 font-normal whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2108,7 +2108,7 @@ const TradingPage = () => {
                         <td className={`py-2 px-3 text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{order.pendingPrice?.toFixed(5)}</td>
                         <td className={`py-2 px-3 text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{order.stopLoss || '-'}</td>
                         <td className={`py-2 px-3 text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{order.takeProfit || '-'}</td>
-                        <td className="py-2 px-3">
+                        <td className="py-2 px-3 whitespace-nowrap">
                           <button 
                             onClick={() => cancelPendingOrder(order._id)}
                             className="p-1.5 bg-red-500/20 text-red-400 rounded hover:bg-red-500/30 transition-colors"
@@ -2121,7 +2121,7 @@ const TradingPage = () => {
                     ))
                   )}
                 </tbody>
-              </table>
+              </table></div>
               )}
 
               {activePositionTab === 'Cancelled' && (

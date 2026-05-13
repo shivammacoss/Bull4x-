@@ -3,16 +3,16 @@
 // ============================================
 
 import React from 'react'
-import { FiTrendingUp, FiDollarSign, FiBarChart2, FiAward } from 'react-icons/fi'
+import { TrendingUp, DollarSign, BarChart2, Award } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 
 const benefits = [
-  { icon: <FiDollarSign size={20} />, title: 'High rebate structure', color: 'text-green-accent', bg: 'bg-green-accent/10' },
-  { icon: <FiTrendingUp size={20} />, title: 'Lifetime commissions', color: 'text-blue-400', bg: 'bg-blue-400/10' },
-  { icon: <FiBarChart2 size={20} />, title: 'Partner dashboard tracking', color: 'text-purple-400', bg: 'bg-purple-400/10' },
-  { icon: <FiAward size={20} />, title: 'Marketing support', color: 'text-red-accent', bg: 'bg-red-accent/10' },
+  { icon: <DollarSign size={20} />, title: 'High rebate structure', color: 'text-green-accent', bg: 'bg-green-accent/10' },
+  { icon: <TrendingUp size={20} />, title: 'Lifetime commissions', color: 'text-blue-400', bg: 'bg-blue-400/10' },
+  { icon: <BarChart2 size={20} />, title: 'Partner dashboard tracking', color: 'text-purple-400', bg: 'bg-purple-400/10' },
+  { icon: <Award size={20} />, title: 'Marketing support', color: 'text-red-accent', bg: 'bg-red-accent/10' },
 ]
 
 const ibLevels = [

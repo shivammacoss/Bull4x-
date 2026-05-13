@@ -3,7 +3,7 @@
 // ============================================
 
 import React from 'react'
-import { FiCreditCard, FiDollarSign } from 'react-icons/fi'
+import { CreditCard, DollarSign } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 

@@ -3,9 +3,9 @@
 // ============================================
 
 import {
-  FiShield, FiBookOpen, FiUserCheck, FiActivity, FiFlag,
-  FiFileText, FiLock, FiAward,
-} from 'react-icons/fi'
+  Shield, BookOpen, UserCheck, Activity, Flag,
+  FileText, Lock, Award,
+} from 'lucide-react'
 import MarketTicker from '../../components/MarketTicker'
 import {
   LegalPageShell, LegalHero, LegalBody, SectionCard, Bullet,
@@ -48,33 +48,33 @@ function AmlPolicy() {
       </div>
 
       <LegalHero
-        icon={FiShield}
+        icon={Shield}
         badge="Legal · AML"
         title="AML"
         highlight="Policy"
-        subtitle="BULL4X strictly follows Anti-Money Laundering (AML) regulations and is committed to preventing financial crime across all operations."
+        subtitle="BULL4X strictly follows Anti-Money Laundering (AML) regulations and is committed to preventing nancial crime across all operations."
         updated="January 2025"
       />
 
       <LegalBody sections={sections}>
-        <HighlightBanner icon={FiShield} title="Zero tolerance for financial crime">
+        <HighlightBanner icon={Shield} title="Zero tolerance for nancial crime">
           BULL4X maintains a <span className="text-white font-semibold">zero-tolerance
-          policy</span> toward money laundering, terrorist financing, and other financial
+          policy</span> toward money laundering, terrorist nancing, and other nancial
           crimes. We are committed to full compliance with all applicable AML laws and
           regulations. Any suspicious activity will be reported to relevant authorities
           in accordance with applicable laws.
         </HighlightBanner>
 
-        <SectionCard id="intro" no="01" icon={FiBookOpen} title="Introduction">
+        <SectionCard id="intro" no="01" icon={BookOpen} title="Introduction">
           <p>
             This Anti-Money Laundering (AML) Policy outlines the procedures and controls
             implemented by BULL4X to prevent, detect, and report money laundering and
-            terrorist financing activities. This policy applies to all clients,
+            terrorist nancing activities. This policy applies to all clients,
             employees, and business relationships.
           </p>
         </SectionCard>
 
-        <SectionCard id="kyc" no="02" icon={FiUserCheck} title="Know Your Customer (KYC)">
+        <SectionCard id="kyc" no="02" icon={UserCheck} title="Know Your Customer (KYC)">
           <p>
             All clients are required to complete our KYC verification process before
             trading. We require the following documentation:
@@ -82,7 +82,7 @@ function AmlPolicy() {
           <FeatureGrid items={kycRequirements} />
         </SectionCard>
 
-        <SectionCard id="monitoring" no="03" icon={FiActivity} title="Transaction Monitoring">
+        <SectionCard id="monitoring" no="03" icon={Activity} title="Transaction Monitoring">
           <p>
             We continuously monitor all client transactions for suspicious activity. Our
             compliance team reviews transactions that deviate from normal patterns or
@@ -91,7 +91,7 @@ function AmlPolicy() {
           </p>
         </SectionCard>
 
-        <SectionCard id="red-flags" no="04" icon={FiFlag} title="Suspicious Activity Indicators">
+        <SectionCard id="red-flags" no="04" icon={Flag} title="Suspicious Activity Indicators">
           <p>
             The following are examples of activities that may trigger enhanced scrutiny
             or reporting:
@@ -99,17 +99,17 @@ function AmlPolicy() {
           <FlagList items={redFlags} />
         </SectionCard>
 
-        <SectionCard id="reporting" no="05" icon={FiFileText} title="Reporting Obligations">
+        <SectionCard id="reporting" no="05" icon={FileText} title="Reporting Obligations">
           <p>
             Where we have reasonable grounds to suspect money laundering or terrorist
-            financing, we are legally obligated to file a Suspicious Activity Report
-            (SAR) with the relevant financial intelligence unit. We are prohibited by
+            nancing, we are legally obligated to le a Suspicious Activity Report
+            (SAR) with the relevant nancial intelligence unit. We are prohibited by
             law from disclosing to the client that a report has been made ("tipping
             off").
           </p>
         </SectionCard>
 
-        <SectionCard id="restrictions" no="06" icon={FiLock} title="Account Restrictions">
+        <SectionCard id="restrictions" no="06" icon={Lock} title="Account Restrictions">
           <p>
             We reserve the right to restrict, suspend, or terminate any account where we
             have concerns about AML compliance. In such cases, we may freeze funds
@@ -123,7 +123,7 @@ function AmlPolicy() {
           </ul>
         </SectionCard>
 
-        <SectionCard id="training" no="07" icon={FiAward} title="Employee Training">
+        <SectionCard id="training" no="07" icon={Award} title="Employee Training">
           <p>
             All BULL4X employees receive regular AML training to ensure they can
             identify and report suspicious activity. Our compliance team undergoes

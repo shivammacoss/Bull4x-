@@ -167,7 +167,7 @@ const AdminLayout = ({ children, title, subtitle }) => {
               }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
                 isActive(item.path)
-                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' 
+                  ? 'bg-gradient-to-r from-[#D9A136] to-[#F0C96F] text-[#0d1117] font-semibold shadow-[0_0_18px_rgba(217,161,54,0.35)]'
                   : 'text-gray-400 hover:text-white hover:bg-dark-700'
               }`}
               title={!sidebarExpanded ? item.name : ''}
@@ -209,9 +209,9 @@ const AdminLayout = ({ children, title, subtitle }) => {
               {subtitle && <p className="text-gray-500 text-sm hidden sm:block">{subtitle}</p>}
             </div>
           </div>
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs sm:text-sm border ${admin?.role === 'ADMIN' ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 border-purple-500/30' : 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-400 border-blue-500/30'}`}>
-            <span className={`w-2 h-2 rounded-full ${admin?.role === 'ADMIN' ? 'bg-purple-500' : 'bg-blue-500'}`}></span>
-            <span className="hidden sm:inline">{admin?.role === 'ADMIN' ? 'Employee Mode' : 'Admin Mode'}</span>
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs sm:text-sm border ${admin?.role === 'ADMIN' ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-400 border-purple-500/30' : 'bg-[#D9A136]/15 text-[#F0C96F] border-[#D9A136]/40'}`}>
+            <span className={`w-2 h-2 rounded-full ${admin?.role === 'ADMIN' ? 'bg-purple-500' : 'bg-[#D9A136] shadow-[0_0_6px_rgba(217,161,54,0.8)] animate-pulse'}`}></span>
+            <span className="hidden sm:inline font-mono uppercase tracking-wider text-[10px] sm:text-xs">{admin?.role === 'ADMIN' ? 'Employee Mode' : 'Admin Mode'}</span>
           </div>
         </header>
 

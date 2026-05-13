@@ -136,16 +136,16 @@ const AdminTransactions = () => {
           {success && <div className="mb-4 p-3 bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center gap-2"><Check size={18} /> {success}</div>}
           
           <div className="bg-dark-800 rounded-xl border border-gray-800 overflow-hidden">
-            <table className="w-full">
+            <div className="overflow-x-auto"><table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">User</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Type</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Amount</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Method</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Date</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">User</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Type</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Amount</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Method</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Date</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -156,20 +156,20 @@ const AdminTransactions = () => {
                 ) : (
                   filteredTransactions.map((tx) => (
                     <tr key={tx._id} className="border-b border-gray-800">
-                      <td className="py-4 px-4 text-white">{tx.userId?.firstName || tx.userId?.email || 'Unknown'}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-white whitespace-nowrap">{tx.userId?.firstName || tx.userId?.email || 'Unknown'}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {tx.type === 'Deposit' ? <ArrowDownCircle size={16} className="text-green-500" /> : <ArrowUpCircle size={16} className="text-red-500" />}
                           <span className="text-white">{tx.type}</span>
                         </div>
                       </td>
                       <td className={`py-4 px-4 font-medium ${tx.type === 'Deposit' ? 'text-green-500' : 'text-red-500'}`}>${tx.amount}</td>
-                      <td className="py-4 px-4 text-gray-400">{tx.paymentMethod}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-gray-400 whitespace-nowrap">{tx.paymentMethod}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded text-xs ${tx.status === 'Approved' ? 'bg-green-500/20 text-green-500' : tx.status === 'Rejected' ? 'bg-red-500/20 text-red-500' : 'bg-yellow-500/20 text-yellow-500'}`}>{tx.status}</span>
                       </td>
-                      <td className="py-4 px-4 text-gray-400 text-sm">{formatDate(tx.createdAt)}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-gray-400 text-sm whitespace-nowrap">{formatDate(tx.createdAt)}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         {tx.status === 'Pending' && (
                           <div className="flex gap-2">
                             <button onClick={() => { setSelectedTx(tx); setActionType('approve'); setShowRemarkModal(true); }} className="p-2 bg-green-500/20 text-green-500 rounded hover:bg-green-500/30"><Check size={14} /></button>
@@ -181,7 +181,7 @@ const AdminTransactions = () => {
                   ))
                 )}
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
       </main>

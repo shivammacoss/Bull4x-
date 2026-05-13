@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiCheck, FiArrowRight } from 'react-icons/fi'
+import { Check, ArrowRight } from 'lucide-react'
 import { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 import { accounts } from '../HomeData'
@@ -82,7 +82,7 @@ export default function AccountsSection() {
                   <div className="w-3 h-3 rounded-full border border-white/10" />
                 </div>
 
-                <span className={`badge mb-4 w-fit text-xs ${acc.highlight ? 'bg-white/15 text-white' : acc.badgeColor}`}>
+                <span className={`badge mb-4 w-t text-xs ${acc.highlight ? 'bg-white/15 text-white' : acc.badgeColor}`}>
                   {acc.badge}
                 </span>
 
@@ -127,7 +127,7 @@ export default function AccountsSection() {
                 <ul className="space-y-2 mb-6">
                   {acc.features.map((f) => (
                     <li key={f} className={`flex items-center gap-2 text-xs ${acc.highlight ? 'text-white/85' : 'text-slate-400'}`}>
-                      <FiCheck size={11} className={acc.highlight ? 'text-white' : 'text-[#D9A136]'} />
+                      <Check size={11} className={acc.highlight ? 'text-white' : 'text-[#D9A136]'} />
                       {f}
                     </li>
                   ))}
@@ -150,7 +150,7 @@ export default function AccountsSection() {
 
         <div className="text-center mt-8">
           <Link to="/accounts" className="b4x-btn-outline gap-2">
-            Compare All Accounts <FiArrowRight size={16} />
+            Compare All Accounts <ArrowRight size={16} />
           </Link>
         </div>
       </div>

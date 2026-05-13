@@ -5,7 +5,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight, FiShield, FiZap, FiTarget } from 'react-icons/fi'
+import { ArrowRight, Shield, Zap, Target } from 'lucide-react'
 import AnimatedSection from '../../components/AnimatedSection'
 
 function Watermark({ char, className = '' }) {
@@ -21,9 +21,9 @@ function Watermark({ char, className = '' }) {
 }
 
 const pillars = [
-  { icon: <FiShield size={14} />, label: 'Transparency', kanji: 'Clarity' },
-  { icon: <FiZap size={14} />,    label: 'Innovation',   kanji: 'Innovate' },
-  { icon: <FiTarget size={14} />, label: 'Integrity',    kanji: 'Trust' },
+  { icon: <Shield size={14} />, label: 'Transparency', kanji: 'Clarity' },
+  { icon: <Zap size={14} />,    label: 'Innovation',   kanji: 'Innovate' },
+  { icon: <Target size={14} />, label: 'Integrity',    kanji: 'Trust' },
 ]
 
 export default function AboutSection() {
@@ -69,7 +69,7 @@ export default function AboutSection() {
 
                 {/* Katana SVG art — monochromatic */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <svg viewBox="0 0 200 200" className="w-52 h-52 opacity-[0.12]" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg viewBox="0 0 200 200" className="w-52 h-52 opacity-[0.12]" ll="none" xmlns="http://www.w3.org/2000/svg">
                     <line x1="100" y1="18" x2="100" y2="158" stroke="white" strokeWidth="1.5" />
                     <line x1="100" y1="18" x2="103" y2="155" stroke="white" strokeWidth="0.6" opacity="0.6" />
                     <ellipse cx="100" cy="155" rx="18" ry="5" stroke="white" strokeWidth="1.5" />
@@ -176,10 +176,10 @@ export default function AboutSection() {
                 BULL4X was founded with a clear vision — to give traders around the world access to professional-grade trading infrastructure, transparent pricing, and reliable support.
               </p>
               <p className="text-slate-400 leading-relaxed">
-                Inspired by Japanese precision and global financial expertise, our platform combines advanced technology with deep liquidity to deliver a seamless trading experience.
+                Inspired by Japanese precision and global nancial expertise, our platform combines advanced technology with deep liquidity to deliver a seamless trading experience.
               </p>
               <p className="text-slate-400 leading-relaxed">
-                From beginners entering financial markets to professional algorithmic traders, BULL4X provides the tools, speed, and reliability needed to trade with confidence in global markets.
+                From beginners entering nancial markets to professional algorithmic traders, BULL4X provides the tools, speed, and reliability needed to trade with confidence in global markets.
               </p>
             </div>
 
@@ -212,7 +212,7 @@ export default function AboutSection() {
               onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 30px rgba(217,161,54,0.6)'}
               onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 18px rgba(217,161,54,0.35)'}
             >
-              Learn More About Us <FiArrowRight size={15} />
+              Learn More About Us <ArrowRight size={15} />
             </Link>
           </AnimatedSection>
         </div>

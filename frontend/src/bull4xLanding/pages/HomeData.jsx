@@ -1,13 +1,13 @@
 // BULL4X - Home Page Data
 import React from 'react'
-import { FiZap, FiShield, FiGlobe, FiCpu, FiTarget, FiDroplet, FiActivity, FiDollarSign, FiLayers, FiMonitor, FiSmartphone, FiServer } from 'react-icons/fi'
+import { Zap, Shield, Globe, Cpu, Target, Droplet, Activity, DollarSign, Layers, Monitor, Smartphone, Server } from 'lucide-react'
 
 export const whyFeatures = [
-  { icon: <FiDroplet size={20}/>, title: 'Institutional-Grade Liquidity', desc: 'We connect traders to deep liquidity pools sourced from premium financial institutions, ensuring minimal slippage and competitive pricing.', color: 'text-red-accent', bg: 'bg-red-accent/10', kanji: 'Liquidity' },
-  { icon: <FiZap size={20}/>, title: 'Ultra-Fast Execution', desc: 'Our advanced matching engines are optimized for millisecond execution speeds, making it ideal for scalpers, day traders, and algorithmic strategies.', color: 'text-red-accent', bg: 'bg-red-accent/10', kanji: 'Speed' },
-  { icon: <FiTarget size={20}/>, title: 'Transparent Pricing', desc: 'We operate with a fair and transparent pricing model. No hidden fees, no manipulation — just clean execution.', color: 'text-green-accent', bg: 'bg-green-accent/10', kanji: 'Clarity' },
-  { icon: <FiGlobe size={20}/>, title: 'Multi-Asset Access', desc: 'Trade multiple asset classes from one account with seamless platform integration across forex, indices, commodities, stocks, and crypto.', color: 'text-blue-400', bg: 'bg-blue-400/10', kanji: 'Market' },
-  { icon: <FiCpu size={20}/>, title: 'Advanced Technology', desc: 'Our platform integrates professional charting tools, customizable indicators, real-time market data, and AI-powered insights.', color: 'text-purple-400', bg: 'bg-purple-400/10', kanji: 'Tech' },
+  { icon: <Droplet size={20}/>, title: 'Institutional-Grade Liquidity', desc: 'We connect traders to deep liquidity pools sourced from premium nancial institutions, ensuring minimal slippage and competitive pricing.', color: 'text-red-accent', bg: 'bg-red-accent/10', kanji: 'Liquidity' },
+  { icon: <Zap size={20}/>, title: 'Ultra-Fast Execution', desc: 'Our advanced matching engines are optimized for millisecond execution speeds, making it ideal for scalpers, day traders, and algorithmic strategies.', color: 'text-red-accent', bg: 'bg-red-accent/10', kanji: 'Speed' },
+  { icon: <Target size={20}/>, title: 'Transparent Pricing', desc: 'We operate with a fair and transparent pricing model. No hidden fees, no manipulation — just clean execution.', color: 'text-green-accent', bg: 'bg-green-accent/10', kanji: 'Clarity' },
+  { icon: <Globe size={20}/>, title: 'Multi-Asset Access', desc: 'Trade multiple asset classes from one account with seamless platform integration across forex, indices, commodities, stocks, and crypto.', color: 'text-blue-400', bg: 'bg-blue-400/10', kanji: 'Market' },
+  { icon: <Cpu size={20}/>, title: 'Advanced Technology', desc: 'Our platform integrates professional charting tools, customizable indicators, real-time market data, and AI-powered insights.', color: 'text-purple-400', bg: 'bg-purple-400/10', kanji: 'Tech' },
 ]
 
 export const marketAssets = [
@@ -19,9 +19,9 @@ export const marketAssets = [
 ]
 
 export const platforms = [
-  { icon: <FiMonitor size={22}/>, name: 'Bull4X WebTrader', tag: 'Browser-Based', desc: 'A browser-based trading platform that requires no downloads. Access markets instantly from any device with full charting functionality and advanced order types.', color: 'text-red-accent', bg: 'bg-red-accent/10', border: 'border-red-accent/20' },
-  { icon: <FiSmartphone size={22}/>, name: 'Mobile Trading App', tag: 'iOS & Android', desc: 'Trade on the go with full account management, price alerts, real-time data, and intuitive navigation.', color: 'text-green-accent', bg: 'bg-green-accent/10', border: 'border-green-accent/20' },
-  { icon: <FiServer size={22}/>, name: 'Desktop Terminal', tag: 'Professional Grade', desc: 'Professional-grade platform designed for advanced traders requiring algorithmic trading, API integration, and enhanced customization.', color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20' },
+  { icon: <Monitor size={22}/>, name: 'Bull4X WebTrader', tag: 'Browser-Based', desc: 'A browser-based trading platform that requires no downloads. Access markets instantly from any device with full charting functionality and advanced order types.', color: 'text-red-accent', bg: 'bg-red-accent/10', border: 'border-red-accent/20' },
+  { icon: <Smartphone size={22}/>, name: 'Mobile Trading App', tag: 'iOS & Android', desc: 'Trade on the go with full account management, price alerts, real-time data, and intuitive navigation.', color: 'text-green-accent', bg: 'bg-green-accent/10', border: 'border-green-accent/20' },
+  { icon: <Server size={22}/>, name: 'Desktop Terminal', tag: 'Professional Grade', desc: 'Professional-grade platform designed for advanced traders requiring algorithmic trading, API integration, and enhanced customization.', color: 'text-blue-400', bg: 'bg-blue-400/10', border: 'border-blue-400/20' },
 ]
 
 export const platformFeatures = [
@@ -30,17 +30,17 @@ export const platformFeatures = [
 ]
 
 export const accounts = [
-  { name: 'Standard', badge: 'Beginner', badgeColor: 'bg-blue-500/20 text-blue-400', minDeposit: '$100', spreads: 'From 1.5 pips', commission: 'Zero commission', desc: 'Designed for new traders entering the financial markets. Competitive spreads and a simple pricing model ideal for beginners and swing traders.', features: ['Competitive spreads','Zero commission','Full platform access','24/5 support'], cta: 'Open Standard', highlight: false },
-  { name: 'ECN Raw', badge: 'Popular', badgeColor: 'bg-red-accent/20 text-red-accent', minDeposit: '$500', spreads: 'From 0.0 pips', commission: 'Fixed low commission', desc: 'Built for traders who demand tight spreads and institutional pricing. Connects directly to liquidity providers with minimal markups.', features: ['Raw spreads from 0.0','Ultra-low commission','Scalping allowed','Priority execution'], cta: 'Open ECN Raw', highlight: true },
+  { name: 'Standard', badge: 'Beginner', badgeColor: 'bg-blue-500/20 text-blue-400', minDeposit: '$100', spreads: 'From 1.5 pips', commission: 'Zero commission', desc: 'Designed for new traders entering the nancial markets. Competitive spreads and a simple pricing model ideal for beginners and swing traders.', features: ['Competitive spreads','Zero commission','Full platform access','24/5 support'], cta: 'Open Standard', highlight: false },
+  { name: 'ECN Raw', badge: 'Popular', badgeColor: 'bg-red-accent/20 text-red-accent', minDeposit: '$500', spreads: 'From 0.0 pips', commission: 'xed low commission', desc: 'Built for traders who demand tight spreads and institutional pricing. Connects directly to liquidity providers with minimal markups.', features: ['Raw spreads from 0.0','Ultra-low commission','Scalping allowed','Priority execution'], cta: 'Open ECN Raw', highlight: true },
   { name: 'Pro', badge: 'Advanced', badgeColor: 'bg-purple-500/20 text-purple-400', minDeposit: '$5,000', spreads: 'Ultra-tight', commission: 'Reduced', desc: 'Tailored for experienced traders seeking enhanced trading conditions. Includes advanced analytics tools and premium support access.', features: ['Tightest spreads','Priority execution','Advanced analytics','Dedicated support'], cta: 'Open Pro', highlight: false },
   { name: 'VIP', badge: 'Exclusive', badgeColor: 'bg-gold-500/20 text-gold-400', minDeposit: 'Custom', spreads: 'Custom pricing', commission: 'Negotiable', desc: 'Institutional-level account for high-volume traders. Personalized trading experience with enhanced support and execution priority.', features: ['Personal manager','Exclusive pricing','Institutional liquidity','Custom solutions'], cta: 'Contact Us', highlight: false },
 ]
 
 export const tradingConditions = [
-  { icon: <FiActivity size={20}/>, title: 'No Dealing Desk (NDD)', desc: 'Orders are routed directly to liquidity providers without manual intervention, ensuring transparent and conflict-free trading.', color: 'text-red-accent', bg: 'bg-red-accent/10' },
-  { icon: <FiDollarSign size={20}/>, title: 'Spreads & Commissions', desc: 'We offer both spread-only accounts and raw spread accounts with commission structures. Competitive pricing across all instruments.', color: 'text-red-accent', bg: 'bg-red-accent/10' },
-  { icon: <FiLayers size={20}/>, title: 'Flexible Leverage', desc: 'Flexible leverage options available depending on account type and regulatory jurisdiction. Traders are encouraged to manage risk responsibly.', color: 'text-blue-400', bg: 'bg-blue-400/10' },
-  { icon: <FiShield size={20}/>, title: 'Risk Management', desc: 'Stop Loss & Take Profit, Trailing Stop, Negative Balance Protection, and Margin Call Alerts built into every account.', color: 'text-green-accent', bg: 'bg-green-accent/10' },
+  { icon: <Activity size={20}/>, title: 'No Dealing Desk (NDD)', desc: 'Orders are routed directly to liquidity providers without manual intervention, ensuring transparent and conflict-free trading.', color: 'text-red-accent', bg: 'bg-red-accent/10' },
+  { icon: <DollarSign size={20}/>, title: 'Spreads & Commissions', desc: 'We offer both spread-only accounts and raw spread accounts with commission structures. Competitive pricing across all instruments.', color: 'text-red-accent', bg: 'bg-red-accent/10' },
+  { icon: <Layers size={20}/>, title: 'Flexible Leverage', desc: 'Flexible leverage options available depending on account type and regulatory jurisdiction. Traders are encouraged to manage risk responsibly.', color: 'text-blue-400', bg: 'bg-blue-400/10' },
+  { icon: <Shield size={20}/>, title: 'Risk Management', desc: 'Stop Loss & Take Profit, Trailing Stop, Negative Balance Protection, and Margin Call Alerts built into every account.', color: 'text-green-accent', bg: 'bg-green-accent/10' },
 ]
 
 export const toolsResearch = [

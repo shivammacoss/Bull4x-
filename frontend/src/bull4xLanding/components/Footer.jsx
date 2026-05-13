@@ -5,10 +5,10 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import {
-  FiMail, FiMessageCircle,
-  FiTwitter, FiFacebook, FiLinkedin, FiInstagram, FiYoutube,
-  FiArrowRight, FiShield, FiAlertTriangle
-} from 'react-icons/fi'
+  Mail, MessageCircle,
+  Twitter, Facebook, Linkedin, Instagram, Youtube,
+  ArrowRight, Shield, AlertTriangle
+} from 'lucide-react'
 
 const footerLinks = {
   quickLinks: [
@@ -44,11 +44,11 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { icon: <FiTwitter />,   label: 'Twitter',   href: '#' },
-  { icon: <FiFacebook />,  label: 'Facebook',  href: '#' },
-  { icon: <FiLinkedin />,  label: 'LinkedIn',  href: '#' },
-  { icon: <FiInstagram />, label: 'Instagram', href: '#' },
-  { icon: <FiYoutube />,   label: 'YouTube',   href: '#' },
+  { icon: <Twitter />,   label: 'Twitter',   href: '#' },
+  { icon: <Facebook />,  label: 'Facebook',  href: '#' },
+  { icon: <Linkedin />,  label: 'LinkedIn',  href: '#' },
+  { icon: <Instagram />, label: 'Instagram', href: '#' },
+  { icon: <Youtube />,   label: 'YouTube',   href: '#' },
 ]
 
 function Footer() {
@@ -66,7 +66,7 @@ function Footer() {
 
           {/* Brand Column */}
           <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center mb-5 group w-fit">
+            <Link to="/" className="flex items-center mb-5 group w-t">
               <img
                 src="/bull4x-logo.png"
                 alt="BULL4X"
@@ -84,11 +84,11 @@ function Footer() {
                 href="mailto:support@bull4x.com"
                 className="flex items-center gap-2 text-sm text-slate-400 hover:text-[#D9A136] transition-colors duration-200"
               >
-                <FiMail size={13} className="text-[#D9A136] flex-shrink-0" />
+                <Mail size={13} className="text-[#D9A136] flex-shrink-0" />
                 support@bull4x.com
               </a>
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <FiMessageCircle size={13} className="text-[#D9A136] flex-shrink-0" />
+                <MessageCircle size={13} className="text-[#D9A136] flex-shrink-0" />
                 Live Chat — 24/5 Support
               </div>
             </div>
@@ -123,7 +123,7 @@ function Footer() {
                     to={link.path}
                     className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-[#D9A136] transition-colors duration-200 group"
                   >
-                    <FiArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#D9A136]" />
+                    <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#D9A136]" />
                     {link.label}
                   </Link>
                 </li>
@@ -146,7 +146,7 @@ function Footer() {
                     to={link.path}
                     className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-[#D9A136] transition-colors duration-200 group"
                   >
-                    <FiArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#D9A136]" />
+                    <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#D9A136]" />
                     {link.label}
                   </Link>
                 </li>
@@ -169,7 +169,7 @@ function Footer() {
                     to={link.path}
                     className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-[#D9A136] transition-colors duration-200 group"
                   >
-                    <FiArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#D9A136]" />
+                    <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#D9A136]" />
                     {link.label}
                   </Link>
                 </li>
@@ -192,7 +192,7 @@ function Footer() {
                     to={link.path}
                     className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-[#D9A136] transition-colors duration-200 group"
                   >
-                    <FiArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#D9A136]" />
+                    <ArrowRight size={11} className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#D9A136]" />
                     {link.label}
                   </Link>
                 </li>
@@ -206,7 +206,7 @@ function Footer() {
       <div className="border-t border-white/5">
         <div className="section-container py-5">
           <div className="flex items-start gap-3 p-4 rounded-xl bg-yellow-500/5 border border-yellow-500/10">
-            <FiAlertTriangle className="text-yellow-500 flex-shrink-0 mt-0.5" size={14} />
+            <AlertTriangle className="text-yellow-500 flex-shrink-0 mt-0.5" size={14} />
             <div>
               <p className="text-xs font-semibold text-yellow-500 mb-1 uppercase tracking-wider">Risk Warning</p>
               <p className="text-xs text-slate-500 leading-relaxed">
@@ -228,7 +228,7 @@ function Footer() {
             </p>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                <FiShield size={11} className="text-[#00d4aa]" />
+                <Shield size={11} className="text-[#00d4aa]" />
                 SSL Secured
               </div>
               <div className="flex items-center gap-1.5 text-xs text-slate-500">

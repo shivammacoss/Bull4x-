@@ -501,9 +501,9 @@ const Dashboard = () => {
               key={item.name}
               onClick={() => navigate(item.path)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors ${
-                activeMenu === item.name 
-                  ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white' 
-                  : isDarkMode 
+                activeMenu === item.name
+                  ? 'bg-gradient-to-r from-[#D9A136] to-[#F0C96F] text-[#0d1117] font-semibold shadow-[0_0_18px_rgba(217,161,54,0.35)]'
+                  : isDarkMode
                     ? 'text-gray-400 hover:text-white hover:bg-dark-700'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}

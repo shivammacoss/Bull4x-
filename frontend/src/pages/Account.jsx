@@ -837,117 +837,193 @@ const Account = () => {
               </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 xl:grid-cols-2'}`}>
               {userAccounts.filter(acc => {
                 if (activeTab === 'real') return !acc.accountTypeId?.isDemo && !acc.isDemo && acc.status === 'Active'
                 if (activeTab === 'demo') return (acc.accountTypeId?.isDemo || acc.isDemo) && acc.status === 'Active'
                 if (activeTab === 'archived') return acc.status === 'Archived' || acc.status !== 'Active'
                 return true
-              }).map((account) => (
-                <div key={account._id} className={`${isDarkMode ? 'bg-dark-800 border-gray-800' : 'bg-white border-gray-200 shadow-sm'} rounded-xl border`}>
-                  {/* Exness-style Horizontal Card */}
-                  <div className={`${isMobile ? 'p-3' : 'p-4 px-6'}`}>
-                    {/* Top Row - Account Info */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                          {account.accountTypeId?.isDemo || account.isDemo ? 'Demo' : 'Real'}
+              }).map((account) => {
+                const isDemo = account.isDemo || account.accountTypeId?.isDemo
+                const isActive = account.status === 'Active'
+                const accentFrom = isDemo ? 'from-yellow-500' : 'from-[#D9A136]'
+                const accentVia = isDemo ? 'via-orange-500' : 'via-[#F0C96F]'
+                const accentTo = isDemo ? 'to-yellow-500' : 'to-[#D9A136]'
+
+                return (
+                <div
+                  key={account._id}
+                  className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 ${
+                    isDarkMode
+                      ? `bg-gradient-to-br from-dark-800 to-dark-900 border-gray-800 ${isDemo ? 'hover:border-yellow-500/40 hover:shadow-[0_8px_30px_rgba(234,179,8,0.12)]' : 'hover:border-[#D9A136]/40 hover:shadow-[0_8px_30px_rgba(217,161,54,0.18)]'}`
+                      : `bg-white border-gray-200 shadow-sm hover:shadow-lg ${isDemo ? 'hover:border-yellow-300' : 'hover:border-[#F0C96F]'}`
+                  }`}
+                >
+                  {/* Top gradient accent strip */}
+                  <div className={`h-1 w-full bg-gradient-to-r ${accentFrom} ${accentVia} ${accentTo}`} />
+
+                  {/* Decorative blurred glow */}
+                  <div className={`absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-10 blur-3xl pointer-events-none ${isDemo ? 'bg-yellow-500' : 'bg-[#D9A136]'}`} />
+
+                  <div className={`relative ${isMobile ? 'p-4' : 'p-5 md:p-6'}`}>
+                    {/* Header: Icon + Account Info + Status */}
+                    <div className="flex items-start justify-between gap-3 mb-5">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} rounded-xl flex items-center justify-center flex-shrink-0 ${
+                          isDemo
+                            ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 ring-1 ring-yellow-500/30'
+                            : 'bg-gradient-to-br from-[#D9A136]/20 to-[#F0C96F]/20 ring-1 ring-[#D9A136]/30'
+                        }`}>
+                          {isDemo
+                            ? <Trophy size={isMobile ? 18 : 22} className="text-yellow-500" />
+                            : <TrendingUp size={isMobile ? 18 : 22} className="text-[#F0C96F]" />}
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className={`text-[10px] uppercase font-bold tracking-widest px-1.5 py-0.5 rounded ${
+                              isDemo ? 'text-yellow-500 bg-yellow-500/10' : 'text-[#F0C96F] bg-[#D9A136]/10'
+                            }`}>
+                              {isDemo ? 'Demo' : 'Real'}
+                            </span>
+                            <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} truncate`}>
+                              {account.accountTypeId?.name || 'Standard'}
+                            </span>
+                          </div>
+                          <h3 className={`font-bold ${isMobile ? 'text-base' : 'text-lg'} font-mono tracking-wide truncate ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            #{account.accountId}
+                          </h3>
+                        </div>
+                      </div>
+
+                      <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border flex-shrink-0 ${
+                        isActive
+                          ? 'bg-green-500/10 border-green-500/20'
+                          : 'bg-gray-500/10 border-gray-500/20'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
+                        <span className={`text-[10px] font-semibold uppercase tracking-wider ${isActive ? 'text-green-500' : 'text-gray-500'}`}>
+                          {account.status || 'Active'}
                         </span>
-                        <span className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{account.accountTypeId?.name || 'Standard'}</span>
-                        <span className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>#{account.accountId}</span>
                       </div>
                     </div>
 
-                    {/* Bottom Row - Balance & Actions */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className={`font-bold ${isMobile ? 'text-xl' : 'text-2xl'} ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                          {account.balance.toLocaleString()}<span className="text-sm font-normal text-gray-500 ml-1">USD</span>
-                        </p>
+                    {/* Balance + Mini Stats */}
+                    <div className="flex flex-wrap items-end justify-between gap-4 mb-5">
+                      <div className="min-w-0">
+                        <p className={`text-[10px] uppercase tracking-[0.18em] mb-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Balance</p>
+                        <div className="flex items-baseline gap-1.5 flex-wrap">
+                          <span className={`font-bold ${isMobile ? 'text-2xl' : 'text-3xl md:text-4xl'} ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                            ${account.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                          <span className="text-xs text-gray-500 font-medium">USD</span>
+                        </div>
                       </div>
-                      
-                      {/* Action Buttons - Exness Style */}
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => isMobile ? navigate(`/mobile?account=${account._id}`) : navigate(`/trade/${account._id}`)}
-                          className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-colors"
-                        >
-                          <TrendingUp size={16} /> Trade
-                        </button>
-                        {account.isDemo || account.accountTypeId?.isDemo ? (
-                          <button
-                            onClick={() => handleResetDemo(account._id)}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg border ${isDarkMode ? 'border-gray-700 text-gray-300 hover:bg-dark-700' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
-                          >
-                            <RefreshCw size={16} /> Reset
-                          </button>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => { setSelectedAccount(account); setShowTransferModal(true); }}
-                              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg border ${isDarkMode ? 'border-gray-700 text-gray-300 hover:bg-dark-700' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
-                            >
-                              <Plus size={16} /> Deposit
-                            </button>
-                            <button
-                              onClick={() => { setSelectedAccount(account); setShowWithdrawModal(true); }}
-                              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg border ${isDarkMode ? 'border-gray-700 text-gray-300 hover:bg-dark-700' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
-                            >
-                              <Minus size={16} /> Withdraw
-                            </button>
-                            <div className="relative">
-                              <button
-                                onClick={() => setShowAccountMenu(showAccountMenu === account._id ? null : account._id)}
-                                className={`px-3 py-2 rounded-lg border ${isDarkMode ? 'border-gray-700 text-gray-300 hover:bg-dark-700' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
-                              >
-                                <MoreHorizontal size={16} />
-                              </button>
-                              {showAccountMenu === account._id && (
-                                <div 
-                                  className={`absolute right-0 top-full mt-2 ${isDarkMode ? 'bg-dark-700 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl z-50 min-w-[180px]`}
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setShowAccountMenu(null)
-                                      setShowAccountInfoModal(account)
-                                    }}
-                                    className={`w-full px-4 py-2 text-left text-sm ${isDarkMode ? 'text-gray-300 hover:bg-dark-600' : 'text-gray-700 hover:bg-gray-100'} rounded-t-lg flex items-center gap-2`}
-                                  >
-                                    <Eye size={14} /> Account Info
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setShowAccountMenu(null)
-                                      setSelectedAccount(account)
-                                      setShowAccountTransferModal(true)
-                                    }}
-                                    className={`w-full px-4 py-2 text-left text-sm ${isDarkMode ? 'text-gray-300 hover:bg-dark-600' : 'text-gray-700 hover:bg-gray-100'} flex items-center gap-2`}
-                                  >
-                                    <Copy size={14} /> Transfer
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setShowAccountMenu(null)
-                                      setShowArchiveConfirm(account)
-                                    }}
-                                    className={`w-full px-4 py-2 text-left text-sm text-red-400 ${isDarkMode ? 'hover:bg-dark-600' : 'hover:bg-gray-100'} rounded-b-lg flex items-center gap-2`}
-                                  >
-                                    <X size={14} /> Archive Account
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </>
+
+                      <div className="flex gap-2 flex-wrap">
+                        {account.leverage && (
+                          <div className={`px-3 py-1.5 rounded-lg border ${isDarkMode ? 'bg-dark-700/40 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
+                            <p className="text-[9px] uppercase tracking-widest text-gray-500 font-semibold">Leverage</p>
+                            <p className={`font-semibold text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>1:{account.leverage}</p>
+                          </div>
+                        )}
+                        {account.credit > 0 && (
+                          <div className="px-3 py-1.5 rounded-lg border border-purple-500/20 bg-purple-500/10">
+                            <p className="text-[9px] uppercase tracking-widest text-purple-400 font-semibold">Credit</p>
+                            <p className="font-semibold text-sm text-purple-400">${account.credit.toFixed(2)}</p>
+                          </div>
                         )}
                       </div>
                     </div>
+
+                    {/* Actions */}
+                    <div className={`pt-4 border-t ${isDarkMode ? 'border-gray-800' : 'border-gray-200'} flex flex-wrap items-center gap-2`}>
+                      <button
+                        onClick={() => isMobile ? navigate(`/mobile?account=${account._id}`) : navigate(`/trade/${account._id}`)}
+                        className={`flex items-center justify-center gap-1.5 px-5 py-2.5 font-semibold text-sm rounded-lg transition-all hover:-translate-y-0.5 ${
+                          isDemo
+                            ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white hover:shadow-lg hover:shadow-yellow-500/30'
+                            : 'bg-gradient-to-r from-[#D9A136] to-[#F0C96F] text-[#0d1117] hover:shadow-lg hover:shadow-[#D9A136]/35'
+                        }`}
+                      >
+                        <TrendingUp size={15} /> Trade
+                      </button>
+
+                      {isDemo ? (
+                        <button
+                          onClick={() => handleResetDemo(account._id)}
+                          className={`flex items-center gap-1.5 px-4 py-2.5 text-sm rounded-lg border transition-colors ${isDarkMode ? 'border-gray-700 text-gray-300 hover:bg-dark-700 hover:border-gray-600' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+                        >
+                          <RefreshCw size={15} /> Reset
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => { setSelectedAccount(account); setShowTransferModal(true); }}
+                            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm rounded-lg border transition-colors ${isDarkMode ? 'border-gray-700 text-gray-300 hover:bg-green-500/10 hover:border-green-500/40 hover:text-green-400' : 'border-gray-300 text-gray-700 hover:bg-green-50 hover:border-green-300 hover:text-green-600'}`}
+                          >
+                            <Plus size={15} /> Deposit
+                          </button>
+                          <button
+                            onClick={() => { setSelectedAccount(account); setShowWithdrawModal(true); }}
+                            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm rounded-lg border transition-colors ${isDarkMode ? 'border-gray-700 text-gray-300 hover:bg-red-500/10 hover:border-red-500/40 hover:text-red-400' : 'border-gray-300 text-gray-700 hover:bg-red-50 hover:border-red-300 hover:text-red-600'}`}
+                          >
+                            <Minus size={15} /> Withdraw
+                          </button>
+                          <div className="relative ml-auto">
+                            <button
+                              onClick={() => setShowAccountMenu(showAccountMenu === account._id ? null : account._id)}
+                              className={`p-2.5 rounded-lg border transition-colors ${isDarkMode ? 'border-gray-700 text-gray-300 hover:bg-dark-700 hover:border-gray-600' : 'border-gray-300 text-gray-700 hover:bg-gray-100'}`}
+                              aria-label="More actions"
+                            >
+                              <MoreHorizontal size={16} />
+                            </button>
+                            {showAccountMenu === account._id && (
+                              <div
+                                className={`absolute right-0 top-full mt-2 ${isDarkMode ? 'bg-dark-700 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl z-50 min-w-[180px] overflow-hidden`}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowAccountMenu(null)
+                                    setShowAccountInfoModal(account)
+                                  }}
+                                  className={`w-full px-4 py-2.5 text-left text-sm ${isDarkMode ? 'text-gray-300 hover:bg-dark-600' : 'text-gray-700 hover:bg-gray-100'} flex items-center gap-2`}
+                                >
+                                  <Eye size={14} /> Account Info
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowAccountMenu(null)
+                                    setSelectedAccount(account)
+                                    setShowAccountTransferModal(true)
+                                  }}
+                                  className={`w-full px-4 py-2.5 text-left text-sm ${isDarkMode ? 'text-gray-300 hover:bg-dark-600' : 'text-gray-700 hover:bg-gray-100'} flex items-center gap-2`}
+                                >
+                                  <Copy size={14} /> Transfer
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setShowAccountMenu(null)
+                                    setShowArchiveConfirm(account)
+                                  }}
+                                  className={`w-full px-4 py-2.5 text-left text-sm text-red-400 ${isDarkMode ? 'hover:bg-dark-600' : 'hover:bg-gray-100'} flex items-center gap-2`}
+                                >
+                                  <X size={14} /> Archive Account
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           )}
 
@@ -1220,13 +1296,15 @@ const Account = () => {
 
             <div className={`p-3 rounded-lg mb-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-100'}`}>
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-blue-500/20 rounded flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-500/20 rounded flex items-center justify-center flex-shrink-0">
                   <TrendingUp size={16} className="text-blue-500" />
                 </div>
-                <div>
-                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{selectedAccount.accountId}</p>
-                  <p className="text-gray-500 text-xs">{selectedAccount.accountTypeId?.name}</p>
-                </div>
+                <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{selectedAccount.accountId}</p>
+                {selectedAccount.accountTypeId?.name && (
+                  <span className="ml-auto px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-500/30 text-blue-400 text-xs font-medium">
+                    {selectedAccount.accountTypeId.name}
+                  </span>
+                )}
               </div>
               <div className="flex justify-between text-sm mt-3 pt-3 border-t border-gray-600">
                 <span className="text-gray-400">Account Balance:</span>
@@ -1312,13 +1390,15 @@ const Account = () => {
 
             <div className={`p-3 rounded-lg mb-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-100'}`}>
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 bg-blue-500/20 rounded flex items-center justify-center">
+                <div className="w-8 h-8 bg-blue-500/20 rounded flex items-center justify-center flex-shrink-0">
                   <TrendingUp size={16} className="text-blue-500" />
                 </div>
-                <div>
-                  <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{selectedAccount.accountId}</p>
-                  <p className="text-gray-500 text-xs">{selectedAccount.accountTypeId?.name}</p>
-                </div>
+                <p className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{selectedAccount.accountId}</p>
+                {selectedAccount.accountTypeId?.name && (
+                  <span className="ml-auto px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-500/30 text-blue-400 text-xs font-medium">
+                    {selectedAccount.accountTypeId.name}
+                  </span>
+                )}
               </div>
               <div className="flex justify-between text-sm mt-3 pt-3 border-t border-gray-600">
                 <span className="text-gray-400">Available Balance:</span>

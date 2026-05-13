@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { FiArrowRight, FiPlay, FiStar, FiChevronDown, FiTrendingUp } from 'react-icons/fi'
+import { ArrowRight, Play, Star, ChevronDown, TrendingUp } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 import { testimonials, faqs } from '../HomeData'
@@ -21,7 +21,7 @@ function FAQItem({ q, a, index }) {
         <div className="flex items-center justify-between p-5">
           <h4 className="text-white font-medium text-sm pr-4">{q}</h4>
           <span className={`flex-shrink-0 transition-transform duration-300 ${open ? 'text-red-accent rotate-180' : 'text-gray-400'}`}>
-            <FiChevronDown size={18} />
+            <ChevronDown size={18} />
           </span>
         </div>
         <motion.div initial={false} animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }} transition={{ duration: 0.3 }} style={{ overflow: 'hidden' }}>
@@ -54,7 +54,7 @@ export default function BottomSection() {
                   <div className="absolute top-3 right-3 text-xs text-white/[0.04] font-black uppercase tracking-widest" style={{ fontFamily: "'Inter', sans-serif" }}>Voice</div>
                   <div className="flex gap-1 mb-4">
                     {Array.from({ length: t.rating }).map((_, j) => (
-                      <FiStar key={j} size={14} style={{ color: '#c9a84c', fill: '#c9a84c' }} />
+                      <Star key={j} size={14} style={{ color: '#c9a84c', ll: '#c9a84c' }} />
                     ))}
                   </div>
                   <p className="text-gray-300 text-sm leading-relaxed flex-1 mb-5 italic">"{t.quote}"</p>
@@ -82,7 +82,7 @@ export default function BottomSection() {
             badge="FAQ"
             title="Frequently Asked Questions"
             highlight="Frequently Asked"
-            subtitle="Find answers to the most common questions about trading with BULL4X."
+            subtitle="nd answers to the most common questions about trading with BULL4X."
           />
           <div className="max-w-3xl mx-auto mt-12 space-y-3">
             {faqs.map((faq, i) => (
@@ -107,7 +107,7 @@ export default function BottomSection() {
         <div className="section-container relative z-10 text-center">
           <AnimatedSection animation="slideUp">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiTrendingUp size={14} className="text-red-accent" />
+              <TrendingUp size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-widest">Start Trading Today</span>
               <span className="text-red-accent/50 text-xs font-semibold uppercase tracking-wider" style={{ fontFamily: "'Inter', sans-serif" }}>Now</span>
             </div>
@@ -125,10 +125,10 @@ export default function BottomSection() {
           <AnimatedSection animation="slideUp" delay={0.3}>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary text-base px-8 py-3.5 gap-2">
-                Open Live Account <FiArrowRight size={16} />
+                Open Live Account <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-outline text-base px-8 py-3.5 gap-2">
-                <FiPlay size={14} /> Try Free Demo
+                <Play size={14} /> Try Free Demo
               </Link>
             </div>
           </AnimatedSection>

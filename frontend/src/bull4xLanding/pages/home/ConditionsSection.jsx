@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight } from 'react-icons/fi'
+import { ArrowRight } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 import { tradingConditions } from '../HomeData'
@@ -90,7 +90,7 @@ export default function ConditionsSection() {
 
             <div className="text-center mt-6">
               <Link to="/trading" className="b4x-btn-primary gap-2">
-                View Trading Conditions <FiArrowRight size={16} />
+                View Trading Conditions <ArrowRight size={16} />
               </Link>
             </div>
           </div>

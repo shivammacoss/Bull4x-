@@ -273,13 +273,13 @@ const AdminSupport = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-700">
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Ticket ID</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">User</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Subject</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Priority</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Created</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Ticket ID</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">User</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Subject</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Priority</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Created</th>
+                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -292,32 +292,32 @@ const AdminSupport = () => {
               ) : (
                 filteredTickets.map((ticket) => (
                   <tr key={ticket._id} className="border-b border-gray-800 hover:bg-dark-700/50 cursor-pointer" onClick={() => openTicketChat(ticket.ticketId)}>
-                    <td className="py-4 px-4 text-white font-mono text-sm">{ticket.ticketId}</td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 text-white font-mono text-sm whitespace-nowrap">{ticket.ticketId}</td>
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <div>
                         <p className="text-white font-medium">{ticket.userId?.firstName || 'Unknown'}</p>
                         <p className="text-gray-500 text-sm">{ticket.userId?.email || ''}</p>
                       </div>
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <span className="text-white">{ticket.subject}</span>
                         <span className="text-gray-500 text-sm">({ticket.messages?.length || 0})</span>
                       </div>
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <span className={`px-2 py-1 rounded text-xs ${getPriorityColor(ticket.priority)}`}>
                         {ticket.priority}
                       </span>
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs w-fit ${getStatusColor(ticket.status)}`}>
                         {getStatusIcon(ticket.status)}
                         {ticket.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-gray-400">{new Date(ticket.createdAt).toLocaleString()}</td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 text-gray-400 whitespace-nowrap">{new Date(ticket.createdAt).toLocaleString()}</td>
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <button 
                           onClick={() => openTicketChat(ticket.ticketId)}

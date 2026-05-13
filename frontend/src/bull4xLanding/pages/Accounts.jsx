@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight, FiCheck, FiX, FiUser, FiShield, FiZap } from 'react-icons/fi'
+import { ArrowRight, Check, X, User, Shield, Zap } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
@@ -41,7 +41,7 @@ const accounts = [
     badgeColor: 'bg-red-accent/20 text-red-accent',
     minDeposit: '$500',
     spreads: 'From 0.0 pips',
-    commission: 'Low fixed',
+    commission: 'Low xed',
     leverage: 'Up to 1:500',
     execution: 'ECN/STP',
     instruments: '60+',
@@ -50,7 +50,7 @@ const accounts = [
     features: [
       { label: 'Minimum Deposit', value: '$500' },
       { label: 'Spreads From', value: '0.0 pips' },
-      { label: 'Commission', value: 'Low fixed' },
+      { label: 'Commission', value: 'Low xed' },
       { label: 'Max Leverage', value: '1:500' },
       { label: 'Execution Type', value: 'ECN/STP' },
       { label: 'Instruments', value: '60+' },
@@ -113,7 +113,7 @@ const accounts = [
 ]
 
 const steps = [
-  { step: '01', title: 'Register', desc: 'Fill in your personal details and create your account in minutes.' },
+  { step: '01', title: 'Register', desc: 'll in your personal details and create your account in minutes.' },
   { step: '02', title: 'Verify', desc: 'Submit your ID and proof of address for quick KYC verification.' },
   { step: '03', title: 'Fund', desc: 'Deposit funds using your preferred payment method securely.' },
   { step: '04', title: 'Trade', desc: 'Access all markets and start trading with professional tools.' },
@@ -136,7 +136,7 @@ function Accounts() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiUser size={14} className="text-red-accent" />
+              <User size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Account Types</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
@@ -147,7 +147,7 @@ function Accounts() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/contact" className="b4x-btn-primary gap-2">
-                Open Account <FiArrowRight size={16} />
+                Open Account <ArrowRight size={16} />
               </Link>
               <Link to="/contact" className="b4x-btn-outline gap-2">
                 Talk to an Expert
@@ -187,7 +187,7 @@ function Accounts() {
                     </div>
                   )}
 
-                  <span className={`badge mb-4 w-fit ${acc.badgeColor}`}>{acc.badge}</span>
+                  <span className={`badge mb-4 w-t ${acc.badgeColor}`}>{acc.badge}</span>
 
                   <h3 className="text-2xl font-bold text-white mb-4">{acc.name}</h3>
 
@@ -205,7 +205,7 @@ function Accounts() {
                   <div className="space-y-1.5 mb-6">
                     {acc.pros.map((p) => (
                       <div key={p} className="flex items-center gap-2 text-xs text-gray-300">
-                        <FiCheck size={11} className="text-red-accent flex-shrink-0" />
+                        <Check size={11} className="text-red-accent flex-shrink-0" />
                         {p}
                       </div>
                     ))}
@@ -257,7 +257,7 @@ function Accounts() {
 
           <AnimatedSection animation="slideUp" delay={0.5} className="text-center mt-12">
             <Link to="/contact" className="b4x-btn-primary gap-2 text-base px-8 py-3.5">
-              Open Your Account Now <FiArrowRight size={16} />
+              Open Your Account Now <ArrowRight size={16} />
             </Link>
           </AnimatedSection>
         </div>
@@ -284,9 +284,9 @@ function Accounts() {
               />
               <div className="space-y-4 mt-8">
                 {[
-                  { icon: <FiShield />, title: 'Segregated Client Accounts', desc: 'Your funds are held in segregated accounts at top-tier banks, completely separate from company funds.' },
-                  { icon: <FiZap />, title: 'Advanced SSL Encryption', desc: 'All data transmissions are protected with 256-bit SSL encryption technology.' },
-                  { icon: <FiUser />, title: 'KYC & AML Compliance', desc: 'Strict Know Your Customer and Anti-Money Laundering procedures protect all clients.' },
+                  { icon: <Shield />, title: 'Segregated Client Accounts', desc: 'Your funds are held in segregated accounts at top-tier banks, completely separate from company funds.' },
+                  { icon: <Zap />, title: 'Advanced SSL Encryption', desc: 'All data transmissions are protected with 256-bit SSL encryption technology.' },
+                  { icon: <User />, title: 'KYC & AML Compliance', desc: 'Strict Know Your Customer and Anti-Money Laundering procedures protect all clients.' },
                 ].map((item, i) => (
                   <AnimatedSection key={item.title} animation="slideRight" delay={i * 0.1}>
                     <div className="flex gap-4 p-4 rounded-xl bg-bull-600 border border-white/5 hover:border-green-accent/20 transition-all duration-300">
@@ -318,7 +318,7 @@ function Accounts() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/contact" className="b4x-btn-primary gap-2">
-                Open Live Account <FiArrowRight size={16} />
+                Open Live Account <ArrowRight size={16} />
               </Link>
               <Link to="/contact" className="b4x-btn-secondary gap-2">
                 Open Demo Account

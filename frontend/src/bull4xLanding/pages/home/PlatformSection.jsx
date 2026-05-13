@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight, FiCheck } from 'react-icons/fi'
+import { ArrowRight, Check } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 import { platforms, platformFeatures } from '../HomeData'
@@ -86,7 +86,7 @@ export default function PlatformSection() {
                     className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
                     style={{ background: 'rgba(217,161,54,0.15)' }}
                   >
-                    <FiCheck size={11} className="text-[#D9A136]" />
+                    <Check size={11} className="text-[#D9A136]" />
                   </div>
                   <span className="text-slate-300 text-sm">{f}</span>
                 </div>
@@ -94,7 +94,7 @@ export default function PlatformSection() {
             </div>
 
             <div className="flex flex-wrap justify-center gap-4 mt-8">
-              <Link to="/platforms" className="b4x-btn-primary gap-2">Explore Platform <FiArrowRight size={16} /></Link>
+              <Link to="/platforms" className="b4x-btn-primary gap-2">Explore Platform <ArrowRight size={16} /></Link>
               <Link to="/accounts" className="b4x-btn-outline gap-2">Try Demo</Link>
             </div>
           </div>

@@ -3,7 +3,7 @@
 // ============================================
 
 import React from 'react'
-import { FiCheck } from 'react-icons/fi'
+import { Check } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import AnimatedSection from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
@@ -39,7 +39,7 @@ function IslamicAccountSection() {
                     {features.map((feature) => (
                       <div key={feature} className="flex items-start gap-3">
                         <div className="w-5 h-5 rounded-full bg-green-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <FiCheck size={12} className="text-green-accent" />
+                          <Check size={12} className="text-green-accent" />
                         </div>
                         <span className="text-gray-300 text-sm">{feature}</span>
                       </div>

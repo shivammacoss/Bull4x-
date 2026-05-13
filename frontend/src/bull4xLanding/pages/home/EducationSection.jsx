@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight } from 'react-icons/fi'
+import { ArrowRight } from 'lucide-react'
 import { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 import { educationItems } from '../HomeData'
@@ -35,7 +35,7 @@ export default function EducationSection() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3 md:justify-end">
-              <Link to="/education" className="b4x-btn-primary gap-2">Explore Education <FiArrowRight size={16} /></Link>
+              <Link to="/education" className="b4x-btn-primary gap-2">Explore Education <ArrowRight size={16} /></Link>
               <Link to="/accounts" className="b4x-btn-outline gap-2">Start Demo</Link>
             </div>
           </div>

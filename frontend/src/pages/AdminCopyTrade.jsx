@@ -289,22 +289,22 @@ const AdminCopyTrade = () => {
           ) : filteredMasters.length === 0 ? (
             <div className="text-center py-12 text-gray-500">No masters found</div>
           ) : (
-            <table className="w-full">
+            <div className="overflow-x-auto"><table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Trader</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">User</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Followers</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Commission</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Admin Share</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Status</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Actions</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Trader</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">User</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Followers</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Commission</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Admin Share</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Status</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredMasters.map(master => (
                   <tr key={master._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
                           <span className="text-purple-500 font-medium">{master.displayName?.charAt(0)}</span>
@@ -312,17 +312,17 @@ const AdminCopyTrade = () => {
                         <span className="text-white font-medium">{master.displayName}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <p className="text-white text-sm">{master.userId?.firstName}</p>
                       <p className="text-gray-500 text-xs">{master.userId?.email}</p>
                     </td>
-                    <td className="py-4 px-4 text-white">{master.stats?.activeFollowers || 0}</td>
-                    <td className="py-4 px-4 text-white">{master.approvedCommissionPercentage || master.requestedCommissionPercentage}%</td>
-                    <td className="py-4 px-4 text-white">{master.status === 'ACTIVE' && master.adminSharePercentage !== undefined ? `${master.adminSharePercentage}%` : '-'}</td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 text-white whitespace-nowrap">{master.stats?.activeFollowers || 0}</td>
+                    <td className="py-4 px-4 text-white whitespace-nowrap">{master.approvedCommissionPercentage || master.requestedCommissionPercentage}%</td>
+                    <td className="py-4 px-4 text-white whitespace-nowrap">{master.status === 'ACTIVE' && master.adminSharePercentage !== undefined ? `${master.adminSharePercentage}%` : '-'}</td>
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(master.status)}`}>{master.status}</span>
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         {master.status === 'PENDING' && (
                           <>
@@ -338,7 +338,7 @@ const AdminCopyTrade = () => {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       )}
@@ -352,33 +352,33 @@ const AdminCopyTrade = () => {
           {followers.length === 0 ? (
             <div className="text-center py-12 text-gray-500">No followers yet</div>
           ) : (
-            <table className="w-full">
+            <div className="overflow-x-auto"><table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Follower</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Following</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Copy Mode</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Trades</th>
-                  <th className="text-left text-gray-500 text-sm py-3 px-4">Status</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Follower</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Following</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Copy Mode</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Trades</th>
+                  <th className="text-left text-gray-500 text-sm py-3 px-4 whitespace-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {followers.map(f => (
                   <tr key={f._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <p className="text-white text-sm">{f.followerId?.firstName}</p>
                       <p className="text-gray-500 text-xs">{f.followerId?.email}</p>
                     </td>
-                    <td className="py-4 px-4 text-white">{f.masterId?.displayName}</td>
-                    <td className="py-4 px-4 text-white">{f.copyMode === 'FIXED_LOT' ? `Fixed: ${f.copyValue}` : `${f.copyValue}x`}</td>
-                    <td className="py-4 px-4 text-white">{f.stats?.totalCopiedTrades || 0}</td>
-                    <td className="py-4 px-4">
+                    <td className="py-4 px-4 text-white whitespace-nowrap">{f.masterId?.displayName}</td>
+                    <td className="py-4 px-4 text-white whitespace-nowrap">{f.copyMode === 'FIXED_LOT' ? `Fixed: ${f.copyValue}` : `${f.copyValue}x`}</td>
+                    <td className="py-4 px-4 text-white whitespace-nowrap">{f.stats?.totalCopiedTrades || 0}</td>
+                    <td className="py-4 px-4 whitespace-nowrap">
                       <span className={`px-2 py-1 rounded-full text-xs ${f.status === 'ACTIVE' ? 'bg-gradient-to-r from-blue-500 to-cyan-500-500/20 text-blue-500' : 'bg-yellow-500/20 text-yellow-500'}`}>{f.status}</span>
                     </td>
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       )}

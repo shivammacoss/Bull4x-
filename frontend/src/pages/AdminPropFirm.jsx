@@ -506,13 +506,13 @@ const AdminPropFirm = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">User</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Challenge</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Balance</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">P&L</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Start Date</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">User</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Challenge</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Balance</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">P&L</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Start Date</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -525,20 +525,20 @@ const AdminPropFirm = () => {
                     const pnl = (p.currentBalance || 0) - (p.initialBalance || 0)
                     return (
                       <tr key={p._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                        <td className="py-4 px-4 text-white font-medium">{p.userId?.firstName || p.userId?.email || 'Unknown'}</td>
-                        <td className="py-4 px-4 text-gray-400">{p.challengeId?.name || 'Challenge'}</td>
-                        <td className="py-4 px-4 text-white">${(p.currentBalance || 0).toLocaleString()}</td>
+                        <td className="py-4 px-4 text-white font-medium whitespace-nowrap">{p.userId?.firstName || p.userId?.email || 'Unknown'}</td>
+                        <td className="py-4 px-4 text-gray-400 whitespace-nowrap">{p.challengeId?.name || 'Challenge'}</td>
+                        <td className="py-4 px-4 text-white whitespace-nowrap">${(p.currentBalance || 0).toLocaleString()}</td>
                         <td className={`py-4 px-4 font-medium ${pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                           {pnl >= 0 ? '+' : ''}${pnl.toLocaleString()}
                         </td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs w-fit ${getStatusColor(p.status)}`}>
                             {getStatusIcon(p.status)}
                             {p.status}
                           </span>
                         </td>
-                        <td className="py-4 px-4 text-gray-400">{new Date(p.createdAt).toLocaleDateString()}</td>
-                        <td className="py-4 px-4">
+                        <td className="py-4 px-4 text-gray-400 whitespace-nowrap">{new Date(p.createdAt).toLocaleDateString()}</td>
+                        <td className="py-4 px-4 whitespace-nowrap">
                           <button className="p-2 hover:bg-dark-600 rounded-lg transition-colors text-gray-400 hover:text-white">
                             <Eye size={16} />
                           </button>

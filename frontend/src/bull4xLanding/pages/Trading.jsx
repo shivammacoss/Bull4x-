@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight, FiCheck, FiTrendingUp, FiTrendingDown } from 'react-icons/fi'
+import { ArrowRight, Check, TrendingUp, TrendingDown } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
@@ -84,7 +84,7 @@ const marketCategories = [
 
 function Trading() {
   const [activeTab, setActiveTab] = useState('forex')
-  const activeMarket = marketCategories.find(m => m.id === activeTab)
+  const activeMarket = marketCategories.nd(m => m.id === activeTab)
 
   return (
     <PageTransition>
@@ -100,7 +100,7 @@ function Trading() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiTrendingUp size={14} className="text-red-accent" />
+              <TrendingUp size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Global Markets</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
@@ -111,7 +111,7 @@ function Trading() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Start Trading <FiArrowRight size={16} />
+                Start Trading <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-outline gap-2">
                 Open Demo Account
@@ -165,14 +165,14 @@ function Trading() {
                 <div className="grid grid-cols-2 gap-3 mb-6">
                   {activeMarket.features.map((f) => (
                     <div key={f} className="flex items-center gap-2 p-3 rounded-lg bg-bull-600 border border-white/5">
-                      <FiCheck size={14} className="text-red-accent flex-shrink-0" />
+                      <Check size={14} className="text-red-accent flex-shrink-0" />
                       <span className="text-gray-300 text-sm">{f}</span>
                     </div>
                   ))}
                 </div>
 
                 <Link to="/accounts" className="b4x-btn-primary gap-2">
-                  Trade {activeMarket.label} Now <FiArrowRight size={16} />
+                  Trade {activeMarket.label} Now <ArrowRight size={16} />
                 </Link>
               </AnimatedSection>
 
@@ -235,7 +235,7 @@ function Trading() {
                       <td className="font-mono">{row.ask}</td>
                       <td className="font-mono text-red-accent">{row.spread}</td>
                       <td className={`font-mono font-semibold flex items-center gap-1 ${row.pos ? 'text-green-accent' : 'text-red-accent'}`}>
-                        {row.pos ? <FiTrendingUp size={12} /> : <FiTrendingDown size={12} />}
+                        {row.pos ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                         {row.change}
                       </td>
                       <td>
@@ -295,7 +295,7 @@ function Trading() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Open Live Account <FiArrowRight size={16} />
+                Open Live Account <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-secondary gap-2">
                 Try Demo Free

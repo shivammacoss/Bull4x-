@@ -203,16 +203,16 @@ const AdminAccounts = () => {
 
           {/* Accounts Table */}
           <div className="bg-dark-800 rounded-xl border border-gray-800 overflow-hidden">
-            <table className="w-full">
+            <div className="overflow-x-auto"><table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Account ID</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">User</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Type</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Balance</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Leverage</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Account ID</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">User</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Type</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Balance</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Leverage</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                  <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -223,19 +223,19 @@ const AdminAccounts = () => {
                 ) : (
                   filteredAccounts.map((account) => (
                     <tr key={account._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className="textbg-gradient-to-r from-blue-500 to-cyan-500 font-mono text-sm">{account.accountId}</span>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div>
                           <p className="text-white font-medium">{account.userId?.firstName || 'Unknown'}</p>
                           <p className="text-gray-500 text-sm">{account.userId?.email}</p>
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-gray-400">{account.accountTypeId?.name || 'N/A'}</td>
-                      <td className="py-4 px-4 text-white font-medium">${account.balance?.toLocaleString() || 0}</td>
-                      <td className="py-4 px-4 text-gray-400">{account.leverage}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-gray-400 whitespace-nowrap">{account.accountTypeId?.name || 'N/A'}</td>
+                      <td className="py-4 px-4 text-white font-medium whitespace-nowrap">${account.balance?.toLocaleString() || 0}</td>
+                      <td className="py-4 px-4 text-gray-400 whitespace-nowrap">{account.leverage}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded text-xs ${
                           account.status === 'Active' ? 'bg-green-500/20 text-green-500' :
                           account.status === 'Suspended' ? 'bg-red-500/20 text-red-500' :
@@ -244,7 +244,7 @@ const AdminAccounts = () => {
                           {account.status}
                         </span>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <button onClick={() => openEditModal(account)} className="p-2 hover:bg-dark-600 rounded-lg transition-colors text-gray-400 hover:text-white" title="Edit">
                             <Edit size={16} />
@@ -258,7 +258,7 @@ const AdminAccounts = () => {
                   ))
                 )}
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
       </main>

@@ -6,18 +6,18 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  FiMenu, FiX, FiTrendingUp, FiBarChart2, FiMonitor,
-  FiUser, FiDollarSign, FiTool, FiBook, FiInfo, FiMail
-} from 'react-icons/fi'
+  Menu, X, TrendingUp, BarChart2, Monitor,
+  User, DollarSign, Wrench, Book, Info, Mail
+} from 'lucide-react'
 
 const navItems = [
-  { label: 'Home',           path: '/',               icon: <FiTrendingUp /> },
-  { label: 'Trading',        path: '/trading',         icon: <FiBarChart2 /> },
-  { label: 'Platforms',      path: '/platforms',       icon: <FiMonitor /> },
-  { label: 'Accounts',       path: '/accounts',        icon: <FiUser /> },
-  { label: 'Education',      path: '/education',       icon: <FiBook /> },
-  { label: 'About',          path: '/about',           icon: <FiInfo /> },
-  { label: 'Contact',        path: '/contact',         icon: <FiMail /> },
+  { label: 'Home',           path: '/',               icon: <TrendingUp /> },
+  { label: 'Trading',        path: '/trading',         icon: <BarChart2 /> },
+  { label: 'Platforms',      path: '/platforms',       icon: <Monitor /> },
+  { label: 'Accounts',       path: '/accounts',        icon: <User /> },
+  { label: 'Education',      path: '/education',       icon: <Book /> },
+  { label: 'About',          path: '/about',           icon: <Info /> },
+  { label: 'Contact',        path: '/contact',         icon: <Mail /> },
 ]
 
 function Navbar() {
@@ -48,7 +48,7 @@ function Navbar() {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: 'easeOut' }}
       ref={menuRef}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`xed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-[#0d1117]/85 backdrop-blur-xl border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
           : 'bg-transparent'
@@ -103,7 +103,7 @@ function Navbar() {
               onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 28px rgba(217,161,54,0.6), 0 0 50px rgba(217,161,54,0.2)'}
               onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 16px rgba(217,161,54,0.35)'}
             >
-              <FiUser size={13} />
+              <User size={13} />
               Open Account
             </Link>
 
@@ -116,11 +116,11 @@ function Navbar() {
               <AnimatePresence mode="wait">
                 {isOpen ? (
                   <motion.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                    <FiX size={18} />
+                    <X size={18} />
                   </motion.span>
                 ) : (
                   <motion.span key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                    <FiMenu size={18} />
+                    <Menu size={18} />
                   </motion.span>
                 )}
               </AnimatePresence>
@@ -182,7 +182,7 @@ function Navbar() {
                   className="flex items-center justify-center gap-2 w-full px-4 py-3 text-white font-semibold text-sm rounded-lg transition-all duration-200"
                   style={{ background: '#D9A136', boxShadow: '0 0 16px rgba(217,161,54,0.3)' }}
                 >
-                  <FiUser size={14} />
+                  <User size={14} />
                   Open Live Account
                 </Link>
               </motion.div>

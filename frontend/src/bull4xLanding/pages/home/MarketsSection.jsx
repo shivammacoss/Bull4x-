@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight } from 'react-icons/fi'
+import { ArrowRight } from 'lucide-react'
 import { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 import { marketAssets } from '../HomeData'
@@ -38,7 +38,7 @@ export default function MarketsSection() {
           badge="Markets"
           title="Global Markets Access"
           highlight="Global Markets"
-          subtitle="At BULL4X, you can access a wide range of global financial instruments from a single account."
+          subtitle="At BULL4X, you can access a wide range of global nancial instruments from a single account."
         />
 
         <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-14">
@@ -77,7 +77,7 @@ export default function MarketsSection() {
               </div>
               <p className="text-slate-400 text-sm mb-4">And many more instruments available</p>
               <Link to="/trading" className="b4x-btn-primary gap-2 text-sm">
-                Explore All Markets <FiArrowRight size={14} />
+                Explore All Markets <ArrowRight size={14} />
               </Link>
             </div>
           </StaggerItem>

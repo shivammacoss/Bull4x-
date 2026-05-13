@@ -1,7 +1,7 @@
 import {
-  FiInfo, FiList, FiSettings, FiShield, FiToggleRight,
-  FiRefreshCw, FiPackage,
-} from 'react-icons/fi'
+  Info, List, Settings, Shield, ToggleRight,
+  RefreshCw, Package,
+} from 'lucide-react'
 import {
   LegalPageShell, LegalHero, LegalBody, SectionCard, Bullet,
   HighlightBanner, FeatureGrid, ContactCard,
@@ -20,7 +20,7 @@ const sections = [
 const CookiePolicy = () => (
   <LegalPageShell standalone>
     <LegalHero
-      icon={FiPackage}
+      icon={Package}
       badge="Legal · Cookies"
       title="Cookie"
       highlight="Policy"
@@ -29,30 +29,30 @@ const CookiePolicy = () => (
     />
 
     <LegalBody sections={sections}>
-      <HighlightBanner icon={FiInfo} title="Transparency in tracking">
+      <HighlightBanner icon={Info} title="Transparency in tracking">
         This Cookie Policy explains what cookies are, how BULL4X uses them, the types of
         cookies we deploy (i.e. the information we collect using cookies and how that
         information is used), and how to control your cookie preferences. By continuing
         to use our platform, you consent to the use of cookies as described below.
       </HighlightBanner>
 
-      <SectionCard id="what" no="01" icon={FiInfo} title="What Are Cookies?">
+      <SectionCard id="what" no="01" icon={Info} title="What Are Cookies?">
         <p>
-          Cookies are small text files placed on your device (computer, smartphone, or
+          Cookies are small text les placed on your device (computer, smartphone, or
           tablet) when you visit a website or use an application. They are widely used
           to make websites and apps work, work more efficiently, and provide reporting
           information to the operators.
         </p>
         <p>
           Cookies set by the website or app owner (in this case, BULL4X) are called
-          "first-party cookies". Cookies set by parties other than the website owner are
+          "rst-party cookies". Cookies set by parties other than the website owner are
           called "third-party cookies". Third-party cookies enable features or
           functionality provided by external services (e.g. analytics, payment
           processing).
         </p>
       </SectionCard>
 
-      <SectionCard id="types" no="02" icon={FiList} title="Types of Cookies We Use">
+      <SectionCard id="types" no="02" icon={List} title="Types of Cookies We Use">
         <FeatureGrid items={[
           { title: 'Essential Cookies', desc: 'Required for the platform to function. They enable secure login, session management, and core trading features. These cannot be disabled.' },
           { title: 'Performance Cookies', desc: 'Help us understand how users interact with our platform — which pages are visited, error rates, and load times — so we can improve performance.' },
@@ -63,7 +63,7 @@ const CookiePolicy = () => (
         ]} />
       </SectionCard>
 
-      <SectionCard id="why" no="03" icon={FiSettings} title="Why We Use Cookies">
+      <SectionCard id="why" no="03" icon={Settings} title="Why We Use Cookies">
         <p>BULL4X uses cookies for the following business purposes:</p>
         <ul className="space-y-2">
           <Bullet><span className="text-white font-semibold">Authentication:</span> To recognize you when you sign in and keep your session secure across pages.</Bullet>
@@ -75,7 +75,7 @@ const CookiePolicy = () => (
         </ul>
       </SectionCard>
 
-      <SectionCard id="third" no="04" icon={FiShield} title="Third-Party Cookies">
+      <SectionCard id="third" no="04" icon={Shield} title="Third-Party Cookies">
         <p>
           We may also use cookies provided by trusted third parties to support specific
           functions of the platform, including:
@@ -92,24 +92,24 @@ const CookiePolicy = () => (
         </p>
       </SectionCard>
 
-      <SectionCard id="manage" no="05" icon={FiToggleRight} title="Managing Your Preferences">
+      <SectionCard id="manage" no="05" icon={ToggleRight} title="Managing Your Preferences">
         <p>
           You have the right to decide whether to accept or reject cookies (other than
           strictly necessary ones). You can manage your preferences in the following ways:
         </p>
         <ul className="space-y-2">
           <Bullet><span className="text-white font-semibold">Browser Settings:</span> Most browsers allow you to refuse or accept cookies via settings. Refer to your browser's help section for instructions.</Bullet>
-          <Bullet><span className="text-white font-semibold">Cookie Banner:</span> When you first visit our platform, you may be presented with a cookie preference banner where you can opt in or out of non-essential cookies.</Bullet>
+          <Bullet><span className="text-white font-semibold">Cookie Banner:</span> When you rst visit our platform, you may be presented with a cookie preference banner where you can opt in or out of non-essential cookies.</Bullet>
           <Bullet><span className="text-white font-semibold">Mobile Devices:</span> On mobile, you can usually limit ad tracking through your device's privacy settings.</Bullet>
         </ul>
-        <HighlightBanner icon={FiInfo} tone="warn" title="A note about essential cookies">
+        <HighlightBanner icon={Info} tone="warn" title="A note about essential cookies">
           Please note that blocking essential cookies will impact platform functionality —
           including the ability to log in, place trades, or process payments — and some
           features may not work as intended.
         </HighlightBanner>
       </SectionCard>
 
-      <SectionCard id="updates" no="06" icon={FiRefreshCw} title="Updates to This Policy">
+      <SectionCard id="updates" no="06" icon={RefreshCw} title="Updates to This Policy">
         <p>
           We may update this Cookie Policy from time to time to reflect changes in
           technology, legislation, or our business practices. When we do, we will revise

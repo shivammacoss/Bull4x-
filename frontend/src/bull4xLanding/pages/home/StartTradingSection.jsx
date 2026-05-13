@@ -3,7 +3,7 @@
 // ============================================
 
 import React from 'react'
-import { FiUserPlus, FiDollarSign, FiTrendingUp } from 'react-icons/fi'
+import { UserPlus, DollarSign, TrendingUp } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
@@ -11,7 +11,7 @@ import SectionHeader from '../../components/SectionHeader'
 const steps = [
   {
     number: '1',
-    icon: <FiUserPlus size={24} />,
+    icon: <UserPlus size={24} />,
     title: 'Register Account',
     desc: 'Create your account in minutes.',
     color: 'text-blue-400',
@@ -19,7 +19,7 @@ const steps = [
   },
   {
     number: '2',
-    icon: <FiDollarSign size={24} />,
+    icon: <DollarSign size={24} />,
     title: 'Fund Account',
     desc: 'Deposit funds using secure payment methods.',
     color: 'text-green-accent',
@@ -27,7 +27,7 @@ const steps = [
   },
   {
     number: '3',
-    icon: <FiTrendingUp size={24} />,
+    icon: <TrendingUp size={24} />,
     title: 'Start Trading',
     desc: 'Access global markets and begin trading instantly.',
     color: 'text-red-accent',

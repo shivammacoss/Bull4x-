@@ -419,17 +419,17 @@ const AdminManagement = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-700">
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Employee</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Permissions</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Joined</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Employee</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Permissions</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Joined</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredAdmins.map((admin) => (
                     <tr key={admin._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
                             <span className="text-blue-500 font-bold">{admin.firstName?.charAt(0)}</span>
@@ -440,13 +440,13 @@ const AdminManagement = () => {
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className="text-gray-400">{getPermissionCount(admin.sidebarPermissions)} / {sidebarPermissions.length}</span>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className="text-gray-400">{new Date(admin.createdAt).toLocaleDateString()}</span>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <button
                           onClick={() => handleToggleStatus(admin)}
                           className={`px-3 py-1 rounded-full text-xs ${
@@ -456,7 +456,7 @@ const AdminManagement = () => {
                           {admin.status}
                         </button>
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           <button 
                             onClick={() => { setSelectedAdmin({...admin}); setShowPermissionsModal(true) }}

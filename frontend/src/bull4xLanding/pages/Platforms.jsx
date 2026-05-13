@@ -5,9 +5,9 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  FiArrowRight, FiCheck, FiMonitor, FiSmartphone,
-  FiCpu, FiWifi, FiZap, FiShield, FiBarChart2
-} from 'react-icons/fi'
+  ArrowRight, Check, Monitor, Smartphone,
+  Cpu, Wifi, Zap, Shield, BarChart2
+} from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
@@ -15,7 +15,7 @@ import MarketTicker from '../components/MarketTicker'
 const platforms = [
   {
     id: 'webtrader',
-    icon: <FiMonitor size={24} />,
+    icon: <Monitor size={24} />,
     name: 'Bull4X WebTrader',
     tagline: 'Browser-Based. No Downloads Required.',
     desc: 'A powerful, fully-featured trading platform accessible directly from your browser. No installation needed � just log in and start trading instantly from any device.',
@@ -37,7 +37,7 @@ const platforms = [
   },
   {
     id: 'mobile',
-    icon: <FiSmartphone size={24} />,
+    icon: <Smartphone size={24} />,
     name: 'Mobile Trading App',
     tagline: 'Trade Anytime, Anywhere.',
     desc: 'Full-featured mobile trading app for iOS and Android. Manage your account, monitor markets, and execute trades on the go with the same professional tools.',
@@ -59,7 +59,7 @@ const platforms = [
   },
   {
     id: 'desktop',
-    icon: <FiCpu size={24} />,
+    icon: <Cpu size={24} />,
     name: 'Desktop Terminal',
     tagline: 'Professional Trading Environment.',
     desc: 'Advanced desktop terminal for professional traders who demand the highest performance. Supports automated trading, API access, and VPS compatibility.',
@@ -96,7 +96,7 @@ const platformComparison = [
 
 function Platforms() {
   const [activePlatform, setActivePlatform] = useState('webtrader')
-  const active = platforms.find(p => p.id === activePlatform)
+  const active = platforms.nd(p => p.id === activePlatform)
 
   return (
     <PageTransition>
@@ -112,7 +112,7 @@ function Platforms() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiMonitor size={14} className="text-red-accent" />
+              <Monitor size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Trading Platforms</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
@@ -123,7 +123,7 @@ function Platforms() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Get Started <FiArrowRight size={16} />
+                Get Started <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-outline gap-2">
                 Try Demo Free
@@ -186,7 +186,7 @@ function Platforms() {
                 <div className="grid grid-cols-2 gap-2 mb-6">
                   {active.features.map((f) => (
                     <div key={f} className="flex items-center gap-2 text-sm text-gray-300">
-                      <FiCheck size={13} className="text-red-accent flex-shrink-0" />
+                      <Check size={13} className="text-red-accent flex-shrink-0" />
                       {f}
                     </div>
                   ))}
@@ -194,7 +194,7 @@ function Platforms() {
 
                 <div className="flex gap-3">
                   <Link to="/accounts" className="b4x-btn-primary gap-2">
-                    Launch Platform <FiArrowRight size={16} />
+                    Launch Platform <ArrowRight size={16} />
                   </Link>
                   <Link to="/accounts" className="b4x-btn-secondary gap-2">
                     Try Demo
@@ -213,7 +213,7 @@ function Platforms() {
             badge="Compare"
             title="Platform Comparison"
             highlight="Comparison"
-            subtitle="Find the right platform for your trading style."
+            subtitle="nd the right platform for your trading style."
           />
           <AnimatedSection animation="slideUp" delay={0.2} className="mt-10 overflow-x-auto">
             <div className="bg-bull-600 rounded-2xl border border-white/5 overflow-hidden">
@@ -284,7 +284,7 @@ function Platforms() {
               </div>
               <AnimatedSection animation="slideUp" delay={0.4} className="mt-6">
                 <Link to="/accounts" className="b4x-btn-primary gap-2">
-                  Start Copy Trading <FiArrowRight size={16} />
+                  Start Copy Trading <ArrowRight size={16} />
                 </Link>
               </AnimatedSection>
             </div>
@@ -310,7 +310,7 @@ function Platforms() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Open Live Account <FiArrowRight size={16} />
+                Open Live Account <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-secondary gap-2">
                 Try Demo Free

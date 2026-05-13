@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiFileText, FiArrowRight } from 'react-icons/fi'
+import { FileText, ArrowRight } from 'lucide-react'
 import AnimatedSection, { PageTransition } from '../../components/AnimatedSection'
 import MarketTicker from '../../components/MarketTicker'
 
@@ -22,7 +22,7 @@ const obligations = [
 const sections = [
   {
     title: '1. Account Opening & Eligibility',
-    content: `To open an account with BULL4X, you must be at least 18 years of age and legally permitted to trade financial instruments in your jurisdiction. By submitting an account application, you confirm that you meet these eligibility requirements and that all information provided is accurate and complete.
+    content: `To open an account with BULL4X, you must be at least 18 years of age and legally permitted to trade nancial instruments in your jurisdiction. By submitting an account application, you confirm that you meet these eligibility requirements and that all information provided is accurate and complete.
 
 We reserve the right to decline any account application at our sole discretion and without providing a reason.`,
   },
@@ -72,7 +72,7 @@ function TermsConditions() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiFileText size={14} className="text-red-accent" />
+              <FileText size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Legal</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Terms & Conditions</h1>
@@ -91,7 +91,7 @@ function TermsConditions() {
           {/* Agreement Banner */}
           <AnimatedSection animation="slideUp">
             <div className="flex items-start gap-4 p-6 rounded-2xl bg-red-accent/5 border border-red-accent/20 mb-12">
-              <FiFileText className="text-red-accent flex-shrink-0 mt-1" size={20} />
+              <FileText className="text-red-accent flex-shrink-0 mt-1" size={20} />
               <div>
                 <h3 className="text-white font-bold text-lg mb-2">Agreement to Terms</h3>
                 <p className="text-gray-300 text-sm leading-relaxed">
@@ -137,7 +137,7 @@ function TermsConditions() {
           <AnimatedSection animation="slideUp" delay={0.3} className="mt-12">
             <div className="flex flex-wrap gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Open Account <FiArrowRight size={16} />
+                Open Account <ArrowRight size={16} />
               </Link>
               <Link to="/contact" className="b4x-btn-secondary gap-2">
                 Contact Us

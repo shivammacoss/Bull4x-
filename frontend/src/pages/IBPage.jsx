@@ -721,7 +721,7 @@ const IBPage = () => {
                       ))}
                     </div>
                   ) : (
-                    <table className="w-full">
+                    <div className="overflow-x-auto"><table className="w-full">
                       <thead className={isDarkMode ? 'bg-dark-700' : 'bg-gray-50'}>
                         <tr>
                           <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>User</th>
@@ -738,11 +738,11 @@ const IBPage = () => {
                             <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{ref.email}</td>
                             <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{new Date(ref.createdAt).toLocaleDateString()}</td>
                             <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>-</td>
-                            <td className="px-4 py-3 text-accent-green text-sm">-</td>
+                            <td className="px-4 py-3 text-accent-green text-sm whitespace-nowrap">-</td>
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </table></div>
                   )}
                 </div>
               )}
@@ -770,7 +770,7 @@ const IBPage = () => {
                       ))}
                     </div>
                   ) : (
-                    <table className="w-full">
+                    <div className="overflow-x-auto"><table className="w-full">
                       <thead className={isDarkMode ? 'bg-dark-700' : 'bg-gray-50'}>
                         <tr>
                           <th className={`text-left text-xs font-medium px-4 py-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Date</th>
@@ -790,8 +790,8 @@ const IBPage = () => {
                             <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{comm.symbol}</td>
                             <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Level {comm.level}</td>
                             <td className={`px-4 py-3 text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{comm.tradeLotSize?.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-accent-green text-sm">${comm.commissionAmount?.toFixed(2)}</td>
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-3 text-accent-green text-sm whitespace-nowrap">${comm.commissionAmount?.toFixed(2)}</td>
+                            <td className="px-4 py-3 whitespace-nowrap">
                               <span className={`px-2 py-1 rounded text-xs ${
                                 comm.status === 'CREDITED' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
                               }`}>
@@ -801,7 +801,7 @@ const IBPage = () => {
                           </tr>
                         ))}
                       </tbody>
-                    </table>
+                    </table></div>
                   )}
                 </div>
               )}

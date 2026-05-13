@@ -317,11 +317,11 @@ console.log('Menu items:', menuItems)
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-700">
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">User</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Email</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Phone</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Joined</th>
-                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">User</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Email</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Phone</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Joined</th>
+                      <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -340,7 +340,7 @@ console.log('Menu items:', menuItems)
                     ) : (
                       filteredUsers.map((user, index) => (
                         <tr key={index} className="border-b border-gray-800 hover:bg-dark-700/50">
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500/20 rounded-full flex items-center justify-center">
                                 <span className="text-accent-green font-medium">
@@ -350,22 +350,22 @@ console.log('Menu items:', menuItems)
                               <span className="text-white font-medium">{user.firstName || 'Unknown'}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-4 whitespace-nowrap">
                             <div className="flex items-center gap-2 text-gray-400">
                               <Mail size={14} />
                               <span>{user.email}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-4 whitespace-nowrap">
                             <div className="flex items-center gap-2 text-gray-400">
                               <Phone size={14} />
                               <span>{user.phone || 'N/A'}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-4 text-gray-400">
+                          <td className="py-4 px-4 text-gray-400 whitespace-nowrap">
                             {formatDate(user.createdAt)}
                           </td>
-                          <td className="py-4 px-4">
+                          <td className="py-4 px-4 whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <button className="p-2 hover:bg-dark-600 rounded-lg transition-colors text-gray-400 hover:text-white">
                                 <Eye size={16} />

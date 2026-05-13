@@ -7,10 +7,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useScroll, useSpring, useMotionValueEvent } from 'framer-motion'
 import {
-  FiArrowLeft, FiArrowRight, FiArrowUp, FiChevronRight,
-  FiClock, FiShield, FiMail, FiLink2, FiPrinter,
-  FiFileText, FiAlertTriangle, FiLock, FiPackage,
-} from 'react-icons/fi'
+  ArrowLeft, ArrowRight, ArrowUp, ChevronRight,
+  Clock, Shield, Mail, Link2, Printer,
+  FileText, AlertTriangle, Lock, Package,
+} from 'lucide-react'
 
 export const GOLD = '#D9A136'
 export const GOLD_LIGHT = '#F0C96F'
@@ -20,22 +20,22 @@ export const INK_HI = '#161c26'    // hover/raised
 
 // All 5 legal docs — used for the cross-link bar
 const ALL_LEGAL_DOCS = [
-  { label: 'Privacy Policy',     path: '/privacy-policy',          icon: FiLock },
-  { label: 'Terms of Service',   path: '/terms-of-service',        icon: FiFileText },
-  { label: 'Cookie Policy',      path: '/cookie-policy',           icon: FiPackage },
-  { label: 'Risk Disclosure',    path: '/legal/risk-disclosure',   icon: FiAlertTriangle },
-  { label: 'AML Policy',         path: '/legal/aml-policy',        icon: FiShield },
+  { label: 'Privacy Policy',     path: '/privacy-policy',          icon: Lock },
+  { label: 'Terms of Service',   path: '/terms-of-service',        icon: FileText },
+  { label: 'Cookie Policy',      path: '/cookie-policy',           icon: Package },
+  { label: 'Risk Disclosure',    path: '/legal/risk-disclosure',   icon: AlertTriangle },
+  { label: 'AML Policy',         path: '/legal/aml-policy',        icon: Shield },
 ]
 
 // =================================================================
-// Reading progress bar (fixed top)
+// Reading progress bar (xed top)
 // =================================================================
 const ReadingProgress = () => {
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 25, mass: 0.4 })
   return (
     <motion.div
-      className="fixed top-0 left-0 right-0 z-50 h-[3px] origin-left"
+      className="xed top-0 left-0 right-0 z-50 h-[3px] origin-left"
       style={{
         scaleX,
         background: `linear-gradient(90deg, ${GOLD}, ${GOLD_LIGHT}, ${GOLD})`,
@@ -46,10 +46,10 @@ const ReadingProgress = () => {
 }
 
 // =================================================================
-// Animated grid background (subtle, fixed)
+// Animated grid background (subtle, xed)
 // =================================================================
 const GridBackdrop = () => (
-  <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+  <div className="pointer-events-none xed inset-0 z-0 overflow-hidden">
     <div
       className="absolute inset-0 opacity-[0.04]"
       style={{
@@ -85,7 +85,7 @@ const FloatingToolbar = () => {
       initial={{ opacity: 0, x: 12 }}
       animate={{ opacity: show ? 1 : 0, x: show ? 0 : 12 }}
       transition={{ duration: 0.25 }}
-      className="hidden xl:flex fixed right-6 top-1/2 -translate-y-1/2 z-30 flex-col gap-2"
+      className="hidden xl:flex xed right-6 top-1/2 -translate-y-1/2 z-30 flex-col gap-2"
       style={{ pointerEvents: show ? 'auto' : 'none' }}
     >
       <button
@@ -93,14 +93,14 @@ const FloatingToolbar = () => {
         title="Back to top"
         className="group flex items-center justify-center w-11 h-11 rounded-xl border border-white/10 bg-black/40 backdrop-blur-md hover:border-[#D9A136]/50 transition-all"
       >
-        <FiArrowUp size={16} className="text-white/70 group-hover:text-[#D9A136]" />
+        <ArrowUp size={16} className="text-white/70 group-hover:text-[#D9A136]" />
       </button>
       <button
         onClick={() => window.print()}
         title="Print this document"
         className="group flex items-center justify-center w-11 h-11 rounded-xl border border-white/10 bg-black/40 backdrop-blur-md hover:border-[#D9A136]/50 transition-all"
       >
-        <FiPrinter size={16} className="text-white/70 group-hover:text-[#D9A136]" />
+        <Printer size={16} className="text-white/70 group-hover:text-[#D9A136]" />
       </button>
     </motion.div>
   )
@@ -128,7 +128,7 @@ export const LegalPageShell = ({ standalone = false, children }) => (
             to="/"
             className="group inline-flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
           >
-            <FiArrowLeft
+            <ArrowLeft
               size={16}
               className="group-hover:-translate-x-0.5 transition-transform"
             />
@@ -272,13 +272,13 @@ export const LegalHero = ({
           {/* Stat strip */}
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-10 pt-8 border-t border-white/5">
             {updated && (
-              <StatChip icon={FiClock} label="LAST UPDATED" value={updated} />
+              <StatChip icon={Clock} label="LAST UPDATED" value={updated} />
             )}
             {readMin && (
-              <StatChip icon={FiFileText} label="READING TIME" value={`${readMin} min`} />
+              <StatChip icon={FileText} label="READING TIME" value={`${readMin} min`} />
             )}
             {effective && (
-              <StatChip icon={FiShield} label="STATUS" value={effective} />
+              <StatChip icon={Shield} label="STATUS" value={effective} />
             )}
           </div>
         </motion.div>
@@ -305,7 +305,7 @@ const StatChip = ({ icon: Icon, label, value }) => (
 )
 
 // =================================================================
-// Sticky TOC with scroll-spy + active fill animation
+// Sticky TOC with scroll-spy + active ll animation
 // =================================================================
 export const TocSidebar = ({ sections }) => {
   const [activeId, setActiveId] = useState(sections?.[0]?.id ?? null)
@@ -315,7 +315,7 @@ export const TocSidebar = ({ sections }) => {
     const obs = new IntersectionObserver(
       (entries) => {
         const visible = entries
-          .filter((e) => e.isIntersecting)
+          .lter((e) => e.isIntersecting)
           .sort(
             (a, b) =>
               a.target.getBoundingClientRect().top -
@@ -379,7 +379,7 @@ export const TocSidebar = ({ sections }) => {
                   {s.no}
                 </span>
                 <span className="truncate flex-1">{s.title}</span>
-                <FiChevronRight
+                <ChevronRight
                   size={11}
                   className={`flex-shrink-0 transition-opacity ${active ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}
                   style={{ color: GOLD }}
@@ -394,7 +394,7 @@ export const TocSidebar = ({ sections }) => {
           onClick={() => window.print()}
           className="mt-6 w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-xs font-semibold border border-white/10 hover:border-[#D9A136]/40 text-white/60 hover:text-white transition-all"
         >
-          <FiPrinter size={13} />
+          <Printer size={13} />
           Print Document
         </button>
       </div>
@@ -723,7 +723,7 @@ export const ContactCard = ({
               border: `1px solid ${GOLD}55`,
             }}
           >
-            <FiMail size={18} style={{ color: GOLD }} />
+            <Mail size={18} style={{ color: GOLD }} />
           </div>
           <div className="min-w-0">
             <div className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold mb-0.5">
@@ -749,7 +749,7 @@ export const ContactCard = ({
               border: `1px solid ${GOLD}55`,
             }}
           >
-            <FiLink2 size={18} style={{ color: GOLD }} />
+            <Link2 size={18} style={{ color: GOLD }} />
           </div>
           <div className="min-w-0">
             <div className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold mb-0.5">
@@ -773,7 +773,7 @@ export const ContactCard = ({
           }}
         >
           {primaryLabel}
-          <FiArrowRight size={15} className="group-hover/btn:translate-x-0.5 transition-transform" />
+          <ArrowRight size={15} className="group-hover/btn:translate-x-0.5 transition-transform" />
         </Link>
         {secondaryLink && secondaryLabel && (
           <Link

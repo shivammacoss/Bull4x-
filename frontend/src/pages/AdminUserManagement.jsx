@@ -524,31 +524,31 @@ const AdminUserManagement = () => {
     if (!showModal || !selectedUser) return null
 
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-dark-800 rounded-2xl w-full max-w-md border border-gray-700 overflow-hidden">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+        <div className="bg-dark-800 rounded-2xl w-full max-w-md sm:max-w-xl md:max-w-2xl border border-gray-700 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
           {/* Modal Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500/20 rounded-full flex items-center justify-center">
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-700 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-r from-blue-500 to-cyan-500/20 rounded-full flex items-center justify-center flex-shrink-0">
                 <span className="text-accent-green font-medium">
                   {selectedUser.firstName?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
               </div>
-              <div>
-                <h3 className="text-white font-semibold">{selectedUser.firstName}</h3>
-                <p className="text-gray-500 text-sm">{selectedUser.email}</p>
+              <div className="min-w-0">
+                <h3 className="text-white font-semibold truncate">{selectedUser.firstName}</h3>
+                <p className="text-gray-500 text-xs sm:text-sm truncate">{selectedUser.email}</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={closeModal}
-              className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-dark-700 rounded-lg transition-colors flex-shrink-0"
             >
               <X size={18} className="text-gray-400" />
             </button>
           </div>
 
           {/* Modal Content */}
-          <div className="p-4">
+          <div className="p-3 sm:p-4 overflow-y-auto flex-1">
             {/* Message */}
             {message.text && (
               <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${
@@ -561,47 +561,47 @@ const AdminUserManagement = () => {
 
             {/* View User Details */}
             {modalType === 'view' && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-dark-700 p-3 rounded-lg">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                  <div className="bg-dark-700 p-3 rounded-lg min-w-0">
                     <p className="text-gray-500 text-xs mb-1">Full Name</p>
-                    <p className="text-white">{selectedUser.firstName}</p>
+                    <p className="text-white truncate">{selectedUser.firstName}</p>
                   </div>
-                  <div className="bg-dark-700 p-3 rounded-lg">
+                  <div className="bg-dark-700 p-3 rounded-lg min-w-0">
                     <p className="text-gray-500 text-xs mb-1">Phone</p>
-                    <p className="text-white">{selectedUser.phone || 'N/A'}</p>
+                    <p className="text-white truncate">{selectedUser.phone || 'N/A'}</p>
                   </div>
-                  <div className="bg-dark-700 p-3 rounded-lg">
+                  <div className="bg-dark-700 p-3 rounded-lg min-w-0">
                     <p className="text-gray-500 text-xs mb-1">Joined</p>
-                    <p className="text-white">{formatDate(selectedUser.createdAt)}</p>
+                    <p className="text-white truncate">{formatDate(selectedUser.createdAt)}</p>
                   </div>
-                  <div className="bg-dark-700 p-3 rounded-lg">
+                  <div className="bg-dark-700 p-3 rounded-lg min-w-0">
                     <p className="text-gray-500 text-xs mb-1">Status</p>
-                    <p className={`${selectedUser.isBanned ? 'text-red-500' : selectedUser.isBlocked ? 'text-yellow-500' : 'text-green-500'}`}>
+                    <p className={`truncate ${selectedUser.isBanned ? 'text-red-500' : selectedUser.isBlocked ? 'text-yellow-500' : 'text-green-500'}`}>
                       {selectedUser.isBanned ? 'Banned' : selectedUser.isBlocked ? 'Blocked' : 'Active'}
                     </p>
                   </div>
                 </div>
                 <div className="bg-dark-700 p-3 rounded-lg">
                   <p className="text-gray-500 text-xs mb-1">Email</p>
-                  <p className="text-white">{selectedUser.email}</p>
+                  <p className="text-white break-all">{selectedUser.email}</p>
                 </div>
                 {/* Wallet Balance with Actions */}
-                <div className="bg-gradient-to-r from-green-500/10 to-teal-500/10 border border-green-500/30 p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
+                <div className="bg-gradient-to-r from-green-500/10 to-teal-500/10 border border-green-500/30 p-3 sm:p-4 rounded-lg">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="min-w-0">
                       <p className="text-gray-400 text-xs mb-1">💰 Main Wallet Balance</p>
-                      <p className="text-white text-2xl font-bold">${userWalletBalance?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}</p>
+                      <p className="text-white text-xl sm:text-2xl font-bold break-words">${userWalletBalance?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}</p>
                     </div>
-                    <div className="flex gap-2">
-                      <button 
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button
                         onClick={() => setModalType('addFundWallet')}
                         className="p-2 bg-green-500/20 text-green-500 rounded-lg hover:bg-green-500/30 transition-colors"
                         title="Add to Wallet"
                       >
                         <Plus size={16} />
                       </button>
-                      <button 
+                      <button
                         onClick={() => setModalType('deductWallet')}
                         className="p-2 bg-orange-500/20 text-orange-500 rounded-lg hover:bg-orange-500/30 transition-colors"
                         title="Deduct from Wallet"
@@ -613,7 +613,7 @@ const AdminUserManagement = () => {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-2 gap-2 pt-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 pt-2">
                   <button 
                     onClick={() => setModalType('password')}
                     className="flex items-center justify-center gap-2 p-3 bg-blue-500/20 text-blue-500 rounded-lg hover:bg-blue-500/30 transition-colors"

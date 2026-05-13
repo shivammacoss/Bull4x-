@@ -434,49 +434,49 @@ export default function AdminPropTrading() {
                 <table className="w-full">
                   <thead className="bg-dark-700">
                     <tr>
-                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Account</th>
-                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">User</th>
-                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Challenge</th>
-                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Phase</th>
-                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Equity</th>
-                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">DD%</th>
-                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Profit%</th>
-                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Status</th>
-                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4">Actions</th>
+                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4 whitespace-nowrap">Account</th>
+                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4 whitespace-nowrap">User</th>
+                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4 whitespace-nowrap">Challenge</th>
+                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4 whitespace-nowrap">Phase</th>
+                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4 whitespace-nowrap">Equity</th>
+                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4 whitespace-nowrap">DD%</th>
+                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4 whitespace-nowrap">Profit%</th>
+                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                      <th className="text-left text-gray-400 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredAccounts.map((acc) => (
                       <tr key={acc._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                        <td className="py-3 px-4 text-white font-mono text-sm">{acc.accountId}</td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 text-white font-mono text-sm whitespace-nowrap">{acc.accountId}</td>
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <p className="text-white text-sm">{acc.userId?.firstName || 'N/A'}</p>
                           <p className="text-gray-500 text-xs">{acc.userId?.email}</p>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <p className="text-white text-sm">${acc.challengeId?.fundSize?.toLocaleString()}</p>
                           <p className="text-gray-500 text-xs">{acc.challengeId?.name}</p>
                         </td>
-                        <td className="py-3 px-4 text-white">
+                        <td className="py-3 px-4 text-white whitespace-nowrap">
                           {acc.totalPhases === 0 ? 'Funded' : `${acc.currentPhase}/${acc.totalPhases}`}
                         </td>
-                        <td className="py-3 px-4 text-white">${acc.currentEquity?.toLocaleString()}</td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 text-white whitespace-nowrap">${acc.currentEquity?.toLocaleString()}</td>
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <span className={acc.currentOverallDrawdownPercent > 5 ? 'text-red-500' : 'text-white'}>
                             {acc.currentOverallDrawdownPercent?.toFixed(2)}%
                           </span>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <span className={acc.currentProfitPercent >= 0 ? 'text-green-500' : 'text-red-500'}>
                             {acc.currentProfitPercent?.toFixed(2)}%
                           </span>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(acc.status)}`}>
                             {acc.status}
                           </span>
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 whitespace-nowrap">
                           <div className="flex items-center gap-1">
                             {acc.status === 'ACTIVE' && (
                               <>

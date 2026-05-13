@@ -5,16 +5,16 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import {
-  FiArrowRight, FiBarChart2, FiCalendar, FiTrendingUp,
-  FiCpu, FiTool, FiServer, FiActivity, FiTarget
-} from 'react-icons/fi'
+  ArrowRight, BarChart2, Calendar, TrendingUp,
+  Cpu, Wrench, Server, Activity, Target
+} from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
 
 const tools = [
   {
-    icon: <FiBarChart2 size={22} />,
+    icon: <BarChart2 size={22} />,
     title: 'Daily Market Analysis',
     desc: 'In-depth daily analysis of major markets including forex, indices, commodities, and crypto. Written by our team of professional analysts.',
     features: ['Morning briefings', 'Technical analysis', 'Fundamental outlook', 'Key levels & targets'],
@@ -23,7 +23,7 @@ const tools = [
     badge: 'Daily',
   },
   {
-    icon: <FiTrendingUp size={22} />,
+    icon: <TrendingUp size={22} />,
     title: 'Technical Reports',
     desc: 'Comprehensive technical analysis reports covering chart patterns, support/resistance levels, and trend analysis across all asset classes.',
     features: ['Chart pattern analysis', 'Support & resistance', 'Trend identification', 'Entry & exit signals'],
@@ -32,7 +32,7 @@ const tools = [
     badge: 'Weekly',
   },
   {
-    icon: <FiTarget size={22} />,
+    icon: <Target size={22} />,
     title: 'Trading Signals',
     desc: 'Professional trading signals with clear entry, stop-loss, and take-profit levels. Delivered directly to your platform or mobile app.',
     features: ['Entry price alerts', 'Stop-loss levels', 'Take-profit targets', 'Risk/reward ratios'],
@@ -41,7 +41,7 @@ const tools = [
     badge: 'Real-time',
   },
   {
-    icon: <FiCpu size={22} />,
+    icon: <Cpu size={22} />,
     title: 'AI Market Insights',
     desc: 'Cutting-edge AI-powered market analysis that processes thousands of data points to identify trading opportunities and market trends.',
     features: ['Pattern recognition', 'Sentiment analysis', 'Predictive modeling', 'Automated alerts'],
@@ -50,7 +50,7 @@ const tools = [
     badge: 'AI-Powered',
   },
   {
-    icon: <FiTool size={22} />,
+    icon: <Wrench size={22} />,
     title: 'Risk Calculator',
     desc: 'Professional risk management calculator to help you determine optimal position sizes, risk per trade, and potential profit/loss scenarios.',
     features: ['Position size calculator', 'Pip value calculator', 'Margin calculator', 'Risk/reward tool'],
@@ -59,16 +59,16 @@ const tools = [
     badge: 'Free Tool',
   },
   {
-    icon: <FiCalendar size={22} />,
+    icon: <Calendar size={22} />,
     title: 'Economic Calendar',
     desc: 'Comprehensive economic calendar with real-time updates on major economic events, central bank decisions, and market-moving data releases.',
-    features: ['Real-time updates', 'Impact ratings', 'Historical data', 'Custom filters'],
+    features: ['Real-time updates', 'Impact ratings', 'Historical data', 'Custom lters'],
     color: 'text-red-accent',
     bg: 'bg-red-accent/10',
     badge: 'Live',
   },
   {
-    icon: <FiServer size={22} />,
+    icon: <Server size={22} />,
     title: 'VPS Hosting',
     desc: 'Ultra-low latency VPS hosting co-located with our trading servers. Ideal for automated trading strategies and Expert Advisors.',
     features: ['Ultra-low latency', 'Co-located servers', '99.9% uptime', '24/7 monitoring'],
@@ -77,7 +77,7 @@ const tools = [
     badge: 'Premium',
   },
   {
-    icon: <FiActivity size={22} />,
+    icon: <Activity size={22} />,
     title: 'Market Sentiment',
     desc: 'Real-time market sentiment data showing the positioning of retail and institutional traders across major instruments.',
     features: ['Long/short ratios', 'Institutional flow', 'Retail sentiment', 'Contrarian signals'],
@@ -117,7 +117,7 @@ function ToolsResearch() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiTool size={14} className="text-red-accent" />
+              <Wrench size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Tools & Research</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
@@ -128,7 +128,7 @@ function ToolsResearch() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Access All Tools <FiArrowRight size={16} />
+                Access All Tools <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-outline gap-2">
                 Open Free Demo
@@ -190,15 +190,15 @@ function ToolsResearch() {
               {/* Calendar header */}
               <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-bull-700">
                 <div className="flex items-center gap-3">
-                  <FiCalendar className="text-red-accent" size={16} />
+                  <Calendar className="text-red-accent" size={16} />
                   <span className="text-white font-semibold text-sm">Upcoming Events</span>
                 </div>
                 <div className="flex gap-2">
-                  {['All', 'High', 'Medium', 'Low'].map((filter) => (
-                    <button key={filter} className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                      filter === 'All' ? 'bg-red-accent/20 text-red-accent' : 'text-gray-400 hover:text-white'
+                  {['All', 'High', 'Medium', 'Low'].map((lter) => (
+                    <button key={lter} className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      lter === 'All' ? 'bg-red-accent/20 text-red-accent' : 'text-gray-400 hover:text-white'
                     }`}>
-                      {filter}
+                      {lter}
                     </button>
                   ))}
                 </div>
@@ -279,7 +279,7 @@ function ToolsResearch() {
               </div>
               <AnimatedSection animation="slideUp" delay={0.4} className="mt-6">
                 <Link to="/contact" className="b4x-btn-primary gap-2">
-                  Get VPS Hosting <FiArrowRight size={16} />
+                  Get VPS Hosting <ArrowRight size={16} />
                 </Link>
               </AnimatedSection>
             </div>
@@ -299,7 +299,7 @@ function ToolsResearch() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Open Live Account <FiArrowRight size={16} />
+                Open Live Account <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-secondary gap-2">
                 Try Demo Free

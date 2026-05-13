@@ -911,7 +911,7 @@ const CopyTradePage = () => {
                               </span>
                             )}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 whitespace-nowrap">
                             <span className={`px-2 py-1 rounded text-xs ${
                               trade.status === 'OPEN' ? 'bg-blue-500/20 text-blue-500' :
                               trade.status === 'CLOSED' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'
@@ -987,7 +987,7 @@ const CopyTradePage = () => {
                               )}
                             </td>
                             {copyTradeCommissionFeeCells(trade)}
-                            <td className="px-4 py-3">
+                            <td className="px-4 py-3 whitespace-nowrap">
                               <span className={`px-2 py-1 rounded text-xs ${
                                 trade.status === 'OPEN' ? 'bg-blue-500/20 text-blue-500' :
                                 trade.status === 'CLOSED' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'

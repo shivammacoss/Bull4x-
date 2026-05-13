@@ -675,40 +675,40 @@ const AdminTradeManagement = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-700">
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Trade ID</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">User</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Symbol</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Side</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Lots</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Open Price</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">P&L</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Open Date</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Close Date</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Trade ID</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">User</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Symbol</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Side</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Lots</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Open Price</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">P&L</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Open Date</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Close Date</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredTrades.map((trade) => (
                     <tr key={trade._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                      <td className="py-4 px-4 text-white font-mono text-sm">{trade.tradeId}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-white font-mono text-sm whitespace-nowrap">{trade.tradeId}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <p className="text-white">{trade.userId?.firstName || trade.userId?.email}</p>
                         <p className="text-gray-500 text-xs font-mono">{trade.userId?._id || 'N/A'}</p>
                       </td>
-                      <td className="py-4 px-4 text-white font-medium">{trade.symbol}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-white font-medium whitespace-nowrap">{trade.symbol}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className={`flex items-center gap-1 ${trade.side === 'BUY' ? 'text-green-500' : 'text-red-500'}`}>
                           {trade.side === 'BUY' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
                           {trade.side}
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-white">{trade.quantity}</td>
-                      <td className="py-4 px-4 text-gray-400">${trade.openPrice?.toFixed(5)}</td>
+                      <td className="py-4 px-4 text-white whitespace-nowrap">{trade.quantity}</td>
+                      <td className="py-4 px-4 text-gray-400 whitespace-nowrap">${trade.openPrice?.toFixed(5)}</td>
                       <td className={`py-4 px-4 font-medium ${calculateFloatingPnl(trade) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                         {calculateFloatingPnl(trade) >= 0 ? '+' : ''}${calculateFloatingPnl(trade).toFixed(2)}
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex flex-col gap-1">
                           <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs w-fit ${getStatusColor(trade.status)}`}>
                             {getStatusIcon(trade.status)}
@@ -725,7 +725,7 @@ const AdminTradeManagement = () => {
                       <td className="py-4 px-4 text-gray-400 text-sm whitespace-nowrap">
                         {trade.closedAt ? new Date(trade.closedAt).toLocaleDateString('en-GB') : '-'}
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           <button 
                             onClick={() => openEditModal(trade)}

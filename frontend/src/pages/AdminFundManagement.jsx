@@ -296,9 +296,9 @@ const AdminFundManagement = () => {
 
       {/* Transactions Table */}
       <div className="bg-dark-800 rounded-xl border border-gray-800 overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 border-b border-gray-800">
-          <h2 className="text-white font-semibold text-lg">All Transactions</h2>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5 border-b border-gray-800">
+          <h2 className="text-white font-semibold text-lg whitespace-nowrap flex-shrink-0">All Transactions</h2>
+          <div className="flex flex-wrap items-center gap-3">
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
@@ -344,7 +344,7 @@ const AdminFundManagement = () => {
             </div>
             <button
               onClick={() => exportToExcel()}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2"
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 whitespace-nowrap flex-shrink-0"
             >
               <Download size={18} /> Excel
             </button>
@@ -442,36 +442,36 @@ const AdminFundManagement = () => {
 
             {/* Desktop Table */}
             <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[1100px]">
                 <thead>
                   <tr className="border-b border-gray-700">
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Transaction ID</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">User</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Type</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Amount</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Bonus</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Total</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Method</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Date</th>
-                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Transaction ID</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">User</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Type</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Amount</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Bonus</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Total</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Method</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Status</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Date</th>
+                    <th className="text-left text-gray-500 text-sm font-medium py-3 px-4 whitespace-nowrap">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredTransactions.map((txn) => (
                     <tr key={txn._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                      <td className="py-4 px-4 text-white font-mono text-sm">{txn.transactionRef || txn._id?.slice(-8)}</td>
-                      <td className="py-4 px-4 text-white">{txn.userId?.firstName || txn.userId?.email}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-white font-mono text-sm whitespace-nowrap">{txn.transactionRef || txn._id?.slice(-8)}</td>
+                      <td className="py-4 px-4 text-white whitespace-nowrap">{txn.userId?.firstName || txn.userId?.email}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className={`flex items-center gap-1 ${isWalletInflowType(txn.type) ? 'text-green-500' : 'text-red-500'}`}>
                           {isWalletInflowType(txn.type) ? <ArrowDownRight size={14} /> : <ArrowUpRight size={14} />}
                           {txn.type}
                         </span>
                       </td>
-                      <td className={`py-4 px-4 font-medium ${isWalletInflowType(txn.type) ? 'text-green-500' : 'text-red-500'}`}>
+                      <td className={`py-4 px-4 font-medium whitespace-nowrap ${isWalletInflowType(txn.type) ? 'text-green-500' : 'text-red-500'}`}>
                         {isWalletInflowType(txn.type) ? '+' : '-'}${(txn.amount || 0).toLocaleString()}
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         {isWalletInflowType(txn.type) ? (
                           txn.bonusAmount && txn.bonusAmount > 0 ? (
                             <span className="text-green-500 font-medium">+${txn.bonusAmount.toLocaleString()}</span>
@@ -482,7 +482,7 @@ const AdminFundManagement = () => {
                           <span className="text-gray-500">-</span>
                         )}
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 whitespace-nowrap">
                         {isWalletInflowType(txn.type) ? (
                           <span className="text-white font-medium">
                             ${(txn.totalAmount || (txn.amount + (txn.bonusAmount || 0))).toLocaleString()}
@@ -491,14 +491,14 @@ const AdminFundManagement = () => {
                           <span className="text-gray-500">-</span>
                         )}
                       </td>
-                      <td className="py-4 px-4 text-gray-400">{txn.paymentMethod || '-'}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-gray-400 whitespace-nowrap">{txn.paymentMethod || '-'}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(txn.status)}`}>
                           {txn.status}
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-gray-400">{new Date(txn.createdAt).toLocaleString()}</td>
-                      <td className="py-4 px-4">
+                      <td className="py-4 px-4 text-gray-400 whitespace-nowrap">{new Date(txn.createdAt).toLocaleString()}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-1">
                           <button 
                             onClick={() => viewTransactionDetails(txn)}

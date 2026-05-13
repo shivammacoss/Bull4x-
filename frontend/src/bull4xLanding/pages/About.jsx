@@ -5,52 +5,52 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import {
-  FiArrowRight, FiCheck, FiShield, FiUsers,
-  FiGlobe, FiTrendingUp, FiAward, FiHeart
-} from 'react-icons/fi'
+  ArrowRight, Check, Shield, Users,
+  Globe, TrendingUp, Award, Heart
+} from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
 
 const values = [
   {
-    icon: <FiShield size={22} />,
+    icon: <Shield size={22} />,
     title: 'Fair Trading Practices',
     desc: 'We operate with complete transparency and integrity. No conflicts of interest, no manipulation � just fair, honest trading conditions.',
     color: 'text-green-accent',
     bg: 'bg-green-accent/10',
   },
   {
-    icon: <FiTrendingUp size={22} />,
+    icon: <TrendingUp size={22} />,
     title: 'Advanced Technology',
     desc: 'We continuously invest in cutting-edge trading infrastructure to deliver the fastest execution and most reliable platform experience.',
     color: 'text-blue-400',
     bg: 'bg-blue-400/10',
   },
   {
-    icon: <FiHeart size={22} />,
+    icon: <Heart size={22} />,
     title: 'Customer-Centric Support',
     desc: 'Our clients are at the heart of everything we do. We provide dedicated, multilingual support 24 hours a day, 5 days a week.',
     color: 'text-red-accent',
     bg: 'bg-red-accent/10',
   },
   {
-    icon: <FiUsers size={22} />,
+    icon: <Users size={22} />,
     title: 'Long-Term Relationships',
     desc: 'We build lasting partnerships with our clients by consistently delivering value, reliability, and professional service.',
     color: 'text-red-accent',
     bg: 'bg-red-accent/10',
   },
   {
-    icon: <FiGlobe size={22} />,
+    icon: <Globe size={22} />,
     title: 'Global Reach',
     desc: 'Serving traders across multiple continents with localized support and globally competitive trading conditions.',
     color: 'text-purple-400',
     bg: 'bg-purple-400/10',
   },
   {
-    icon: <FiAward size={22} />,
-    title: 'Innovation First',
+    icon: <Award size={22} />,
+    title: 'Innovation rst',
     desc: 'We stay ahead of the curve by continuously developing new features, tools, and services that empower our traders.',
     color: 'text-orange-400',
     bg: 'bg-orange-400/10',
@@ -68,7 +68,7 @@ const milestones = [
 ]
 
 const team = [
-  { name: 'James Nakamura', role: 'Chief Executive Officer', desc: '15+ years in institutional trading and fintech leadership.' },
+  { name: 'James Nakamura', role: 'Chief Executive Officer', desc: '15+ years in institutional trading and ntech leadership.' },
   { name: 'Sarah Chen', role: 'Chief Technology Officer', desc: 'Former senior engineer at leading global trading platforms.' },
   { name: 'Michael Torres', role: 'Head of Trading', desc: 'Veteran forex trader with deep expertise in market microstructure.' },
   { name: 'Aiko Yamamoto', role: 'Head of Client Relations', desc: 'Dedicated to delivering exceptional client experiences globally.' },
@@ -91,7 +91,7 @@ function About() {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <AnimatedSection animation="slideLeft">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-                <FiGlobe size={14} className="text-red-accent" />
+                <Globe size={14} className="text-red-accent" />
                 <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">About BULL4X</span>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
@@ -105,7 +105,7 @@ function About() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/accounts" className="b4x-btn-primary gap-2">
-                  Start Trading <FiArrowRight size={16} />
+                  Start Trading <ArrowRight size={16} />
                 </Link>
                 <Link to="/contact" className="b4x-btn-outline gap-2">
                   Contact Us
@@ -298,7 +298,7 @@ function About() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/accounts" className="b4x-btn-primary gap-2">
-                Open Account <FiArrowRight size={16} />
+                Open Account <ArrowRight size={16} />
               </Link>
               <Link to="/contact" className="b4x-btn-secondary gap-2">
                 Contact Our Team

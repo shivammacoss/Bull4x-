@@ -4,7 +4,7 @@
 // ============================================
 
 import React from 'react'
-import { FiTrendingUp, FiTrendingDown } from 'react-icons/fi'
+import { TrendingUp, TrendingDown } from 'lucide-react'
 
 const initialMarketData = [
   { symbol: 'EUR/USD', price: '1.08542', change: '+0.0023', percent: '+0.21%', positive: true },
@@ -51,7 +51,7 @@ function TickerItem({ item }) {
               : '0 0 5px rgba(217,161,54,0.8)',
           }}
         />
-        {item.positive ? <FiTrendingUp size={9} /> : <FiTrendingDown size={9} />}
+        {item.positive ? <TrendingUp size={9} /> : <TrendingDown size={9} />}
         {item.percent}
       </span>
     </div>

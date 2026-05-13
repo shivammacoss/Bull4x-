@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FiLock, FiArrowRight } from 'react-icons/fi'
+import { Lock, ArrowRight } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../../components/AnimatedSection'
 import MarketTicker from '../../components/MarketTicker'
 
@@ -29,7 +29,7 @@ function PrivacyPolicy() {
         <div className="section-container relative z-10">
           <AnimatedSection animation="slideUp" className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-accent/10 border border-red-accent/20 mb-6">
-              <FiLock size={14} className="text-red-accent" />
+              <Lock size={14} className="text-red-accent" />
               <span className="text-red-accent text-xs font-semibold uppercase tracking-wider">Legal</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Privacy Policy</h1>
@@ -48,7 +48,7 @@ function PrivacyPolicy() {
           {/* Commitment Banner */}
           <AnimatedSection animation="slideUp">
             <div className="flex items-start gap-4 p-6 rounded-2xl bg-red-accent/5 border border-red-accent/20 mb-12">
-              <FiLock className="text-red-accent flex-shrink-0 mt-1" size={20} />
+              <Lock className="text-red-accent flex-shrink-0 mt-1" size={20} />
               <div>
                 <h3 className="text-white font-bold text-lg mb-2">Our Privacy Commitment</h3>
                 <p className="text-gray-300 text-sm leading-relaxed">
@@ -95,7 +95,7 @@ function PrivacyPolicy() {
                   {[
                     'Personal identification information (name, date of birth, nationality)',
                     'Contact information (email address, phone number, residential address)',
-                    'Financial information (bank details, trading history, account balances)',
+                    'nancial information (bank details, trading history, account balances)',
                     'Identity verification documents (passport, national ID, proof of address)',
                     'Device and usage data (IP address, browser type, pages visited)',
                     'Communication records (emails, chat logs, support tickets)',
@@ -174,7 +174,7 @@ function PrivacyPolicy() {
           <AnimatedSection animation="slideUp" delay={0.3} className="mt-12">
             <div className="flex flex-wrap gap-4">
               <Link to="/contact" className="b4x-btn-primary gap-2">
-                Contact Us <FiArrowRight size={16} />
+                Contact Us <ArrowRight size={16} />
               </Link>
               <Link to="/accounts" className="b4x-btn-secondary gap-2">
                 Open Account
