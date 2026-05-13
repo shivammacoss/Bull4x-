@@ -6,7 +6,8 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight, BarChart2, Calendar, TrendingUp,
-  Cpu, Wrench, Server, Activity, Target
+  Cpu, Wrench, Server, Activity, Target,
+  Zap, Shield, Eye
 } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
@@ -263,19 +264,24 @@ function ToolsResearch() {
               />
               <div className="grid grid-cols-2 gap-4 mt-8">
                 {[
-                  { icon: '?', title: 'Ultra-Low Latency', desc: 'Sub-millisecond connection' },
-                  { icon: '??', title: 'Co-located Servers', desc: 'Same data center as our servers' },
-                  { icon: '??', title: '99.9% Uptime', desc: 'Guaranteed server availability' },
-                  { icon: '??', title: '24/7 Monitoring', desc: 'Continuous server monitoring' },
-                ].map((item) => (
-                  <AnimatedSection key={item.title} animation="slideRight">
-                    <div className="p-4 rounded-xl bg-bull-600 border border-white/5 hover:border-cyan-400/20 transition-all duration-300">
-                      <div className="text-2xl mb-2">{item.icon}</div>
-                      <h4 className="text-white font-semibold text-sm mb-1">{item.title}</h4>
-                      <p className="text-gray-500 text-xs">{item.desc}</p>
-                    </div>
-                  </AnimatedSection>
-                ))}
+                  { Icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-400/10', title: 'Ultra-Low Latency', desc: 'Sub-millisecond connection' },
+                  { Icon: Server, color: 'text-cyan-400', bg: 'bg-cyan-400/10', title: 'Co-located Servers', desc: 'Same data center as our servers' },
+                  { Icon: Shield, color: 'text-green-accent', bg: 'bg-green-accent/10', title: '99.9% Uptime', desc: 'Guaranteed server availability' },
+                  { Icon: Eye, color: 'text-blue-400', bg: 'bg-blue-400/10', title: '24/7 Monitoring', desc: 'Continuous server monitoring' },
+                ].map((item) => {
+                  const Icon = item.Icon
+                  return (
+                    <AnimatedSection key={item.title} animation="slideRight">
+                      <div className="p-4 rounded-xl bg-bull-600 border border-white/5 hover:border-cyan-400/20 transition-all duration-300 group">
+                        <div className={`w-10 h-10 mb-3 rounded-lg ${item.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <Icon size={20} className={item.color} strokeWidth={1.75} />
+                        </div>
+                        <h4 className="text-white font-semibold text-sm mb-1">{item.title}</h4>
+                        <p className="text-gray-500 text-xs">{item.desc}</p>
+                      </div>
+                    </AnimatedSection>
+                  )
+                })}
               </div>
               <AnimatedSection animation="slideUp" delay={0.4} className="mt-6">
                 <Link to="/contact" className="b4x-btn-primary gap-2">

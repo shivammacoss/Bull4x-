@@ -3,15 +3,16 @@
 // ============================================
 
 import React, { useState } from 'react'
+import { DollarSign, Coins, Bitcoin, BarChart3 } from 'lucide-react'
 import AnimatedSection from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 import TradingViewWidget from '../../components/TradingViewWidget'
 
 const chartTabs = [
-  { id: 'forex', label: 'Forex', symbol: 'FX:EURUSD', icon: '??' },
-  { id: 'gold', label: 'Gold', symbol: 'OANDA:XAUUSD', icon: '??' },
-  { id: 'crypto', label: 'Crypto', symbol: 'BINANCE:BTCUSDT', icon: '?' },
-  { id: 'indices', label: 'Indices', symbol: 'CAPITALCOM:US30', icon: '??' },
+  { id: 'forex', label: 'Forex', symbol: 'FX:EURUSD', Icon: DollarSign },
+  { id: 'gold', label: 'Gold', symbol: 'OANDA:XAUUSD', Icon: Coins },
+  { id: 'crypto', label: 'Crypto', symbol: 'BINANCE:BTCUSDT', Icon: Bitcoin },
+  { id: 'indices', label: 'Indices', symbol: 'CAPITALCOM:US30', Icon: BarChart3 },
 ]
 
 function LiveMarketChartsSection() {
@@ -30,20 +31,23 @@ function LiveMarketChartsSection() {
         {/* Tab Navigation */}
         <AnimatedSection animation="slideUp" delay={0.2}>
           <div className="flex flex-wrap justify-center gap-3 mb-12 mt-10">
-            {chartTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? 'bg-red-accent text-white shadow-lg shadow-red-accent/20'
-                    : 'bg-bull-700 text-gray-400 hover:bg-bull-600 hover:text-white border border-white/5'
-                }`}
-              >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
-              </button>
-            ))}
+            {chartTabs.map((tab) => {
+              const Icon = tab.Icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
+                    activeTab === tab.id
+                      ? 'bg-red-accent text-white shadow-lg shadow-red-accent/20'
+                      : 'bg-bull-700 text-gray-400 hover:bg-bull-600 hover:text-white border border-white/5'
+                  }`}
+                >
+                  <Icon size={16} strokeWidth={2} />
+                  <span>{tab.label}</span>
+                </button>
+              )
+            })}
           </div>
         </AnimatedSection>
 

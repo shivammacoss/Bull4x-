@@ -4,7 +4,11 @@
 
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Check, TrendingUp, TrendingDown } from 'lucide-react'
+import {
+  ArrowRight, Check, TrendingUp, TrendingDown,
+  DollarSign, BarChart3, Coins, LineChart, Bitcoin,
+  Minimize2, Zap, Layers, Network, Clock
+} from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
@@ -23,7 +27,7 @@ const marketCategories = [
   {
     id: 'forex',
     label: 'Forex',
-    icon: '??',
+    Icon: DollarSign,
     title: 'Forex Trading',
     subtitle: 'Trade major, minor, and exotic currency pairs with tight spreads and deep liquidity.',
     features: ['Flexible Leverage', 'Advanced Charting', 'Fast Execution', 'No Requotes'],
@@ -35,7 +39,7 @@ const marketCategories = [
   {
     id: 'indices',
     label: 'Indices',
-    icon: '??',
+    Icon: BarChart3,
     title: 'Indices Trading',
     subtitle: 'Access global indices and trade market volatility with competitive margins.',
     features: ['Low Margins', 'Extended Hours', 'Real-time Data', 'Hedging Allowed'],
@@ -47,7 +51,7 @@ const marketCategories = [
   {
     id: 'commodities',
     label: 'Commodities',
-    icon: '??',
+    Icon: Coins,
     title: 'Commodities Trading',
     subtitle: 'Hedge against inflation and diversify your portfolio with precious metals and energy.',
     features: ['Inflation Hedge', 'Portfolio Diversification', 'Tight Spreads', 'Deep Liquidity'],
@@ -59,7 +63,7 @@ const marketCategories = [
   {
     id: 'stocks',
     label: 'Stocks',
-    icon: '??',
+    Icon: LineChart,
     title: 'Stock Trading',
     subtitle: 'Invest in global shares from leading companies with flexible margin options.',
     features: ['Global Equities', 'Flexible Margins', 'Dividend Exposure', 'Long & Short'],
@@ -71,7 +75,7 @@ const marketCategories = [
   {
     id: 'crypto',
     label: 'Crypto',
-    icon: '?',
+    Icon: Bitcoin,
     title: 'Cryptocurrency Trading',
     subtitle: 'Trade major digital assets 24/7 with secure execution and competitive spreads.',
     features: ['24/7 Trading', 'Secure Execution', 'High Liquidity', 'No Wallet Needed'],
@@ -84,7 +88,7 @@ const marketCategories = [
 
 function Trading() {
   const [activeTab, setActiveTab] = useState('forex')
-  const activeMarket = marketCategories.nd(m => m.id === activeTab)
+  const activeMarket = marketCategories.find(m => m.id === activeTab)
 
   return (
     <PageTransition>
@@ -133,20 +137,23 @@ function Trading() {
 
           {/* Tab Navigation */}
           <AnimatedSection animation="slideUp" delay={0.2} className="flex flex-wrap justify-center gap-2 mt-10 mb-12">
-            {marketCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveTab(cat.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                  activeTab === cat.id
-                    ? 'bg-red-accent text-white shadow-lg shadow-red-accent/20'
-                    : 'bg-bull-600 text-gray-400 border border-white/5 hover:border-red-accent/20 hover:text-white'
-                }`}
-              >
-                <span>{cat.icon}</span>
-                {cat.label}
-              </button>
-            ))}
+            {marketCategories.map((cat) => {
+              const Icon = cat.Icon
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveTab(cat.id)}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                    activeTab === cat.id
+                      ? 'bg-red-accent text-white shadow-lg shadow-red-accent/20'
+                      : 'bg-bull-600 text-gray-400 border border-white/5 hover:border-red-accent/20 hover:text-white'
+                  }`}
+                >
+                  <Icon size={16} strokeWidth={2} />
+                  {cat.label}
+                </button>
+              )
+            })}
           </AnimatedSection>
 
           {/* Active Market Content */}
@@ -155,7 +162,7 @@ function Trading() {
               {/* Left: Info */}
               <AnimatedSection animation="slideLeft" key={activeTab}>
                 <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg ${activeMarket.bg} ${activeMarket.border} border mb-4`}>
-                  <span className="text-xl">{activeMarket.icon}</span>
+                  {(() => { const Icon = activeMarket.Icon; return <Icon size={18} className={activeMarket.color} strokeWidth={2} /> })()}
                   <span className={`text-sm font-semibold ${activeMarket.color}`}>{activeMarket.label}</span>
                 </div>
                 <h2 className="text-3xl font-bold text-white mb-3">{activeMarket.title}</h2>
@@ -263,22 +270,27 @@ function Trading() {
           />
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-14">
             {[
-              { title: 'Tight Spreads', value: 'From 0.0 pips', desc: 'Raw ECN spreads with no markup on our ECN Raw account.', icon: '??' },
-              { title: 'Fast Execution', value: '< 1ms', desc: 'Millisecond order execution with no requotes or rejections.', icon: '?' },
-              { title: 'High Leverage', value: 'Up to 1:500', desc: 'Flexible leverage options to suit your trading strategy.', icon: '??' },
-              { title: 'Deep Liquidity', value: 'Tier-1 LPs', desc: 'Access to top-tier liquidity providers for best pricing.', icon: '??' },
-              { title: 'No Dealing Desk', value: 'NDD Model', desc: 'Straight-through processing with no conflict of interest.', icon: '??' },
-              { title: '24/5 Markets', value: 'Always Open', desc: 'Trade forex and indices 24 hours a day, 5 days a week.', icon: '??' },
-            ].map((item) => (
-              <StaggerItem key={item.title}>
-                <div className="card group text-center">
-                  <div className="text-4xl mb-4">{item.icon}</div>
-                  <div className="text-2xl font-bold text-red-gradient mb-1">{item.value}</div>
-                  <h3 className="text-white font-semibold mb-2 group-hover:text-red-light transition-colors">{item.title}</h3>
-                  <p className="text-gray-400 text-sm">{item.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
+              { title: 'Tight Spreads', value: 'From 0.0 pips', desc: 'Raw ECN spreads with no markup on our ECN Raw account.', Icon: Minimize2, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+              { title: 'Fast Execution', value: '< 1ms', desc: 'Millisecond order execution with no requotes or rejections.', Icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
+              { title: 'High Leverage', value: 'Up to 1:500', desc: 'Flexible leverage options to suit your trading strategy.', Icon: TrendingUp, color: 'text-green-accent', bg: 'bg-green-accent/10' },
+              { title: 'Deep Liquidity', value: 'Tier-1 LPs', desc: 'Access to top-tier liquidity providers for best pricing.', Icon: Layers, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
+              { title: 'No Dealing Desk', value: 'NDD Model', desc: 'Straight-through processing with no conflict of interest.', Icon: Network, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+              { title: '24/5 Markets', value: 'Always Open', desc: 'Trade forex and indices 24 hours a day, 5 days a week.', Icon: Clock, color: 'text-red-accent', bg: 'bg-red-accent/10' },
+            ].map((item) => {
+              const Icon = item.Icon
+              return (
+                <StaggerItem key={item.title}>
+                  <div className="card group text-center">
+                    <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl ${item.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <Icon size={26} className={item.color} strokeWidth={1.75} />
+                    </div>
+                    <div className="text-2xl font-bold text-red-gradient mb-1">{item.value}</div>
+                    <h3 className="text-white font-semibold mb-2 group-hover:text-red-light transition-colors">{item.title}</h3>
+                    <p className="text-gray-400 text-sm">{item.desc}</p>
+                  </div>
+                </StaggerItem>
+              )
+            })}
           </StaggerContainer>
         </div>
       </section>

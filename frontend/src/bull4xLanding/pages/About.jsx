@@ -6,7 +6,8 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight, Check, Shield, Users,
-  Globe, TrendingUp, Award, Heart
+  Globe, TrendingUp, Award, Heart,
+  Target, AlertTriangle, Lock, ScrollText
 } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
@@ -128,7 +129,9 @@ function About() {
         <div className="section-container">
           <AnimatedSection animation="slideUp" className="max-w-4xl mx-auto text-center">
             <div className="p-8 md:p-12 rounded-3xl bg-gradient-to-br from-red-accent/10 to-bull-600 border border-red-accent/20">
-              <div className="text-4xl mb-6">??</div>
+              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-red-accent/15 border border-red-accent/30 flex items-center justify-center">
+                <Target size={32} className="text-red-accent" strokeWidth={1.75} />
+              </div>
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Our Mission</h2>
               <p className="text-gray-300 text-lg leading-relaxed">
                 "To empower traders worldwide through innovation, transparency, and advanced trading technology � providing institutional-grade tools and conditions to every trader, regardless of their experience level."
@@ -245,30 +248,41 @@ function About() {
               {
                 title: 'Risk Disclosure',
                 desc: 'Trading leveraged products carries a high level of risk and may not be suitable for all investors. You may lose more than your initial investment.',
-                icon: '??',
+                Icon: AlertTriangle,
+                color: 'text-red-accent',
+                bg: 'bg-red-accent/10',
               },
               {
                 title: 'Privacy Policy',
                 desc: 'We are committed to protecting your personal data. All information is handled in accordance with applicable data protection regulations.',
-                icon: '??',
+                Icon: Lock,
+                color: 'text-blue-400',
+                bg: 'bg-blue-400/10',
               },
               {
                 title: 'Terms & Conditions',
                 desc: 'Our terms and conditions govern the use of our services and trading platforms. Please read them carefully before opening an account.',
-                icon: '??',
+                Icon: ScrollText,
+                color: 'text-purple-400',
+                bg: 'bg-purple-400/10',
               },
-            ].map((item, i) => (
-              <AnimatedSection key={item.title} animation="slideUp" delay={i * 0.1}>
-                <div className="card h-full">
-                  <div className="text-3xl mb-4">{item.icon}</div>
-                  <h3 className="text-white font-semibold mb-3">{item.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed mb-4">{item.desc}</p>
-                  <button className="text-red-accent text-xs font-semibold hover:text-red-light transition-colors">
-                    Read Full Document ?
-                  </button>
-                </div>
-              </AnimatedSection>
-            ))}
+            ].map((item, i) => {
+              const Icon = item.Icon
+              return (
+                <AnimatedSection key={item.title} animation="slideUp" delay={i * 0.1}>
+                  <div className="card h-full group">
+                    <div className={`w-12 h-12 mb-4 rounded-xl ${item.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <Icon size={22} className={item.color} strokeWidth={1.75} />
+                    </div>
+                    <h3 className="text-white font-semibold mb-3">{item.title}</h3>
+                    <p className="text-gray-400 text-sm leading-relaxed mb-4">{item.desc}</p>
+                    <button className="inline-flex items-center gap-1 text-red-accent text-xs font-semibold hover:text-red-light transition-colors">
+                      Read Full Document <ArrowRight size={12} />
+                    </button>
+                  </div>
+                </AnimatedSection>
+              )
+            })}
           </div>
 
           {/* Risk Warning */}

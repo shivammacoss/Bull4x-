@@ -7,7 +7,10 @@ import { Link } from 'react-router-dom'
 import {
   Mail, MessageCircle, Phone, Globe,
   ArrowRight, Check, Send, User,
-  MapPin, Clock
+  MapPin, Clock, Loader2,
+  Landmark, Building2, Building,
+  ShieldCheck, MessageSquare, FileText,
+  TrendingUp, GraduationCap, Rocket
 } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
@@ -54,21 +57,30 @@ const offices = [
     city: 'Tokyo',
     country: 'Japan',
     address: '1-1 Marunouchi, Chiyoda-ku, Tokyo',
-    flag: '????',
+    icon: Landmark,
+    accent: 'text-gold-400',
+    bg: 'bg-gold-500/10',
+    ring: 'ring-gold-500/30',
     type: 'Headquarters',
   },
   {
     city: 'London',
     country: 'United Kingdom',
     address: '30 St Mary Axe, London, EC3A 8BF',
-    flag: '????',
+    icon: Building2,
+    accent: 'text-blue-400',
+    bg: 'bg-blue-500/10',
+    ring: 'ring-blue-500/30',
     type: 'European Office',
   },
   {
     city: 'Dubai',
     country: 'UAE',
     address: 'DIFC, Gate District, Dubai',
-    flag: '????',
+    icon: Building,
+    accent: 'text-emerald-400',
+    bg: 'bg-emerald-500/10',
+    ring: 'ring-emerald-500/30',
     type: 'MENA Office',
   },
 ]
@@ -89,6 +101,7 @@ function Contact() {
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [openFaq, setOpenFaq] = useState(null)
 
   const handleChange = (e) => {
@@ -97,10 +110,13 @@ function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Simulate form submission
-    setSubmitted(true)
-    setTimeout(() => setSubmitted(false), 5000)
-    setFormData({ fullName: '', email: '', country: '', subject: '', message: '' })
+    setIsSubmitting(true)
+    setTimeout(() => {
+      setIsSubmitting(false)
+      setSubmitted(true)
+      setFormData({ fullName: '', email: '', country: '', subject: '', message: '' })
+      setTimeout(() => setSubmitted(false), 5000)
+    }, 900)
   }
 
   return (
@@ -169,137 +185,177 @@ function Contact() {
           <div className="grid lg:grid-cols-2 gap-16">
             {/* Contact Form */}
             <AnimatedSection animation="slideLeft">
-              <div className="mb-8">
-                <h2 className="text-3xl font-bold text-white mb-2">Send Us a Message</h2>
-                <div className="w-12 h-1 bg-gold-gradient rounded-full mb-4"></div>
-                <p className="text-gray-400">ll in the form below and our team will get back to you within 2 business hours.</p>
-              </div>
+              <div className="relative">
+                {/* Ambient glow behind form */}
+                <div className="absolute -inset-4 bg-gradient-to-br from-gold-500/5 via-transparent to-blue-500/5 rounded-3xl blur-2xl pointer-events-none"></div>
 
-              {submitted ? (
-                <div className="p-6 rounded-2xl bg-green-accent/10 border border-green-accent/20 text-center">
-                  <div className="w-14 h-14 rounded-full bg-green-accent/20 flex items-center justify-center mx-auto mb-4">
-                    <Check size={24} className="text-green-accent" />
-                  </div>
-                  <h3 className="text-white font-semibold text-lg mb-2">Message Sent!</h3>
-                  <p className="text-gray-400 text-sm">Thank you for contacting us. We'll get back to you within 2 business hours.</p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Full Name */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Full Name <span className="text-red-accent">*</span>
-                    </label>
-                    <div className="relative">
-                      <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
-                      <input
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        required
-                        placeholder="John Smith"
-                        className="input-eld pl-10"
-                      />
+                <div className="relative p-6 md:p-8 rounded-2xl bg-bull-700/40 backdrop-blur-sm border border-white/10">
+                  <div className="mb-8">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/10 border border-gold-500/20 mb-4">
+                      <MessageSquare size={12} className="text-gold-400" />
+                      <span className="text-gold-400 text-[10px] font-semibold uppercase tracking-wider">Get in Touch</span>
                     </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">Send Us a Message</h2>
+                    <div className="w-12 h-1 bg-gold-gradient rounded-full mb-4"></div>
+                    <p className="text-gray-400 text-sm">Fill in the form below and our team will get back to you within 2 business hours.</p>
                   </div>
 
-                  {/* Email */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Email Address <span className="text-red-accent">*</span>
-                    </label>
-                    <div className="relative">
-                      <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        placeholder="john@example.com"
-                        className="input-eld pl-10"
-                      />
+                  {submitted ? (
+                    <div className="p-8 rounded-2xl bg-gradient-to-br from-green-accent/15 to-green-accent/5 border border-green-accent/30 text-center animate-in fade-in zoom-in duration-500">
+                      <div className="relative w-16 h-16 mx-auto mb-4">
+                        <div className="absolute inset-0 rounded-full bg-green-accent/20 animate-ping"></div>
+                        <div className="relative w-16 h-16 rounded-full bg-green-accent/20 flex items-center justify-center">
+                          <Check size={28} className="text-green-accent" strokeWidth={3} />
+                        </div>
+                      </div>
+                      <h3 className="text-white font-semibold text-xl mb-2">Message Sent!</h3>
+                      <p className="text-gray-400 text-sm">Thank you for contacting us. We'll get back to you within 2 business hours.</p>
                     </div>
-                  </div>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                      {/* Row 1: Name + Email */}
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Full Name <span className="text-gold-400">*</span>
+                          </label>
+                          <div className="relative group">
+                            <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-gold-400 transition-colors pointer-events-none" />
+                            <input
+                              type="text"
+                              name="fullName"
+                              value={formData.fullName}
+                              onChange={handleChange}
+                              required
+                              placeholder="John Smith"
+                              className="input-field pl-11"
+                            />
+                          </div>
+                        </div>
 
-                  {/* Country */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Country <span className="text-red-accent">*</span>
-                    </label>
-                    <div className="relative">
-                      <Globe size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
-                      <select
-                        name="country"
-                        value={formData.country}
-                        onChange={handleChange}
-                        required
-                        className="input-eld pl-10 appearance-none"
+                        <div>
+                          <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Email Address <span className="text-gold-400">*</span>
+                          </label>
+                          <div className="relative group">
+                            <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-gold-400 transition-colors pointer-events-none" />
+                            <input
+                              type="email"
+                              name="email"
+                              value={formData.email}
+                              onChange={handleChange}
+                              required
+                              placeholder="john@example.com"
+                              className="input-field pl-11"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row 2: Country + Subject */}
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Country <span className="text-gold-400">*</span>
+                          </label>
+                          <div className="relative group">
+                            <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-gold-400 transition-colors pointer-events-none z-10" />
+                            <select
+                              name="country"
+                              value={formData.country}
+                              onChange={handleChange}
+                              required
+                              className="input-field pl-11 pr-10 appearance-none cursor-pointer"
+                            >
+                              <option value="">Select your country</option>
+                              <option value="US">United States</option>
+                              <option value="GB">United Kingdom</option>
+                              <option value="JP">Japan</option>
+                              <option value="AU">Australia</option>
+                              <option value="CA">Canada</option>
+                              <option value="DE">Germany</option>
+                              <option value="FR">France</option>
+                              <option value="SG">Singapore</option>
+                              <option value="AE">United Arab Emirates</option>
+                              <option value="OTHER">Other</option>
+                            </select>
+                            <ArrowRight size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 rotate-90 pointer-events-none" />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            Subject
+                          </label>
+                          <div className="relative group">
+                            <FileText size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-gold-400 transition-colors pointer-events-none z-10" />
+                            <select
+                              name="subject"
+                              value={formData.subject}
+                              onChange={handleChange}
+                              className="input-field pl-11 pr-10 appearance-none cursor-pointer"
+                            >
+                              <option value="">Select a subject</option>
+                              <option value="account">Account Opening</option>
+                              <option value="deposit">Deposit & Withdrawal</option>
+                              <option value="platform">Platform Support</option>
+                              <option value="trading">Trading Conditions</option>
+                              <option value="verification">Account Verification</option>
+                              <option value="other">Other</option>
+                            </select>
+                            <ArrowRight size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 rotate-90 pointer-events-none" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Message */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                            Message <span className="text-gold-400">*</span>
+                          </label>
+                          <span className="text-[10px] text-gray-500">{formData.message.length}/1000</span>
+                        </div>
+                        <textarea
+                          name="message"
+                          value={formData.message}
+                          onChange={handleChange}
+                          required
+                          rows={5}
+                          maxLength={1000}
+                          placeholder="How can we help you today?"
+                          className="input-field resize-none"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="b4x-btn-primary w-full gap-2 py-4 text-base font-semibold relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed"
                       >
-                        <option value="">Select your country</option>
-                        <option value="US">United States</option>
-                        <option value="GB">United Kingdom</option>
-                        <option value="JP">Japan</option>
-                        <option value="AU">Australia</option>
-                        <option value="CA">Canada</option>
-                        <option value="DE">Germany</option>
-                        <option value="FR">France</option>
-                        <option value="SG">Singapore</option>
-                        <option value="AE">United Arab Emirates</option>
-                        <option value="OTHER">Other</option>
-                      </select>
-                    </div>
-                  </div>
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 size={18} className="animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          <>
+                            <Send size={16} className="group-hover:translate-x-1 transition-transform" />
+                            Send Message
+                          </>
+                        )}
+                      </button>
 
-                  {/* Subject */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Subject</label>
-                    <select
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      className="input-eld"
-                    >
-                      <option value="">Select a subject</option>
-                      <option value="account">Account Opening</option>
-                      <option value="deposit">Deposit & Withdrawal</option>
-                      <option value="platform">Platform Support</option>
-                      <option value="trading">Trading Conditions</option>
-                      <option value="verification">Account Verification</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  {/* Message */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Message <span className="text-red-accent">*</span>
-                    </label>
-                    <textarea
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      required
-                      rows={5}
-                      placeholder="How can we help you today?"
-                      className="input-eld resize-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="b4x-btn-primary w-full gap-2 py-3.5 text-base"
-                  >
-                    <Send size={16} />
-                    Send Message
-                  </button>
-
-                  <p className="text-xs text-gray-500 text-center">
-                    By submitting this form, you agree to our Privacy Policy and Terms of Service.
-                  </p>
-                </form>
-              )}
+                      <div className="flex items-center justify-center gap-2 pt-2">
+                        <ShieldCheck size={12} className="text-green-accent flex-shrink-0" />
+                        <p className="text-[11px] text-gray-500 text-center">
+                          By submitting, you agree to our Privacy Policy and Terms of Service.
+                        </p>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
             </AnimatedSection>
 
             {/* Right: Info */}
@@ -331,21 +387,26 @@ function Contact() {
               <div className="mb-8">
                 <h3 className="text-white font-semibold text-xl mb-4">Global Offices</h3>
                 <div className="space-y-3">
-                  {offices.map((office) => (
-                    <div key={office.city} className="flex gap-3 p-4 rounded-xl bg-bull-600 border border-white/5 hover:border-gold-500/20 transition-all duration-300">
-                      <span className="text-2xl flex-shrink-0">{office.flag}</span>
-                      <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-white font-semibold text-sm">{office.city}, {office.country}</span>
-                          <span className="badge bg-gold-500/10 text-gold-400 text-xs">{office.type}</span>
+                  {offices.map((office) => {
+                    const Icon = office.icon
+                    return (
+                      <div key={office.city} className="group flex gap-4 p-4 rounded-xl bg-bull-600 border border-white/5 hover:border-gold-500/20 hover:bg-bull-600/80 transition-all duration-300">
+                        <div className={`w-12 h-12 rounded-xl ${office.bg} ring-1 ${office.ring} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
+                          <Icon size={20} className={office.accent} strokeWidth={1.75} />
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                          <MapPin size={11} className="text-gold-500" />
-                          {office.address}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <span className="text-white font-semibold text-sm">{office.city}, {office.country}</span>
+                            <span className="badge bg-gold-500/10 text-gold-400 text-[10px] uppercase tracking-wider">{office.type}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                            <MapPin size={11} className="text-gold-500 flex-shrink-0" />
+                            <span className="truncate">{office.address}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
 
@@ -354,20 +415,25 @@ function Contact() {
                 <h3 className="text-white font-semibold text-xl mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: 'Open Live Account', path: '/accounts', icon: '??' },
-                    { label: 'Open Demo Account', path: '/accounts', icon: '??' },
-                    { label: 'View Pricing', path: '/pricing', icon: '??' },
-                    { label: 'Education Center', path: '/education', icon: '??' },
-                  ].map((item) => (
-                    <Link
-                      key={item.label}
-                      to={item.path}
-                      className="flex items-center gap-2 p-3 rounded-xl bg-bull-600 border border-white/5 hover:border-gold-500/20 hover:bg-gold-500/5 transition-all duration-300 group"
-                    >
-                      <span className="text-lg">{item.icon}</span>
-                      <span className="text-gray-300 text-xs font-medium group-hover:text-gold-400 transition-colors">{item.label}</span>
-                    </Link>
-                  ))}
+                    { label: 'Open Live Account', path: '/accounts', Icon: Rocket, color: 'text-red-accent', bg: 'bg-red-accent/10' },
+                    { label: 'Open Demo Account', path: '/accounts', Icon: TrendingUp, color: 'text-green-accent', bg: 'bg-green-accent/10' },
+                    { label: 'View Pricing', path: '/pricing', Icon: FileText, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+                    { label: 'Education Center', path: '/education', Icon: GraduationCap, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+                  ].map((item) => {
+                    const Icon = item.Icon
+                    return (
+                      <Link
+                        key={item.label}
+                        to={item.path}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-bull-600 border border-white/5 hover:border-gold-500/20 hover:bg-gold-500/5 transition-all duration-300 group"
+                      >
+                        <div className={`w-9 h-9 rounded-lg ${item.bg} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                          <Icon size={16} className={item.color} strokeWidth={2} />
+                        </div>
+                        <span className="text-gray-300 text-xs font-medium group-hover:text-gold-400 transition-colors">{item.label}</span>
+                      </Link>
+                    )
+                  })}
                 </div>
               </div>
             </AnimatedSection>

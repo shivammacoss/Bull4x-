@@ -3,7 +3,7 @@
 // ============================================
 
 import React from 'react'
-import { Check } from 'lucide-react'
+import { Check, Moon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import AnimatedSection from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
@@ -53,7 +53,12 @@ function IslamicAccountSection() {
 
                 <div className="flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-4xl sm:text-5xl md:text-6xl mb-4">??</div>
+                    <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto mb-4">
+                      <div className="absolute inset-0 rounded-full bg-green-accent/10 animate-pulse"></div>
+                      <div className="relative w-full h-full rounded-full bg-gradient-to-br from-green-accent/20 to-green-accent/5 border border-green-accent/30 flex items-center justify-center">
+                        <Moon size={48} className="text-green-accent" strokeWidth={1.5} />
+                      </div>
+                    </div>
                     <h3 className="text-white font-bold text-xl mb-4">Shariah Compliant</h3>
                     <Link to="/accounts" className="b4x-btn-primary">
                       Open Islamic Account

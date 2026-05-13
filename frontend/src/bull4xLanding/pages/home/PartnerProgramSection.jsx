@@ -3,7 +3,7 @@
 // ============================================
 
 import React from 'react'
-import { TrendingUp, DollarSign, BarChart2, Award } from 'lucide-react'
+import { TrendingUp, DollarSign, BarChart2, Award, Medal, Trophy } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
@@ -16,9 +16,9 @@ const benefits = [
 ]
 
 const ibLevels = [
-  { level: 'Silver IB', rebate: '$3 per lot', color: 'text-gray-400', bg: 'bg-gray-400/10', border: 'border-gray-400/20' },
-  { level: 'Gold IB', rebate: '$5 per lot', color: 'text-gold-500', bg: 'bg-gold-500/10', border: 'border-gold-500/20' },
-  { level: 'Platinum IB', rebate: '$7 per lot', color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20' },
+  { level: 'Silver IB', rebate: '$3 per lot', color: 'text-gray-300', bg: 'bg-gray-400/10', border: 'border-gray-400/20', Icon: Medal },
+  { level: 'Gold IB', rebate: '$5 per lot', color: 'text-gold-500', bg: 'bg-gold-500/10', border: 'border-gold-500/20', Icon: Award },
+  { level: 'Platinum IB', rebate: '$7 per lot', color: 'text-purple-400', bg: 'bg-purple-400/10', border: 'border-purple-400/20', Icon: Trophy },
 ]
 
 function PartnerProgramSection() {
@@ -50,16 +50,19 @@ function PartnerProgramSection() {
         <AnimatedSection animation="slideUp" delay={0.3}>
           <h3 className="text-white font-bold text-xl text-center mb-8">IB Levels</h3>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {ibLevels.map((ib, i) => (
-              <div key={ib.level} className={`card ${ib.border} text-center`}>
-                <div className="text-3xl mb-3">
-                  {i === 0 ? '??' : i === 1 ? '??' : '??'}
+            {ibLevels.map((ib) => {
+              const Icon = ib.Icon
+              return (
+                <div key={ib.level} className={`card ${ib.border} text-center group`}>
+                  <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl ${ib.bg} ring-1 ring-inset ${ib.border} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    <Icon size={26} className={ib.color} strokeWidth={1.75} />
+                  </div>
+                  <h4 className={`${ib.color} font-bold text-lg mb-2`}>{ib.level}</h4>
+                  <p className="text-gray-300 text-2xl font-bold mb-1">{ib.rebate}</p>
+                  <p className="text-gray-500 text-xs">Commission per lot</p>
                 </div>
-                <h4 className={`${ib.color} font-bold text-lg mb-2`}>{ib.level}</h4>
-                <p className="text-gray-300 text-2xl font-bold mb-1">{ib.rebate}</p>
-                <p className="text-gray-500 text-xs">Commission per lot</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </AnimatedSection>
 

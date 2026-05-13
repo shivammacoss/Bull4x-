@@ -4,7 +4,7 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Play, Check, Monitor, TrendingUp, Shield } from 'lucide-react'
+import { ArrowRight, Play, Check, Monitor, TrendingUp, Shield, Rocket } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
@@ -176,7 +176,9 @@ function DemoAccount() {
             <AnimatedSection animation="slideRight" delay={0.2}>
               <div className="p-8 rounded-2xl bg-gradient-to-br from-red-accent/10 to-bull-600 border border-red-accent/20">
                 <div className="text-center mb-8">
-                  <div className="text-5xl mb-4">??</div>
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-red-accent/15 border border-red-accent/30 flex items-center justify-center">
+                    <Rocket size={40} className="text-red-accent" strokeWidth={1.5} />
+                  </div>
                   <h3 className="text-2xl font-bold text-white mb-2">Ready to Start?</h3>
                   <p className="text-gray-400 text-sm">Open your free demo account in under 2 minutes.</p>
                 </div>

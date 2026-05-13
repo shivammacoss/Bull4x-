@@ -3,7 +3,7 @@
 // ============================================
 
 import React from 'react'
-import { Shield, TrendingUp, Heart } from 'lucide-react'
+import { Shield, TrendingUp, Heart, Eye, Target } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem } from '../../components/AnimatedSection'
 import SectionHeader from '../../components/SectionHeader'
 
@@ -46,7 +46,9 @@ function VisionMissionSection() {
         <div className="grid md:grid-cols-2 gap-6 mt-12 mb-16">
           <AnimatedSection animation="slideLeft">
             <div className="p-8 rounded-3xl bg-gradient-to-br from-red-accent/10 to-bull-600 border border-red-accent/20 h-full">
-              <div className="text-4xl mb-4">??</div>
+              <div className="w-14 h-14 rounded-2xl bg-red-accent/15 border border-red-accent/30 flex items-center justify-center mb-4">
+                <Eye size={26} className="text-red-accent" strokeWidth={1.75} />
+              </div>
               <h3 className="text-xl font-bold text-white mb-3">Our Vision</h3>
               <p className="text-gray-300 leading-relaxed">
                 To become a globally trusted trading partner providing traders with access to professional technology and fair market conditions.
@@ -56,7 +58,9 @@ function VisionMissionSection() {
 
           <AnimatedSection animation="slideRight" delay={0.1}>
             <div className="p-8 rounded-3xl bg-gradient-to-br from-blue-500/10 to-bull-600 border border-blue-500/20 h-full">
-              <div className="text-4xl mb-4">??</div>
+              <div className="w-14 h-14 rounded-2xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center mb-4">
+                <Target size={26} className="text-blue-400" strokeWidth={1.75} />
+              </div>
               <h3 className="text-xl font-bold text-white mb-3">Our Mission</h3>
               <p className="text-gray-300 leading-relaxed">
                 To empower traders worldwide by delivering transparent pricing, reliable execution, and innovative trading solutions.

@@ -4,7 +4,10 @@
 
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Check, DollarSign, Info } from 'lucide-react'
+import {
+  ArrowRight, Check, DollarSign, Info,
+  Minimize2, BadgePercent, Eye, Moon, Wallet, Zap
+} from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
 import MarketTicker from '../components/MarketTicker'
@@ -27,32 +30,44 @@ const spreadData = [
 
 const pricingFeatures = [
   {
-    icon: '??',
+    Icon: Minimize2,
+    color: 'text-blue-400',
+    bg: 'bg-blue-400/10',
     title: 'Tight Variable Spreads',
     desc: 'Our spreads are dynamically priced based on real market conditions, ensuring you always get the best available price.',
   },
   {
-    icon: '??',
+    Icon: BadgePercent,
+    color: 'text-purple-400',
+    bg: 'bg-purple-400/10',
     title: 'Competitive Commission',
-    desc: 'ECN Raw accounts offer ultra-low xed commissions per lot, making it ideal for high-volume traders and scalpers.',
+    desc: 'ECN Raw accounts offer ultra-low fixed commissions per lot, making it ideal for high-volume traders and scalpers.',
   },
   {
-    icon: '??',
+    Icon: Eye,
+    color: 'text-cyan-400',
+    bg: 'bg-cyan-400/10',
     title: 'No Hidden Fees',
     desc: 'We believe in complete transparency. No deposit fees, no withdrawal fees, no inactivity fees on active accounts.',
   },
   {
-    icon: '??',
+    Icon: Moon,
+    color: 'text-green-accent',
+    bg: 'bg-green-accent/10',
     title: 'Swap-Free Option',
     desc: 'Islamic swap-free accounts available for traders who require Sharia-compliant trading conditions.',
   },
   {
-    icon: '??',
+    Icon: Wallet,
+    color: 'text-gold-500',
+    bg: 'bg-gold-500/10',
     title: 'Free Deposits',
     desc: 'Deposit funds at no cost via bank transfer, credit/debit card, and major e-wallets.',
   },
   {
-    icon: '?',
+    Icon: Zap,
+    color: 'text-yellow-400',
+    bg: 'bg-yellow-400/10',
     title: 'Fast Withdrawals',
     desc: 'Withdrawals processed within 24 hours on business days. No unnecessary delays.',
   },
@@ -111,15 +126,20 @@ function Pricing() {
             subtitle="Competitive, transparent, and designed to give you the best possible trading conditions."
           />
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-14">
-            {pricingFeatures.map((item) => (
-              <StaggerItem key={item.title}>
-                <div className="card group h-full">
-                  <div className="text-3xl mb-4">{item.icon}</div>
-                  <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-red-light transition-colors">{item.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
+            {pricingFeatures.map((item) => {
+              const Icon = item.Icon
+              return (
+                <StaggerItem key={item.title}>
+                  <div className="card group h-full">
+                    <div className={`w-12 h-12 mb-4 rounded-xl ${item.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <Icon size={22} className={item.color} strokeWidth={1.75} />
+                    </div>
+                    <h3 className="text-white font-semibold text-lg mb-2 group-hover:text-red-light transition-colors">{item.title}</h3>
+                    <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
+                  </div>
+                </StaggerItem>
+              )
+            })}
           </StaggerContainer>
         </div>
       </section>

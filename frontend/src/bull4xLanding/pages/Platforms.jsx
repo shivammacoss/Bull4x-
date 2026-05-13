@@ -6,7 +6,8 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowRight, Check, Monitor, Smartphone,
-  Cpu, Wifi, Zap, Shield, BarChart2
+  Cpu, Wifi, Zap, Shield, BarChart2,
+  Users, Repeat, Minus
 } from 'lucide-react'
 import AnimatedSection, { StaggerContainer, StaggerItem, PageTransition } from '../components/AnimatedSection'
 import SectionHeader from '../components/SectionHeader'
@@ -96,7 +97,7 @@ const platformComparison = [
 
 function Platforms() {
   const [activePlatform, setActivePlatform] = useState('webtrader')
-  const active = platforms.nd(p => p.id === activePlatform)
+  const active = platforms.find(p => p.id === activePlatform)
 
   return (
     <PageTransition>
@@ -230,20 +231,26 @@ function Platforms() {
                   {platformComparison.map((row, i) => (
                     <tr key={row.feature} className={`border-t border-white/5 ${i % 2 === 0 ? '' : 'bg-white/1'}`}>
                       <td className="py-3 px-6 text-sm text-gray-300">{row.feature}</td>
-                      <td className="py-3 px-4 text-center">
-                        {row.webtrader
-                          ? <span className="text-green-accent text-lg">?</span>
-                          : <span className="text-gray-600 text-lg">�</span>}
+                      <td className="py-3 px-4">
+                        <div className="flex justify-center">
+                          {row.webtrader
+                            ? <Check size={18} className="text-green-accent" strokeWidth={2.5} />
+                            : <Minus size={18} className="text-gray-600" strokeWidth={2.5} />}
+                        </div>
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        {row.mobile
-                          ? <span className="text-green-accent text-lg">?</span>
-                          : <span className="text-gray-600 text-lg">�</span>}
+                      <td className="py-3 px-4">
+                        <div className="flex justify-center">
+                          {row.mobile
+                            ? <Check size={18} className="text-green-accent" strokeWidth={2.5} />
+                            : <Minus size={18} className="text-gray-600" strokeWidth={2.5} />}
+                        </div>
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        {row.desktop
-                          ? <span className="text-green-accent text-lg">?</span>
-                          : <span className="text-gray-600 text-lg">�</span>}
+                      <td className="py-3 px-4">
+                        <div className="flex justify-center">
+                          {row.desktop
+                            ? <Check size={18} className="text-green-accent" strokeWidth={2.5} />
+                            : <Minus size={18} className="text-gray-600" strokeWidth={2.5} />}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -268,19 +275,24 @@ function Platforms() {
               />
               <div className="grid grid-cols-2 gap-4 mt-8">
                 {[
-                  { icon: '??', title: 'Follow Top Traders', desc: 'Browse verified trader profiles' },
-                  { icon: '?', title: 'Auto-Copy Trades', desc: 'Instant trade replication' },
-                  { icon: '??', title: 'Performance Stats', desc: 'Full transparency & history' },
-                  { icon: '??', title: 'Risk Controls', desc: 'Set your own risk limits' },
-                ].map((item) => (
-                  <AnimatedSection key={item.title} animation="slideUp">
-                    <div className="p-4 rounded-xl bg-bull-600 border border-white/5 hover:border-red-accent/20 transition-all duration-300">
-                      <div className="text-2xl mb-2">{item.icon}</div>
-                      <h4 className="text-white font-semibold text-sm mb-1">{item.title}</h4>
-                      <p className="text-gray-500 text-xs">{item.desc}</p>
-                    </div>
-                  </AnimatedSection>
-                ))}
+                  { Icon: Users, color: 'text-blue-400', bg: 'bg-blue-400/10', title: 'Follow Top Traders', desc: 'Browse verified trader profiles' },
+                  { Icon: Repeat, color: 'text-green-accent', bg: 'bg-green-accent/10', title: 'Auto-Copy Trades', desc: 'Instant trade replication' },
+                  { Icon: BarChart2, color: 'text-purple-400', bg: 'bg-purple-400/10', title: 'Performance Stats', desc: 'Full transparency & history' },
+                  { Icon: Shield, color: 'text-red-accent', bg: 'bg-red-accent/10', title: 'Risk Controls', desc: 'Set your own risk limits' },
+                ].map((item) => {
+                  const Icon = item.Icon
+                  return (
+                    <AnimatedSection key={item.title} animation="slideUp">
+                      <div className="p-4 rounded-xl bg-bull-600 border border-white/5 hover:border-red-accent/20 transition-all duration-300 group">
+                        <div className={`w-10 h-10 mb-3 rounded-lg ${item.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                          <Icon size={20} className={item.color} strokeWidth={1.75} />
+                        </div>
+                        <h4 className="text-white font-semibold text-sm mb-1">{item.title}</h4>
+                        <p className="text-gray-500 text-xs">{item.desc}</p>
+                      </div>
+                    </AnimatedSection>
+                  )
+                })}
               </div>
               <AnimatedSection animation="slideUp" delay={0.4} className="mt-6">
                 <Link to="/accounts" className="b4x-btn-primary gap-2">
