@@ -1497,9 +1497,9 @@ const AdminUserManagement = () => {
                 </div>
                 
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-gray-400">
+                  <div className="flex items-center gap-2 text-gray-400 ">
                     <Mail size={14} />
-                    <span className="truncate">{user.email}</span>
+                    <span className="truncate  whitespace-nowrap ">{user.email}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-400">
                     <Phone size={14} />
@@ -1545,121 +1545,152 @@ const AdminUserManagement = () => {
 
         {/* Desktop Table View */}
         <div className="hidden lg:block overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[1100px]">
             <thead>
-              <tr className="border-b border-gray-700">
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">User</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Email</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Phone</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Balance</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Status</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Joined</th>
-                <th className="text-left text-gray-500 text-sm font-medium py-3 px-4">Actions</th>
+              <tr className="border-b border-gray-700 bg-dark-700/30">
+                <th className="text-left text-gray-400 text-xs font-semibold uppercase tracking-wider py-4 px-5 whitespace-nowrap">User</th>
+                <th className="text-left text-gray-400 text-xs font-semibold uppercase tracking-wider py-4 px-5 whitespace-nowrap">Email</th>
+                <th className="text-left text-gray-400 text-xs font-semibold uppercase tracking-wider py-4 px-5 whitespace-nowrap">Phone</th>
+                <th className="text-left text-gray-400 text-xs font-semibold uppercase tracking-wider py-4 px-5 whitespace-nowrap">Balance</th>
+                <th className="text-left text-gray-400 text-xs font-semibold uppercase tracking-wider py-4 px-5 whitespace-nowrap">Status</th>
+                <th className="text-left text-gray-400 text-xs font-semibold uppercase tracking-wider py-4 px-5 whitespace-nowrap">Joined</th>
+                <th className="text-right text-gray-400 text-xs font-semibold uppercase tracking-wider py-4 px-5 whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-8">
+                  <td colSpan="7" className="text-center py-12">
                     <RefreshCw size={24} className="text-gray-500 animate-spin mx-auto" />
                   </td>
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-8 text-gray-500">
+                  <td colSpan="7" className="text-center py-12 text-gray-500 text-sm">
                     {searchTerm ? 'No users found matching your search' : 'No users registered yet'}
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user._id} className="border-b border-gray-800 hover:bg-dark-700/50">
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500/20 rounded-full flex items-center justify-center">
-                          <span className="text-accent-green font-medium">
-                            {user.firstName?.charAt(0)?.toUpperCase() || 'U'}
-                          </span>
+                filteredUsers.map((user) => {
+                  const statusInfo = user.isBanned
+                    ? { label: 'Banned', dot: 'bg-red-500', text: 'text-red-400', bg: 'bg-red-500/10', ring: 'ring-red-500/20' }
+                    : user.isBlocked
+                      ? { label: 'Blocked', dot: 'bg-yellow-500', text: 'text-yellow-400', bg: 'bg-yellow-500/10', ring: 'ring-yellow-500/20' }
+                      : { label: 'Active', dot: 'bg-green-500', text: 'text-green-400', bg: 'bg-green-500/10', ring: 'ring-green-500/20' }
+
+                  return (
+                    <tr
+                      key={user._id}
+                      className="border-b border-gray-800/60 hover:bg-dark-700/40 transition-colors group"
+                    >
+                      {/* User */}
+                      <td className="py-4 px-5 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className="relative shrink-0">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center ring-2 ring-dark-700 group-hover:ring-blue-500/30 transition-all">
+                              <span className="text-white font-semibold text-sm">
+                                {user.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                              </span>
+                            </div>
+                            <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${statusInfo.dot} rounded-full ring-2 ring-dark-800`}></span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-white font-medium text-sm whitespace-nowrap">{user.firstName || 'Unknown'}</p>
+                            <p className="text-gray-500 text-xs whitespace-nowrap">ID: {user._id?.slice(-6).toUpperCase()}</p>
+                          </div>
                         </div>
-                        <span className="text-white font-medium">{user.firstName || 'Unknown'}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Mail size={14} />
-                        <span>{user.email}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2 text-gray-400">
-                        <Phone size={14} />
-                        <span>{user.phone || 'N/A'}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <button 
-                        onClick={() => openModal('view', user)}
-                        className="text-blue-400 hover:text-blue-300 text-sm underline"
-                      >
-                        View Balances
-                      </button>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        user.isBanned 
-                          ? 'bg-red-500/20 text-red-500' 
-                          : user.isBlocked 
-                            ? 'bg-yellow-500/20 text-yellow-500' 
-                            : 'bg-green-500/20 text-green-500'
-                      }`}>
-                        {user.isBanned ? 'Banned' : user.isBlocked ? 'Blocked' : 'Active'}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-gray-400">
-                      {formatDate(user.createdAt)}
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-1">
-                        <button 
+                      </td>
+
+                      {/* Email */}
+                      <td className="py-4 px-5 whitespace-nowrap">
+                        <div className="flex items-center gap-2 text-gray-300 text-sm">
+                          <Mail size={14} className="text-gray-500 shrink-0" />
+                          <span className="whitespace-nowrap">{user.email}</span>
+                        </div>
+                      </td>
+
+                      {/* Phone */}
+                      <td className="py-4 px-5 whitespace-nowrap">
+                        <div className="flex items-center gap-2 text-gray-300 text-sm">
+                          <Phone size={14} className="text-gray-500 shrink-0" />
+                          <span className="whitespace-nowrap">{user.phone || 'N/A'}</span>
+                        </div>
+                      </td>
+
+                      {/* Balance */}
+                      <td className="py-4 px-5 whitespace-nowrap">
+                        <button
                           onClick={() => openModal('view', user)}
-                          className="p-2 hover:bg-dark-600 rounded-lg transition-colors text-gray-400 hover:text-white"
-                          title="View Details"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-colors text-xs font-medium whitespace-nowrap"
                         >
-                          <Eye size={16} />
+                          <Wallet size={13} className="shrink-0" />
+                          View Balance
                         </button>
-                        <button 
-                          onClick={() => openModal('password', user)}
-                          className="p-2 hover:bg-dark-600 rounded-lg transition-colors text-gray-400 hover:text-blue-500"
-                          title="Change Password"
-                        >
-                          <Lock size={16} />
-                        </button>
-                        <button 
-                          onClick={() => openModal('deduct', user)}
-                          className="p-2 hover:bg-dark-600 rounded-lg transition-colors text-gray-400 hover:text-orange-500"
-                          title="Deduct Fund"
-                        >
-                          <DollarSign size={16} />
-                        </button>
-                        <button 
-                          onClick={() => openModal('block', user)}
-                          className={`p-2 hover:bg-dark-600 rounded-lg transition-colors ${
-                            user.isBlocked ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'
-                          }`}
-                          title={user.isBlocked ? 'Unblock User' : 'Block User'}
-                        >
-                          <Ban size={16} />
-                        </button>
-                        <button 
-                          onClick={() => openModal('delete', user)}
-                          className="p-2 hover:bg-dark-600 rounded-lg transition-colors text-gray-400 hover:text-red-500"
-                          title="Delete User"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-4 px-5 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${statusInfo.bg} ${statusInfo.text} ring-1 ring-inset ${statusInfo.ring} whitespace-nowrap`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${statusInfo.dot} ${!user.isBanned && !user.isBlocked ? 'animate-pulse' : ''}`}></span>
+                          {statusInfo.label}
+                        </span>
+                      </td>
+
+                      {/* Joined */}
+                      <td className="py-4 px-5 whitespace-nowrap">
+                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                          <Calendar size={13} className="text-gray-500 shrink-0" />
+                          <span className="whitespace-nowrap">{formatDate(user.createdAt)}</span>
+                        </div>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-4 px-5 whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1 w-max ml-auto">
+                          <button
+                            onClick={() => openModal('view', user)}
+                            className="p-2 shrink-0 rounded-lg text-gray-400 hover:bg-blue-500/10 hover:text-blue-400 transition-colors"
+                            title="View Details"
+                          >
+                            <Eye size={16} className="shrink-0" />
+                          </button>
+                          <button
+                            onClick={() => openModal('password', user)}
+                            className="p-2 shrink-0 rounded-lg text-gray-400 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors"
+                            title="Change Password"
+                          >
+                            <Lock size={16} className="shrink-0" />
+                          </button>
+                          <button
+                            onClick={() => openModal('deduct', user)}
+                            className="p-2 shrink-0 rounded-lg text-gray-400 hover:bg-orange-500/10 hover:text-orange-400 transition-colors"
+                            title="Deduct Fund"
+                          >
+                            <DollarSign size={16} className="shrink-0" />
+                          </button>
+                          <button
+                            onClick={() => openModal('block', user)}
+                            className={`p-2 shrink-0 rounded-lg transition-colors ${
+                              user.isBlocked
+                                ? 'text-yellow-400 bg-yellow-500/10'
+                                : 'text-gray-400 hover:bg-yellow-500/10 hover:text-yellow-400'
+                            }`}
+                            title={user.isBlocked ? 'Unblock User' : 'Block User'}
+                          >
+                            <Ban size={16} className="shrink-0" />
+                          </button>
+                          <button
+                            onClick={() => openModal('delete', user)}
+                            className="p-2 shrink-0 rounded-lg text-gray-400 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                            title="Delete User"
+                          >
+                            <Trash2 size={16} className="shrink-0" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
