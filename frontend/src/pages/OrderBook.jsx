@@ -391,7 +391,9 @@ const OrderBook = () => {
               >
                 <option value="all">{t('orders.allAccounts')}</option>
                 {accounts.map(acc => (
-                  <option key={acc._id} value={acc._id}>{acc.accountId}</option>
+                  <option key={acc._id} value={acc._id}>
+                    {acc.accountTypeId?.name ? `${acc.accountTypeId.name}-${acc.accountId}` : acc.accountId}
+                  </option>
                 ))}
               </select>
             </div>

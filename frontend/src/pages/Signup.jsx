@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { X, Mail, ChevronDown, Search, Eye, EyeOff, RefreshCw, ArrowLeft } from 'lucide-react'
+import {
+  X, Mail, ChevronDown, Search, Eye, EyeOff, RefreshCw, ArrowLeft,
+  ArrowRight, Loader2, User, Phone, MapPin, Lock,
+  TrendingUp, Shield, Zap, Globe, CheckCircle2
+} from 'lucide-react'
 import { signup } from '../api/auth'
 import { API_URL } from '../config/api'
 import logo from '../assets/logo.png'
@@ -277,7 +281,7 @@ const Signup = () => {
         }
       }
       
-      toast.success('Account created successfully! Welcome to BlueStone.')
+      toast.success('Account created successfully! Welcome to BULL4X.')
       // Redirect to mobile view on mobile devices
       if (isMobile) {
         navigate('/mobile')
@@ -316,7 +320,7 @@ const Signup = () => {
           localStorage.setItem('token', response.token)
           localStorage.setItem('user', JSON.stringify(response.user))
           
-          toast.success('Account created successfully! Welcome to BlueStone.')
+          toast.success('Account created successfully! Welcome to BULL4X.')
           if (isMobile) {
             navigate('/mobile')
           } else {
@@ -333,240 +337,406 @@ const Signup = () => {
   }, [otpVerified])
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden">
-      {/* Background gradient effects */}
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-transparent rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-orange-500/20 via-purple-500/20 to-transparent rounded-full blur-3xl" />
-      
-      {/* Modal */}
-      <div className="relative bg-dark-700 rounded-2xl p-6 sm:p-8 w-full max-w-md border border-gray-800 mx-4 sm:mx-0">
-        {/* Close button */}
-        <button 
-          onClick={() => navigate('/')}
-          className="absolute top-4 right-4 w-8 h-8 bg-dark-600 rounded-full flex items-center justify-center hover:bg-dark-500 transition-colors"
-        >
-          <X size={16} className="text-gray-400" />
-        </button>
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Animated background — gold mesh + grid */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-[#D9A136]/20 via-[#D9A136]/8 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-tl from-[#F0C96F]/15 via-[#D9A136]/8 to-transparent blur-3xl animate-pulse" style={{ animationDuration: '10s' }} />
+        <div className="absolute top-1/3 right-1/3 w-[400px] h-[400px] rounded-full bg-gradient-to-bl from-[#b8892a]/10 via-transparent to-transparent blur-3xl" />
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(217,161,54,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(217,161,54,0.6) 1px, transparent 1px)',
+            backgroundSize: '48px 48px'
+          }}
+        />
+      </div>
 
-        {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <img src={logo} alt="BULL4X" className="h-12 object-contain" />
-        </div>
+      {/* Close button */}
+      <button
+        onClick={() => navigate('/')}
+        className="absolute top-5 right-5 z-20 w-10 h-10 bg-white/5 backdrop-blur-md border border-[#D9A136]/20 rounded-full flex items-center justify-center hover:bg-[#D9A136]/10 hover:border-[#D9A136]/40 transition-all"
+        aria-label="Close"
+      >
+        <X size={18} className="text-gray-300" />
+      </button>
 
-        {/* Tabs */}
-        <div className="flex bg-dark-600 rounded-full p-1 w-fit mb-8">
-          <button
-            onClick={() => setActiveTab('signup')}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-              activeTab === 'signup' ? 'bg-dark-500 text-white' : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Sign up
-          </button>
-          <Link
-            to="/user/login"
-            className="px-6 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white transition-colors"
-          >
-            Sign in
-          </Link>
-        </div>
+      <div className="relative z-10 min-h-screen flex">
+        {/* LEFT — Branding panel (desktop only) */}
+        <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] flex-col justify-between p-12 xl:p-16 relative">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="BULL4X" className="h-12 object-contain" />
+            <div>
+              <p className="text-white font-bold text-lg leading-none tracking-tight">BULL4X</p>
+              <p className="text-[#D9A136] text-[10px] uppercase tracking-[0.2em] mt-1">Trading Platform</p>
+            </div>
+          </div>
 
-        {/* Title */}
-        <h1 className="text-2xl font-semibold text-white mb-6">
-          {otpStep ? 'Verify Your Email' : 'Create an account'}
-        </h1>
-
-        {/* OTP Verification Step */}
-        {otpStep ? (
-          <div className="space-y-4">
-            <button
-              onClick={() => { setOtpStep(false); setOtp(''); setError('') }}
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4"
-            >
-              <ArrowLeft size={18} /> Back
-            </button>
-
-            <p className="text-gray-400 text-sm mb-4">
-              We've sent a 6-digit OTP to <span className="text-white">{formData.email}</span>
+          {/* Hero text */}
+          <div className="max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#D9A136]/10 border border-[#D9A136]/30 mb-6">
+              <span className="w-2 h-2 rounded-full bg-[#F0C96F] animate-pulse" />
+              <span className="text-[#F0C96F] text-xs font-medium tracking-wider uppercase">Join 50,000+ Traders</span>
+            </div>
+            <h1 className="text-4xl xl:text-5xl font-bold text-white leading-tight mb-5 tracking-tight">
+              Your gateway to{' '}
+              <span className="bg-gradient-to-r from-[#F0C96F] via-[#D9A136] to-[#b8892a] bg-clip-text text-transparent">
+                global markets
+              </span>
+            </h1>
+            <p className="text-gray-400 text-lg leading-relaxed mb-10">
+              Open a free account in 2 minutes. No deposit required to start. Trade forex, crypto, indices, commodities and stocks — all from one platform.
             </p>
 
-            <input
-              type="text"
-              placeholder="Enter 6-digit OTP"
-              value={otp}
-              onChange={(e) => { setOtp(e.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }}
-              maxLength={6}
-              className="w-full bg-dark-600 border border-gray-700 rounded-lg px-4 py-3 text-white text-center text-2xl tracking-widest placeholder-gray-500 focus:outline-none focus:border-gray-600 transition-colors"
-            />
-
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-
-            <button
-              onClick={handleVerifyOtp}
-              disabled={verifyingOtp || otp.length !== 6}
-              className="w-full bg-white text-black font-medium py-3 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {verifyingOtp ? <><RefreshCw size={16} className="animate-spin" /> Verifying...</> : 'Verify OTP'}
-            </button>
-
-            <button
-              onClick={handleResendOtp}
-              disabled={sendingOtp}
-              className="w-full text-gray-400 hover:text-white text-sm transition-colors flex items-center justify-center gap-2"
-            >
-              {sendingOtp ? <><RefreshCw size={14} className="animate-spin" /> Sending...</> : "Didn't receive? Resend OTP"}
-            </button>
-          </div>
-        ) : (
-          /* Form */
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name field */}
-            <div>
-              <input
-                type="text"
-                name="firstName"
-                placeholder="Enter your name"
-                value={formData.firstName}
-                onChange={handleChange}
-                className={`w-full bg-dark-600 border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors ${fieldErrors.firstName ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'}`}
-              />
-              {fieldErrors.firstName && <p className="text-red-500 text-xs mt-1">{fieldErrors.firstName}</p>}
-            </div>
-
-            {/* Email field */}
-            <div>
-              <div className="relative">
-                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`w-full bg-dark-600 border rounded-lg pl-11 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors ${fieldErrors.email ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'}`}
-                />
-              </div>
-              {fieldErrors.email && <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>}
-            </div>
-
-            {/* Phone field with country selector */}
-            <div>
-              <div className="flex relative" ref={dropdownRef}>
-                <button
-                  type="button"
-                  onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                  className={`flex items-center gap-1 sm:gap-2 bg-dark-600 border rounded-l-lg px-2 sm:px-3 py-3 border-r-0 hover:bg-dark-500 transition-colors min-w-[70px] sm:min-w-[90px] ${fieldErrors.phone ? 'border-red-500' : 'border-gray-700'}`}
-                >
-                <span className="text-base sm:text-lg">{selectedCountry.flag}</span>
-                <span className="text-gray-400 text-xs sm:text-sm hidden sm:inline">{selectedCountry.code}</span>
-                <ChevronDown size={14} className="text-gray-500" />
-              </button>
-              
-              {/* Country Dropdown */}
-              {showCountryDropdown && (
-                <div className="absolute top-full left-0 mt-1 w-64 sm:w-72 bg-dark-600 border border-gray-700 rounded-lg shadow-xl z-50 max-h-64 overflow-hidden">
-                  {/* Search */}
-                  <div className="p-2 border-b border-gray-700">
-                    <div className="relative">
-                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                      <input
-                        type="text"
-                        placeholder="Search country..."
-                        value={countrySearch}
-                        onChange={(e) => setCountrySearch(e.target.value)}
-                        className="w-full bg-dark-700 border border-gray-700 rounded-lg pl-9 pr-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gray-600"
-                      />
-                    </div>
+            {/* Why join */}
+            <div className="space-y-3 max-w-md">
+              {[
+                'Instant account activation — no waiting',
+                'Free demo account with $10,000 virtual funds',
+                'Tight spreads from 0.0 pips on ECN accounts',
+                'Bank-grade security & segregated funds',
+              ].map((reason) => (
+                <div key={reason} className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-full bg-[#D9A136]/15 border border-[#D9A136]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <CheckCircle2 size={12} className="text-[#D9A136]" />
                   </div>
-                  {/* Country List */}
-                  <div className="max-h-48 overflow-y-auto">
-                    {filteredCountries.map((country, index) => (
-                      <button
-                        key={`${country.code}-${index}`}
-                        type="button"
-                        onClick={() => handleCountrySelect(country)}
-                        className="w-full flex items-center gap-3 px-3 py-2 hover:bg-dark-500 transition-colors text-left"
-                      >
-                        <span className="text-lg">{country.flag}</span>
-                        <span className="text-white text-sm flex-1">{country.name}</span>
-                        <span className="text-gray-500 text-sm">{country.code}</span>
-                      </button>
-                    ))}
-                    {filteredCountries.length === 0 && (
-                      <p className="text-gray-500 text-sm text-center py-3">No countries found</p>
-                    )}
-                  </div>
+                  <span className="text-gray-300 text-sm">{reason}</span>
                 </div>
-              )}
-              
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Enter phone number"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={`flex-1 bg-dark-600 border rounded-r-lg px-3 sm:px-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors min-w-0 ${fieldErrors.phone ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'}`}
-                />
+              ))}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center gap-4 text-xs text-gray-500">
+            <span>© 2026 BULL4X</span>
+            <span className="w-1 h-1 rounded-full bg-gray-600" />
+            <Link to="/legal/privacy" className="hover:text-[#D9A136] transition-colors">Privacy</Link>
+            <span className="w-1 h-1 rounded-full bg-gray-600" />
+            <Link to="/legal/terms" className="hover:text-[#D9A136] transition-colors">Terms</Link>
+          </div>
+        </div>
+
+        {/* RIGHT — Form */}
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8 py-12">
+          <div className="w-full max-w-md">
+            {/* Mobile logo */}
+            <div className="flex lg:hidden justify-center mb-8">
+              <img src={logo} alt="BULL4X" className="h-14 object-contain" />
+            </div>
+
+            {/* Card */}
+            <div className="relative">
+              {/* Gold glow behind card */}
+              <div className="absolute -inset-0.5 bg-gradient-to-br from-[#D9A136]/30 via-transparent to-[#F0C96F]/20 rounded-3xl blur-xl opacity-50" />
+
+              <div className="relative bg-black/60 backdrop-blur-xl border border-[#D9A136]/20 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/50">
+                {/* Tabs */}
+                <div className="relative flex bg-black/40 rounded-full p-1 w-full mb-7 border border-[#D9A136]/10">
+                  <button
+                    onClick={() => setActiveTab('signup')}
+                    className={`flex-1 px-6 py-2 rounded-full text-sm font-semibold transition-all ${
+                      activeTab === 'signup'
+                        ? 'bg-gradient-to-r from-[#D9A136] to-[#F0C96F] text-black shadow-lg shadow-[#D9A136]/20'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Sign up
+                  </button>
+                  <Link
+                    to="/user/login"
+                    className="flex-1 text-center px-6 py-2 rounded-full text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                  >
+                    Sign in
+                  </Link>
+                </div>
+
+                {/* Heading */}
+                <div className="mb-6">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 tracking-tight">
+                    {otpStep ? (
+                      <>Verify your <span className="bg-gradient-to-r from-[#F0C96F] to-[#D9A136] bg-clip-text text-transparent">email</span></>
+                    ) : (
+                      <>Create your <span className="bg-gradient-to-r from-[#F0C96F] to-[#D9A136] bg-clip-text text-transparent">account</span></>
+                    )}
+                  </h1>
+                  <p className="text-gray-400 text-sm">
+                    {otpStep ? 'Enter the 6-digit code we sent you.' : 'Open a free trading account in under 2 minutes.'}
+                  </p>
+                </div>
+
+                {/* OTP Verification Step */}
+                {otpStep ? (
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => { setOtpStep(false); setOtp(''); setError('') }}
+                      className="inline-flex items-center gap-2 text-gray-400 hover:text-[#D9A136] text-sm transition-colors"
+                    >
+                      <ArrowLeft size={16} /> Back
+                    </button>
+
+                    <div className="p-3 rounded-lg bg-[#D9A136]/5 border border-[#D9A136]/20">
+                      <p className="text-gray-300 text-sm">
+                        OTP sent to <span className="text-[#F0C96F] font-medium">{formData.email}</span>
+                      </p>
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="000000"
+                      value={otp}
+                      onChange={(e) => { setOtp(e.target.value.replace(/\D/g, '').slice(0, 6)); setError('') }}
+                      maxLength={6}
+                      className="w-full bg-black/40 border border-[#D9A136]/15 focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20 rounded-xl px-4 py-4 text-white text-center text-3xl tracking-[0.5em] placeholder-gray-700 focus:outline-none transition-all font-mono"
+                    />
+
+                    {error && (
+                      <div className="px-3.5 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium">
+                        {error}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleVerifyOtp}
+                      disabled={verifyingOtp || otp.length !== 6}
+                      className="group w-full bg-gradient-to-r from-[#D9A136] to-[#F0C96F] hover:from-[#F0C96F] hover:to-[#D9A136] text-black font-semibold py-3.5 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#D9A136]/25 hover:shadow-[#D9A136]/40 flex items-center justify-center gap-2"
+                    >
+                      {verifyingOtp ? (
+                        <><Loader2 size={18} className="animate-spin" /> Verifying...</>
+                      ) : (
+                        <>Verify OTP <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={handleResendOtp}
+                      disabled={sendingOtp}
+                      className="w-full text-gray-400 hover:text-[#D9A136] text-sm transition-colors flex items-center justify-center gap-2"
+                    >
+                      {sendingOtp ? <><RefreshCw size={14} className="animate-spin" /> Sending...</> : "Didn't receive? Resend OTP"}
+                    </button>
+                  </div>
+                ) : (
+                  /* Form */
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Name */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        Full Name
+                      </label>
+                      <div className="relative group">
+                        <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#D9A136] transition-colors pointer-events-none" />
+                        <input
+                          type="text"
+                          name="firstName"
+                          placeholder="John Smith"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          className={`w-full bg-black/40 border rounded-xl pl-11 pr-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:bg-black/60 transition-all ${
+                            fieldErrors.firstName
+                              ? 'border-red-500/50 focus:border-red-500'
+                              : 'border-[#D9A136]/15 focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20'
+                          }`}
+                        />
+                      </div>
+                      {fieldErrors.firstName && <p className="text-red-400 text-xs mt-1.5 ml-1">{fieldErrors.firstName}</p>}
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        Email Address
+                      </label>
+                      <div className="relative group">
+                        <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#D9A136] transition-colors pointer-events-none" />
+                        <input
+                          type="email"
+                          name="email"
+                          placeholder="you@example.com"
+                          value={formData.email}
+                          onChange={handleChange}
+                          className={`w-full bg-black/40 border rounded-xl pl-11 pr-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:bg-black/60 transition-all ${
+                            fieldErrors.email
+                              ? 'border-red-500/50 focus:border-red-500'
+                              : 'border-[#D9A136]/15 focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20'
+                          }`}
+                        />
+                      </div>
+                      {fieldErrors.email && <p className="text-red-400 text-xs mt-1.5 ml-1">{fieldErrors.email}</p>}
+                    </div>
+
+                    {/* Phone with country code */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        Phone Number
+                      </label>
+                      <div className="flex relative" ref={dropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                          className={`flex items-center gap-1.5 sm:gap-2 bg-black/40 border rounded-l-xl px-3 py-3 border-r-0 hover:bg-black/60 transition-colors min-w-[80px] sm:min-w-[100px] ${
+                            fieldErrors.phone ? 'border-red-500/50' : 'border-[#D9A136]/15'
+                          }`}
+                        >
+                          <span className="text-base sm:text-lg">{selectedCountry.flag}</span>
+                          <span className="text-gray-300 text-xs sm:text-sm hidden sm:inline">{selectedCountry.code}</span>
+                          <ChevronDown size={14} className="text-gray-500 ml-auto sm:ml-0" />
+                        </button>
+
+                        {/* Country Dropdown */}
+                        {showCountryDropdown && (
+                          <div className="absolute top-full left-0 mt-2 w-72 bg-black/95 backdrop-blur-xl border border-[#D9A136]/20 rounded-xl shadow-2xl z-50 max-h-72 overflow-hidden">
+                            <div className="p-2 border-b border-[#D9A136]/10">
+                              <div className="relative">
+                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                                <input
+                                  type="text"
+                                  placeholder="Search country..."
+                                  value={countrySearch}
+                                  onChange={(e) => setCountrySearch(e.target.value)}
+                                  className="w-full bg-black/40 border border-[#D9A136]/15 focus:border-[#D9A136]/50 rounded-lg pl-9 pr-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none"
+                                />
+                              </div>
+                            </div>
+                            <div className="max-h-52 overflow-y-auto">
+                              {filteredCountries.map((country, index) => (
+                                <button
+                                  key={`${country.code}-${index}`}
+                                  type="button"
+                                  onClick={() => handleCountrySelect(country)}
+                                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#D9A136]/10 transition-colors text-left"
+                                >
+                                  <span className="text-lg">{country.flag}</span>
+                                  <span className="text-white text-sm flex-1 truncate">{country.name}</span>
+                                  <span className="text-gray-400 text-sm">{country.code}</span>
+                                </button>
+                              ))}
+                              {filteredCountries.length === 0 && (
+                                <p className="text-gray-500 text-sm text-center py-3">No countries found</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        <input
+                          type="tel"
+                          name="phone"
+                          placeholder="Phone number"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          className={`flex-1 bg-black/40 border rounded-r-xl px-3 sm:px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:bg-black/60 transition-all min-w-0 ${
+                            fieldErrors.phone
+                              ? 'border-red-500/50 focus:border-red-500'
+                              : 'border-[#D9A136]/15 focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20'
+                          }`}
+                        />
+                      </div>
+                      {fieldErrors.phone && <p className="text-red-400 text-xs mt-1.5 ml-1">{fieldErrors.phone}</p>}
+                    </div>
+
+                    {/* Address */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        Address
+                      </label>
+                      <div className="relative group">
+                        <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#D9A136] transition-colors pointer-events-none" />
+                        <input
+                          type="text"
+                          name="address"
+                          placeholder="City, Country"
+                          value={formData.address}
+                          onChange={handleChange}
+                          className={`w-full bg-black/40 border rounded-xl pl-11 pr-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:bg-black/60 transition-all ${
+                            fieldErrors.address
+                              ? 'border-red-500/50 focus:border-red-500'
+                              : 'border-[#D9A136]/15 focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20'
+                          }`}
+                        />
+                      </div>
+                      {fieldErrors.address && <p className="text-red-400 text-xs mt-1.5 ml-1">{fieldErrors.address}</p>}
+                    </div>
+
+                    {/* Password */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        Password
+                      </label>
+                      <div className="relative group">
+                        <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#D9A136] transition-colors pointer-events-none" />
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          name="password"
+                          placeholder="At least 6 characters"
+                          value={formData.password}
+                          onChange={handleChange}
+                          className={`w-full bg-black/40 border rounded-xl pl-11 pr-12 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:bg-black/60 transition-all ${
+                            fieldErrors.password
+                              ? 'border-red-500/50 focus:border-red-500'
+                              : 'border-[#D9A136]/15 focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20'
+                          }`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#D9A136] transition-colors"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                      {fieldErrors.password && <p className="text-red-400 text-xs mt-1.5 ml-1">{fieldErrors.password}</p>}
+                    </div>
+
+                    {/* Top-level error */}
+                    {error && (
+                      <div className="px-3.5 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium">
+                        {error}
+                      </div>
+                    )}
+
+                    {/* Submit */}
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="group relative w-full overflow-hidden bg-gradient-to-r from-[#D9A136] to-[#F0C96F] hover:from-[#F0C96F] hover:to-[#D9A136] text-black font-semibold py-3.5 rounded-xl transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-[#D9A136]/25 hover:shadow-[#D9A136]/40 mt-2 flex items-center justify-center gap-2"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          Creating account...
+                        </>
+                      ) : (
+                        <>
+                          Create Account
+                          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
+
+                {/* Terms */}
+                <p className="text-center text-gray-500 text-xs mt-6 leading-relaxed">
+                  By creating an account, you agree to our{' '}
+                  <Link to="/legal/terms" className="text-[#D9A136] hover:text-[#F0C96F] transition-colors">Terms</Link>
+                  {' '}and{' '}
+                  <Link to="/legal/privacy" className="text-[#D9A136] hover:text-[#F0C96F] transition-colors">Privacy Policy</Link>.
+                </p>
               </div>
-              {fieldErrors.phone && <p className="text-red-500 text-xs mt-1">{fieldErrors.phone}</p>}
             </div>
 
-            {/* Address field */}
-            <div>
-              <input
-                type="text"
-                name="address"
-                placeholder="Enter your address"
-                value={formData.address}
-                onChange={handleChange}
-                className={`w-full bg-dark-600 border rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none transition-colors ${fieldErrors.address ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'}`}
-              />
-              {fieldErrors.address && <p className="text-red-500 text-xs mt-1">{fieldErrors.address}</p>}
+            {/* Mobile footer */}
+            <div className="flex lg:hidden items-center justify-center gap-3 mt-8 text-[11px] text-gray-500">
+              <Link to="/legal/privacy" className="hover:text-[#D9A136] transition-colors">Privacy</Link>
+              <span className="w-1 h-1 rounded-full bg-gray-600" />
+              <Link to="/legal/terms" className="hover:text-[#D9A136] transition-colors">Terms</Link>
+              <span className="w-1 h-1 rounded-full bg-gray-600" />
+              <span>© 2026 BULL4X</span>
             </div>
-
-            {/* Password field */}
-            <div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  placeholder="Create password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`w-full bg-dark-600 border rounded-lg px-4 py-3 pr-12 text-white placeholder-gray-500 focus:outline-none transition-colors ${fieldErrors.password ? 'border-red-500' : 'border-gray-700 focus:border-gray-600'}`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {fieldErrors.password && <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>}
-            </div>
-
-            {/* Error message */}
-            {error && (
-              <p className="text-red-500 text-sm">{error}</p>
-            )}
-
-            {/* Submit button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-white text-black font-medium py-3 rounded-lg hover:bg-gray-100 transition-colors mt-2 disabled:opacity-50"
-            >
-              {loading ? 'Creating account...' : 'Create an account'}
-            </button>
-          </form>
-        )}
-
-        {/* Terms */}
-        <p className="text-center text-gray-500 text-sm mt-6">
-          By creating an account, you agree to our{' '}
-          <a href="#" className="text-white hover:underline">Terms & Service</a>
-        </p>
+          </div>
+        </div>
       </div>
     </div>
   )
