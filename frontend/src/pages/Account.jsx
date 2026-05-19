@@ -853,17 +853,23 @@ const Account = () => {
                 return (
                 <div
                   key={account._id}
-                  className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 ${
+                  className={`group relative rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 ${
                     isDarkMode
                       ? `bg-gradient-to-br from-dark-800 to-dark-900 border-gray-800 ${isDemo ? 'hover:border-yellow-500/40 hover:shadow-[0_8px_30px_rgba(234,179,8,0.12)]' : 'hover:border-[#D9A136]/40 hover:shadow-[0_8px_30px_rgba(217,161,54,0.18)]'}`
                       : `bg-white border-gray-200 shadow-sm hover:shadow-lg ${isDemo ? 'hover:border-yellow-300' : 'hover:border-[#F0C96F]'}`
                   }`}
                 >
-                  {/* Top gradient accent strip */}
-                  <div className={`h-1 w-full bg-gradient-to-r ${accentFrom} ${accentVia} ${accentTo}`} />
+                  {/* Decorative layer — clipped to card bounds so glow + strip don't leak,
+                      but kept separate from main card so dropdowns can overflow freely */}
+                  <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                    {/* Top gradient accent strip */}
+                    <div className={`h-1 w-full bg-gradient-to-r ${accentFrom} ${accentVia} ${accentTo}`} />
+                    {/* Blurred glow blob */}
+                    <div className={`absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-10 blur-3xl ${isDemo ? 'bg-yellow-500' : 'bg-[#D9A136]'}`} />
+                  </div>
 
-                  {/* Decorative blurred glow */}
-                  <div className={`absolute -top-12 -right-12 w-48 h-48 rounded-full opacity-10 blur-3xl pointer-events-none ${isDemo ? 'bg-yellow-500' : 'bg-[#D9A136]'}`} />
+                  {/* Spacer matching the accent strip so content doesn't sit underneath it */}
+                  <div className="h-1 w-full" aria-hidden="true" />
 
                   <div className={`relative ${isMobile ? 'p-4' : 'p-5 md:p-6'}`}>
                     {/* Header: Icon + Account Info + Status */}
@@ -980,7 +986,7 @@ const Account = () => {
                             </button>
                             {showAccountMenu === account._id && (
                               <div
-                                className={`absolute right-0 top-full mt-2 ${isDarkMode ? 'bg-dark-700 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl z-50 min-w-[180px] overflow-hidden`}
+                                className={`absolute right-0 bottom-full mb-2 ${isDarkMode ? 'bg-dark-700 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl z-50 min-w-[180px] overflow-hidden`}
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button

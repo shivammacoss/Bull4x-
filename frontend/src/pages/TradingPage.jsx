@@ -2626,16 +2626,57 @@ const TradingPage = () => {
       )}
 
       {/* iOS-Style Close Trade Confirmation Modal */}
-      {showCloseModal && selectedTradeForClose && (
+      {showCloseModal && selectedTradeForClose && (() => {
+        const trade = selectedTradeForClose
+        const livePrice = livePrices[trade.symbol]
+        const inst = instruments.find(i => i.symbol === trade.symbol) || selectedInstrument
+        const currentPrice = livePrice
+          ? (trade.side === 'BUY' ? livePrice.bid : livePrice.ask)
+          : (trade.side === 'BUY' ? inst?.bid : inst?.ask)
+        const hasPrice = typeof currentPrice === 'number' && typeof trade.openPrice === 'number'
+        const rawPnl = hasPrice
+          ? (trade.side === 'BUY'
+              ? (currentPrice - trade.openPrice) * trade.quantity * trade.contractSize
+              : (trade.openPrice - currentPrice) * trade.quantity * trade.contractSize)
+          : 0
+        const pnl = rawPnl - (trade.commission || 0) - (trade.swap || 0)
+        const isProfit = pnl >= 0
+        const formatPrice = (price) => {
+          if (typeof price !== 'number') return '-'
+          if (trade.symbol?.includes('JPY')) return price.toFixed(3)
+          if (['BTCUSD', 'ETHUSD', 'XAUUSD'].includes(trade.symbol)) return price.toFixed(2)
+          if (['XAGUSD'].includes(trade.symbol)) return price.toFixed(4)
+          return price.toFixed(5)
+        }
+        return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center">
           <div className="w-full sm:w-80 bg-[#1c1c1e] sm:rounded-2xl rounded-t-2xl overflow-hidden animate-slide-up">
             {/* Header */}
             <div className="px-4 py-4 text-center">
               <h3 className="text-white font-semibold text-lg">Close Trade?</h3>
               <p className="text-gray-400 text-sm mt-2">
-                {selectedTradeForClose.symbol} • {selectedTradeForClose.side} • {selectedTradeForClose.quantity} lots
+                {trade.symbol} • <span className={trade.side === 'BUY' ? 'text-blue-400' : 'text-red-400'}>{trade.side}</span> • {trade.quantity} lots
               </p>
-              <p className="text-gray-500 text-xs mt-1">
+
+              {/* Live P&L block */}
+              <div className={`mt-3 mx-2 px-3 py-2.5 rounded-xl border ${isProfit ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'}`}>
+                <div className="flex items-center justify-center gap-1.5">
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Live P/L</span>
+                  {hasPrice && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${isProfit ? 'bg-green-400' : 'bg-red-400'} animate-pulse`} />
+                  )}
+                </div>
+                <p className={`text-2xl font-bold tabular-nums mt-1 ${isProfit ? 'text-green-400' : 'text-red-400'}`}>
+                  {hasPrice ? `${isProfit ? '+' : ''}$${pnl.toFixed(2)}` : '—'}
+                </p>
+                <div className="flex items-center justify-center gap-3 mt-1 text-[11px] text-gray-500">
+                  <span>Open: <span className="text-gray-300 font-mono">{formatPrice(trade.openPrice)}</span></span>
+                  <span>•</span>
+                  <span>Now: <span className="text-gray-300 font-mono">{formatPrice(currentPrice)}</span></span>
+                </div>
+              </div>
+
+              <p className="text-gray-500 text-xs mt-3">
                 This action cannot be undone
               </p>
             </div>
@@ -2688,7 +2729,8 @@ const TradingPage = () => {
             </div>
           </div>
         </div>
-      )}
+        )
+      })()}
 
       {/* iOS-Style Close All Trades Confirmation Modal */}
       {showCloseAllModal && (
