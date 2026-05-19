@@ -42,6 +42,7 @@ import logoImage from '../assets/logo.png'
 import cryptoLogo from '../assets/crypto_logo.png'
 import LanguageDropdown from '../components/LanguageDropdown'
 import UserHeader from '../components/UserHeader'
+import KycGateModal from '../components/KycGateModal'
 import { useLockDocumentScroll } from '../hooks/useLockDocumentScroll'
 
 const WalletPage = () => {
@@ -86,7 +87,8 @@ const WalletPage = () => {
   const [calculatingBonus, setCalculatingBonus] = useState(false)
   const fileInputRef = useRef(null)
   // Crypto deposit states
-  const [depositMethod, setDepositMethod] = useState('bank') // 'bank' or 'crypto'
+  const [depositMethod, setDepositMethod] = useState('choice') // 'choice' (initial screen) | 'upi' | 'qr'
+  const [submittingManualDeposit, setSubmittingManualDeposit] = useState(false)
   const [cryptoCurrencies, setCryptoCurrencies] = useState([])
   const [selectedCryptoCurrency, setSelectedCryptoCurrency] = useState('USDT')
   const [cryptoAmount, setCryptoAmount] = useState('')
@@ -99,6 +101,9 @@ const WalletPage = () => {
   const [submittingWithdraw, setSubmittingWithdraw] = useState(false)
   // Payment agreement checkbox
   const [agreeToPayment, setAgreeToPayment] = useState(false)
+  const [kycStatus, setKycStatus] = useState(null) // 'approved' | 'pending' | 'rejected' | null
+  const [showKycGate, setShowKycGate] = useState(false)
+  const [kycGateAction, setKycGateAction] = useState('deposit')
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
 
@@ -163,10 +168,29 @@ const WalletPage = () => {
       fetchWallet()
       fetchTransactions()
       fetchUserBankAccounts()
+      fetchKycStatus()
     }
     fetchPaymentMethods()
     fetchCurrencies()
   }, [user._id])
+
+  const fetchKycStatus = async () => {
+    try {
+      const res = await fetch(`${API_URL}/kyc/status/${user._id}`)
+      const data = await res.json()
+      setKycStatus(data?.kyc?.status || null)
+    } catch (error) {
+      console.error('Error fetching KYC status:', error)
+      setKycStatus(null)
+    }
+  }
+
+  const requireKyc = (action) => {
+    if (kycStatus === 'approved') return true
+    setKycGateAction(action)
+    setShowKycGate(true)
+    return false
+  }
 
   const fetchUserBankAccounts = async () => {
     try {
@@ -434,6 +458,80 @@ const WalletPage = () => {
       setError('Error submitting deposit. Please try again.')
     } finally {
       setUploadingScreenshot(false)
+    }
+  }
+
+  // Manual UPI / QR deposit submission (new flow — replaces crypto OxaPay UI)
+  const handleSubmitManualDeposit = async () => {
+    setError('')
+    if (!user._id) { setError('Please login to make a deposit'); return }
+    if (!amount || parseFloat(amount) < 10) { setError('Minimum deposit is $10'); return }
+    if (!transactionRef?.trim()) { setError('Transaction ID is required'); return }
+    if (!screenshot) { setError('Payment screenshot is required'); return }
+
+    const method = depositMethod === 'upi'
+      ? paymentMethods.find(m => m.type === 'UPI' && m.isActive)
+      : paymentMethods.find(m => m.type === 'QR Code' && m.isActive)
+
+    if (!method) {
+      setError('This payment method is not configured. Please contact support.')
+      return
+    }
+
+    try {
+      setSubmittingManualDeposit(true)
+
+      // Upload screenshot first
+      const formData = new FormData()
+      formData.append('screenshot', screenshot)
+      formData.append('userId', user._id)
+      const uploadRes = await fetch(`${API_URL}/upload/screenshot`, { method: 'POST', body: formData })
+      const uploadData = await uploadRes.json()
+      const screenshotUrl = uploadData?.success ? uploadData.url : null
+      if (!screenshotUrl) {
+        setError('Failed to upload screenshot. Please try again.')
+        return
+      }
+
+      // Submit deposit
+      const res = await fetch(`${API_URL}/wallet/deposit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user._id,
+          amount: parseFloat(amount),
+          localAmount: parseFloat(amount),
+          currency: 'USD',
+          currencySymbol: '$',
+          exchangeRate: 1,
+          markup: 0,
+          paymentMethod: method.type,
+          transactionRef: transactionRef.trim(),
+          screenshot: screenshotUrl
+        })
+      })
+      const data = await res.json()
+
+      if (res.ok) {
+        setSuccess('Deposit request submitted! Awaiting admin approval.')
+        setShowDepositModal(false)
+        setDepositMethod('choice')
+        setAmount('')
+        setTransactionRef('')
+        setScreenshot(null)
+        setScreenshotPreview(null)
+        fetchWallet()
+        fetchTransactions()
+        setTimeout(() => setSuccess(''), 3500)
+      } else {
+        // Backend should reject duplicate transactionRef with a clear message
+        setError(data.message || 'Failed to submit deposit')
+      }
+    } catch (err) {
+      console.error('Manual deposit error:', err)
+      setError('Error submitting deposit. Please try again.')
+    } finally {
+      setSubmittingManualDeposit(false)
     }
   }
 
@@ -810,8 +908,15 @@ const WalletPage = () => {
                 </button>
                 <button
                   onClick={() => {
+                    if (!requireKyc('deposit')) return
+                    setDepositMethod('choice')
+                    setAmount('')
+                    setTransactionRef('')
+                    setScreenshot(null)
+                    setScreenshotPreview(null)
                     setShowDepositModal(true)
                     setError('')
+                    setSuccess('')
                   }}
                   className={`flex items-center gap-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium ${isMobile ? 'px-4 py-2 text-sm' : 'px-6 py-3'} rounded-lg hover:bg-accent-green/90 transition-colors`}
                 >
@@ -819,6 +924,7 @@ const WalletPage = () => {
                 </button>
                 <button
                   onClick={() => {
+                    if (!requireKyc('withdraw')) return
                     setWithdrawPreviewAccepted(false)
                     setWithdrawOtpCode('')
                     setShowWithdrawPreviewModal(false)
@@ -975,191 +1081,262 @@ const WalletPage = () => {
         </main>
       </div>
 
-      {/* Deposit Modal */}
-      {showDepositModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className={`rounded-xl p-4 sm:p-6 w-full max-w-lg border min-h-[500px] max-h-[90vh] overflow-y-auto ${isDarkMode ? 'bg-dark-800 border-gray-700' : 'bg-white border-gray-300'}`}>
-            <div className="flex items-center justify-end mb-4">
-              <button 
-                onClick={() => {
-                  setShowDepositModal(false)
-                  setAmount('')
-                  setTransactionRef('')
-                  setSelectedPaymentMethod(null)
-                  setDepositMethod('bank')
-                  setCryptoAmount('')
-                  setCryptoPaymentData(null)
-                  setError('')
-                }}
-                className={isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}
-              >
+      {/* Deposit Modal — UPI / QR manual flow */}
+      {showDepositModal && (() => {
+        const upiMethod = paymentMethods.find(m => m.type === 'UPI' && m.isActive)
+        const qrMethod  = paymentMethods.find(m => m.type === 'QR Code' && m.isActive)
+        const activeMethod = depositMethod === 'upi' ? upiMethod : depositMethod === 'qr' ? qrMethod : null
+
+        const closeModal = () => {
+          setShowDepositModal(false)
+          setDepositMethod('choice')
+          setAmount('')
+          setTransactionRef('')
+          setScreenshot(null)
+          setScreenshotPreview(null)
+          setError('')
+        }
+
+        const copyUpi = async () => {
+          if (!upiMethod?.upiId) return
+          try {
+            await navigator.clipboard.writeText(upiMethod.upiId)
+            setSuccess('UPI ID copied!')
+            setTimeout(() => setSuccess(''), 1500)
+          } catch (e) {
+            setError('Could not copy UPI ID')
+          }
+        }
+
+        return (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className={`relative rounded-2xl w-full max-w-md border max-h-[92vh] overflow-y-auto ${isDarkMode ? 'bg-gradient-to-b from-[#0d1117] to-black border-[#D9A136]/25' : 'bg-white border-gray-300'} shadow-2xl shadow-black/50`}>
+            {/* Header */}
+            <div className={`flex items-center justify-between px-5 py-4 border-b ${isDarkMode ? 'border-white/5' : 'border-gray-200'}`}>
+              <div className="flex items-center gap-3">
+                {depositMethod !== 'choice' && (
+                  <button
+                    onClick={() => { setDepositMethod('choice'); setError('') }}
+                    className={`p-1.5 rounded-lg ${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/5' : 'text-gray-500 hover:bg-gray-100'} transition-colors`}
+                    aria-label="Back"
+                  >
+                    <ArrowLeft size={18} />
+                  </button>
+                )}
+                <h3 className={`font-semibold text-lg ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                  {depositMethod === 'choice' ? 'Choose Payment Method'
+                    : depositMethod === 'upi' ? 'Pay via UPI'
+                    : 'Pay via QR Code'}
+                </h3>
+              </div>
+              <button onClick={closeModal} className={isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'}>
                 <X size={20} />
               </button>
             </div>
 
-            {/* Crypto Logo - Full Width */}
-            {!cryptoPaymentData && (
-              <div className="mb-4">
-                <img src={cryptoLogo} alt="BULL4X Crypto" className="w-full h-32 object-cover rounded-lg" />
-              </div>
-            )}
+            <div className="p-5">
+              {/* CHOICE SCREEN */}
+              {depositMethod === 'choice' && (
+                <div className="space-y-3">
+                  <p className={`text-sm mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Select how you'd like to pay. Your deposit will be reviewed by an admin after submission.
+                  </p>
 
-            {/* Crypto Info Banner */}
-            {!cryptoPaymentData && (
-              <div className="mb-4 p-4 rounded-lg border border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-cyan-500/10">
-                <div className="flex items-center justify-between mb-3">
-                  <img src="/crypto/btc.svg" alt="BTC" className="w-10 h-10" />
-                  <img src="/crypto/eth.svg" alt="ETH" className="w-10 h-10" />
-                  <img src="/crypto/usdt.svg" alt="USDT" className="w-10 h-10" />
-                  <img src="/crypto/ltc.svg" alt="LTC" className="w-10 h-10" />
-                  <img src="/crypto/bnb.svg" alt="BNB" className="w-10 h-10" />
-                  <img src="/crypto/sol.svg" alt="SOL" className="w-10 h-10" />
+                  <button
+                    onClick={() => { setDepositMethod('upi'); setError('') }}
+                    className={`group w-full flex items-center gap-4 p-5 rounded-xl border transition-all duration-200 ${isDarkMode
+                      ? 'bg-white/[0.02] border-[#D9A136]/20 hover:border-[#D9A136]/50 hover:bg-[#D9A136]/5'
+                      : 'bg-gray-50 border-gray-200 hover:border-[#D9A136] hover:bg-yellow-50'}`}
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#D9A136]/20 to-[#F0C96F]/10 border border-[#D9A136]/30 flex items-center justify-center shrink-0">
+                      <Smartphone size={26} className="text-[#F0C96F]" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <p className={`font-semibold text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>UPI Payment</p>
+                      <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Pay using any UPI app</p>
+                    </div>
+                    <ArrowDownCircle size={20} className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} rotate-[-90deg] group-hover:text-[#D9A136] transition-colors`} />
+                  </button>
+
+                  <button
+                    onClick={() => { setDepositMethod('qr'); setError('') }}
+                    className={`group w-full flex items-center gap-4 p-5 rounded-xl border transition-all duration-200 ${isDarkMode
+                      ? 'bg-white/[0.02] border-[#D9A136]/20 hover:border-[#D9A136]/50 hover:bg-[#D9A136]/5'
+                      : 'bg-gray-50 border-gray-200 hover:border-[#D9A136] hover:bg-yellow-50'}`}
+                  >
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#D9A136]/20 to-[#F0C96F]/10 border border-[#D9A136]/30 flex items-center justify-center shrink-0">
+                      <QrCode size={26} className="text-[#F0C96F]" />
+                    </div>
+                    <div className="text-left flex-1">
+                      <p className={`font-semibold text-base ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>QR Payment</p>
+                      <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Scan QR code with any UPI app</p>
+                    </div>
+                    <ArrowDownCircle size={20} className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} rotate-[-90deg] group-hover:text-[#D9A136] transition-colors`} />
+                  </button>
                 </div>
-                <p className="text-blue-400 text-sm text-center">
-                  Pay with Bitcoin, Ethereum, USDT, and 100+ cryptocurrencies via OxaPay
-                </p>
-              </div>
-            )}
+              )}
 
-            {/* Crypto Content */}
-            {!cryptoPaymentData ? (
-                  <>
-                    {/* Amount Input */}
-                    <div className="mb-4">
-                      <label className="block text-gray-400 text-sm mb-2">Amount (USD)</label>
-                      <input
-                        type="number"
-                        value={cryptoAmount}
-                        onChange={(e) => setCryptoAmount(e.target.value)}
-                        placeholder="Minimum $10"
-                        className={`w-full rounded-lg px-4 py-3 placeholder-gray-500 focus:outline-none focus:border-orange-500 border ${isDarkMode ? 'bg-dark-700 border-gray-700 text-white' : 'bg-gray-50 border-gray-300 text-gray-900'}`}
-                      />
-                    </div>
-
-                    {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => {
-                          setShowDepositModal(false)
-                          setCryptoAmount('')
-                          setDepositMethod('bank')
-                          setError('')
-                        }}
-                        className={`flex-1 py-3 rounded-lg transition-colors ${isDarkMode ? 'bg-dark-700 text-white hover:bg-dark-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'}`}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleCryptoDeposit}
-                        disabled={creatingCryptoPayment || !cryptoAmount}
-                        className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {creatingCryptoPayment ? (
-                          <>
-                            <RefreshCw size={16} className="animate-spin" /> Creating...
-                          </>
-                        ) : (
-                          'Pay with Crypto'
-                        )}
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {/* Payment Created - Show Payment Details */}
-                    <div className={`p-4 rounded-lg mb-4 ${isDarkMode ? 'bg-dark-700' : 'bg-gray-100'}`}>
-                      <div className="text-center mb-4">
-                        <p className="text-green-500 font-medium mb-2">Payment Created Successfully!</p>
-                        <p className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                          ${cryptoAmount} USD
-                        </p>
-                        <p className="text-gray-400 text-sm">Pay with {cryptoPaymentData.currency}</p>
-                      </div>
-
-                      <div className="space-y-3 text-sm">
-                        {cryptoPaymentData.address && (
-                          <div className={`p-3 rounded-lg ${isDarkMode ? 'bg-dark-600' : 'bg-white'}`}>
-                            <p className="text-gray-400 text-xs mb-1">Wallet Address</p>
-                            <p className={`font-mono text-xs break-all ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                              {cryptoPaymentData.address}
-                            </p>
-                            <button
-                              onClick={() => {
-                                navigator.clipboard.writeText(cryptoPaymentData.address)
-                                setSuccess('Address copied!')
-                                setTimeout(() => setSuccess(''), 2000)
-                              }}
-                              className="mt-2 text-orange-500 text-xs flex items-center gap-1 hover:text-orange-400"
-                            >
-                              <Copy size={12} /> Copy Address
-                            </button>
-                          </div>
-                        )}
-
-                        {cryptoPaymentData.network && (
-                          <p className="text-gray-400">
-                            Network: <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>{cryptoPaymentData.network}</span>
-                          </p>
-                        )}
-
-                        <p className="text-gray-400">
-                          Track ID: <span className={isDarkMode ? 'text-white' : 'text-gray-900'}>{cryptoPaymentData.trackId}</span>
-                        </p>
-                      </div>
-                    </div>
-
-                    {success && <p className="text-green-500 text-sm mb-4 text-center">{success}</p>}
-                    {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
-
-                    {/* Agreement Checkbox */}
-                    <div className="mb-4">
-                      <label className="flex items-start gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={agreeToPayment}
-                          onChange={(e) => setAgreeToPayment(e.target.checked)}
-                          className="mt-1 w-4 h-4 rounded border-gray-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
-                        />
-                        <span className="text-gray-400 text-sm">
-                          I agree to the payment terms and confirm that I am making this deposit voluntarily. I understand that crypto transactions are irreversible.
-                        </span>
+              {/* UPI / QR FORM */}
+              {depositMethod !== 'choice' && (
+                <div className="space-y-4">
+                  {/* UPI ID display block — only on UPI tab */}
+                  {depositMethod === 'upi' && (
+                    <div>
+                      <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        UPI ID
                       </label>
-                    </div>
-
-                    <div className="flex flex-col gap-3">
-                      {cryptoPaymentData.payLink && (
-                        <a
-                          href={agreeToPayment ? cryptoPaymentData.payLink : '#'}
-                          target={agreeToPayment ? "_blank" : undefined}
-                          rel={agreeToPayment ? "noopener noreferrer" : undefined}
-                          onClick={(e) => {
-                            if (!agreeToPayment) {
-                              e.preventDefault()
-                            }
-                          }}
-                          className={`w-full bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-medium py-3 rounded-lg text-center ${agreeToPayment ? 'hover:opacity-90 cursor-pointer' : 'opacity-50 cursor-not-allowed'}`}
+                      <div className={`flex items-center gap-2 rounded-xl px-4 py-3 border ${isDarkMode ? 'bg-black/40 border-[#D9A136]/20' : 'bg-gray-50 border-gray-300'}`}>
+                        <span className={`font-mono text-sm flex-1 truncate ${isDarkMode ? 'text-[#F0C96F]' : 'text-gray-900'}`}>
+                          {upiMethod?.upiId || '—'}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={copyUpi}
+                          className={`p-2 rounded-lg shrink-0 transition-colors ${isDarkMode ? 'hover:bg-[#D9A136]/15 text-[#D9A136]' : 'hover:bg-yellow-100 text-yellow-700'}`}
+                          title="Copy UPI ID"
                         >
-                          Proceed to Payment
-                        </a>
-                      )}
-
-                      <button
-                        onClick={() => {
-                          setCryptoPaymentData(null)
-                          setCryptoAmount('')
-                          setError('')
-                        }}
-                        className="text-gray-400 text-sm hover:text-gray-300"
-                      >
-                        Create New Payment
-                      </button>
+                          <Copy size={16} />
+                        </button>
+                      </div>
                     </div>
-                  </>
-                )}
+                  )}
+
+                  {/* QR image display — only on QR tab */}
+                  {depositMethod === 'qr' && (
+                    <div>
+                      <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Scan QR Code
+                      </label>
+                      <div className={`flex items-center justify-center p-4 rounded-xl border ${isDarkMode ? 'bg-white border-[#D9A136]/20' : 'bg-white border-gray-300'}`}>
+                        {qrMethod?.qrCodeImage ? (
+                          <img src={qrMethod.qrCodeImage} alt="QR Code" className="w-48 h-48 object-contain" />
+                        ) : (
+                          <div className="w-48 h-48 flex items-center justify-center text-gray-500 text-sm">No QR configured</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Amount */}
+                  <div>
+                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Amount (USD)
+                    </label>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="Minimum $10"
+                      min="10"
+                      step="0.01"
+                      className={`w-full rounded-xl px-4 py-3 text-sm placeholder-gray-500 focus:outline-none border transition-colors ${isDarkMode
+                        ? 'bg-black/40 border-[#D9A136]/15 text-white focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20'
+                        : 'bg-gray-50 border-gray-300 text-gray-900 focus:border-[#D9A136]'}`}
+                    />
+                  </div>
+
+                  {/* Transaction ID */}
+                  <div>
+                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Transaction ID <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={transactionRef}
+                      onChange={(e) => setTransactionRef(e.target.value)}
+                      placeholder="Enter UPI transaction reference"
+                      className={`w-full rounded-xl px-4 py-3 text-sm font-mono placeholder-gray-500 focus:outline-none border transition-colors ${isDarkMode
+                        ? 'bg-black/40 border-[#D9A136]/15 text-white focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20'
+                        : 'bg-gray-50 border-gray-300 text-gray-900 focus:border-[#D9A136]'}`}
+                    />
+                    <p className={`text-[11px] mt-1.5 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                      Must be unique. Found in your UPI app after payment.
+                    </p>
+                  </div>
+
+                  {/* Screenshot Upload */}
+                  <div>
+                    <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Payment Screenshot <span className="text-red-400">*</span>
+                    </label>
+                    {screenshotPreview ? (
+                      <div className="relative">
+                        <img src={screenshotPreview} alt="Screenshot" className="w-full h-40 object-cover rounded-xl border border-[#D9A136]/20" />
+                        <button
+                          type="button"
+                          onClick={() => { setScreenshot(null); setScreenshotPreview(null) }}
+                          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center"
+                          aria-label="Remove screenshot"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className={`flex flex-col items-center justify-center gap-2 w-full py-6 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${isDarkMode
+                        ? 'border-[#D9A136]/25 hover:border-[#D9A136]/50 hover:bg-[#D9A136]/5 text-gray-400'
+                        : 'border-gray-300 hover:border-[#D9A136] hover:bg-yellow-50 text-gray-600'}`}>
+                        <Upload size={22} className={isDarkMode ? 'text-[#D9A136]' : 'text-[#D9A136]'} />
+                        <span className="text-sm font-medium">Click to upload screenshot</span>
+                        <span className="text-[11px]">PNG, JPG up to 5MB</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0]
+                            if (!file) return
+                            setScreenshot(file)
+                            const reader = new FileReader()
+                            reader.onloadend = () => setScreenshotPreview(reader.result)
+                            reader.readAsDataURL(file)
+                          }}
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Messages */}
+                  {error && (
+                    <div className="px-3.5 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium">
+                      {error}
+                    </div>
+                  )}
+                  {success && (
+                    <div className="px-3.5 py-2.5 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-medium">
+                      {success}
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={closeModal}
+                      disabled={submittingManualDeposit}
+                      className={`flex-1 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 ${isDarkMode ? 'bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10' : 'bg-gray-100 text-gray-900 hover:bg-gray-200'}`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSubmitManualDeposit}
+                      disabled={submittingManualDeposit}
+                      className="flex-1 py-3 rounded-xl bg-gradient-to-r from-[#D9A136] to-[#F0C96F] hover:from-[#F0C96F] hover:to-[#D9A136] text-black font-semibold shadow-lg shadow-[#D9A136]/25 hover:shadow-[#D9A136]/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {submittingManualDeposit ? (
+                        <><RefreshCw size={16} className="animate-spin" /> Submitting...</>
+                      ) : (
+                        'Submit'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      )}
+        )
+      })()}
 
       {/* Transfer Modal */}
       {showTransferModal && (
@@ -1513,6 +1690,14 @@ const WalletPage = () => {
           </div>
         </div>
       )}
+
+      {/* KYC Gate Modal — blocks deposit/withdraw until KYC approved */}
+      <KycGateModal
+        open={showKycGate}
+        onClose={() => setShowKycGate(false)}
+        action={kycGateAction}
+        kycStatus={kycStatus}
+      />
 
     </div>
   )

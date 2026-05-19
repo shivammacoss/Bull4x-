@@ -460,14 +460,18 @@ router.delete('/follow/:id/unfollow', async (req, res) => {
 router.get('/my-subscriptions/:userId', async (req, res) => {
   try {
     const subscriptions = await CopyFollower.find({ followerId: req.params.userId })
-      .populate('masterId', 'displayName stats approvedCommissionPercentage')
+      .populate('masterId', 'displayName stats approvedCommissionPercentage tradingAccountId')
       .populate('followerAccountId', 'accountId balance')
       .sort({ createdAt: -1 })
+
+    // Snapshot the live price cache once per request — used to compute live
+    // equity for each master we encounter below.
+    const currentPrices = Object.fromEntries(infowayService.getPriceCache())
 
     // Calculate actual profit/loss for each subscription from copy trades
     const subscriptionsWithStats = await Promise.all(subscriptions.map(async (sub) => {
       const subObj = sub.toObject()
-      
+
       // Get all copy trades for this subscription
       const copyTrades = await CopyTrade.find({
         followerUserId: req.params.userId,
@@ -503,6 +507,30 @@ router.get('/my-subscriptions/:userId', async (req, res) => {
         netPnl: totalProfit - totalLoss,
         openTrades,
         closedTrades
+      }
+
+      // Live equity of the master's trading account (balance + credit + floating PnL).
+      // Used by the frontend to size copy lots when copyMode === 'EQUITY_BASED'
+      // and to display the master's real equity in the Subscriptions tab.
+      subObj.masterEquity = null
+      subObj.masterBalance = null
+      const masterAccountId = sub.masterId?.tradingAccountId
+      if (masterAccountId) {
+        try {
+          const masterOpenTrades = await Trade.find({
+            tradingAccountId: masterAccountId,
+            status: 'OPEN'
+          })
+          const summary = await tradeEngine.getAccountSummary(
+            masterAccountId,
+            masterOpenTrades,
+            currentPrices
+          )
+          subObj.masterEquity = summary.equity
+          subObj.masterBalance = summary.balance
+        } catch (e) {
+          // Master account may have been deleted/archived — leave fields null
+        }
       }
 
       return subObj

@@ -42,6 +42,7 @@ import AdminEmailTemplates from './pages/AdminEmailTemplates'
 import AdminBonusManagement from './pages/AdminBonusManagement'
 import AdminBannerManagement from './pages/AdminBannerManagement'
 import Bull4xWebsiteLayout from './components/Bull4xWebsiteLayout'
+import KycGuard from './components/KycGuard'
 import Bull4xHome from './bull4xLanding/pages/Home'
 import Bull4xTrading from './bull4xLanding/pages/Trading'
 import Bull4xPlatforms from './bull4xLanding/pages/Platforms'
@@ -118,17 +119,24 @@ function App() {
         <Route path="/user/signup" element={<Signup />} />
         <Route path="/user/login" element={<Login />} />
         <Route path="/user/forgot-password" element={<ForgotPassword />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/mobile" element={<MobileTradingApp />} />
-        <Route path="/account" element={<Account />} />
-        <Route path="/wallet" element={<WalletPage />} />
-        <Route path="/orders" element={<OrderBook />} />
-        <Route path="/trade/:accountId" element={<TradingPage />} />
-        <Route path="/copytrade" element={<CopyTradePage />} />
-        <Route path="/ib" element={<IBPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/support" element={<SupportPage />} />
-        <Route path="/instructions" element={<InstructionsPage />} />
+        {/* Protected app routes — KycGuard blocks all of these (except /profile)
+            until the user's KYC is approved. /profile is the KYC submission page,
+            so it must stay accessible. */}
+        <Route element={<KycGuard />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/mobile" element={<MobileTradingApp />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/wallet" element={<WalletPage />} />
+          <Route path="/orders" element={<OrderBook />} />
+          <Route path="/trade/:accountId" element={<TradingPage />} />
+          <Route path="/copytrade" element={<CopyTradePage />} />
+          <Route path="/ib" element={<IBPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/support" element={<SupportPage />} />
+          <Route path="/instructions" element={<InstructionsPage />} />
+          <Route path="/buy-challenge" element={<BuyChallengePage />} />
+          <Route path="/challenge-dashboard" element={<ChallengeDashboardPage />} />
+        </Route>
         <Route element={<AdminHostGate />}>
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminOverview />} />
@@ -158,8 +166,6 @@ function App() {
           <Route path="/admin-employee" element={<AdminLogin />} />
           <Route path="/employee/login" element={<AdminLogin />} />
         </Route>
-        <Route path="/buy-challenge" element={<BuyChallengePage />} />
-        <Route path="/challenge-dashboard" element={<ChallengeDashboardPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/cookie-policy" element={<CookiePolicy />} />

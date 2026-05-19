@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { 
   LayoutDashboard, User, Wallet, Users, Copy, UserCircle, HelpCircle, FileText, LogOut,
-  TrendingUp, Star, UserPlus, Pause, Play, X, Search, Filter, ChevronRight, Trophy, Crown, DollarSign,
+  TrendingUp, Pencil, UserPlus, Pause, Play, X, Search, Filter, ChevronRight, Trophy, Crown, DollarSign,
   ArrowLeft, Home, Sun, Moon, Globe, Settings
 } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
@@ -12,6 +12,7 @@ import logoImage from '../assets/logo.png'
 import toast from 'react-hot-toast'
 import LanguageDropdown from '../components/LanguageDropdown'
 import UserHeader from '../components/UserHeader'
+import KycGateModal from '../components/KycGateModal'
 import { useLockDocumentScroll } from '../hooks/useLockDocumentScroll'
 import priceStreamService from '../services/priceStream'
 
@@ -61,6 +62,30 @@ const CopyTradePage = () => {
   const [withdrawing, setWithdrawing] = useState(false)
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+  // KYC gating
+  const [kycStatus, setKycStatus] = useState(null)
+  const [showKycGate, setShowKycGate] = useState(false)
+  const [kycGateAction, setKycGateAction] = useState('becomeMaster')
+
+  const fetchKycStatus = async () => {
+    if (!user._id) return
+    try {
+      const res = await fetch(`${API_URL}/kyc/status/${user._id}`)
+      const data = await res.json()
+      setKycStatus(data?.kyc?.status || null)
+    } catch (error) {
+      console.error('Error fetching KYC status:', error)
+      setKycStatus(null)
+    }
+  }
+
+  const requireKyc = (action) => {
+    if (kycStatus === 'approved') return true
+    setKycGateAction(action)
+    setShowKycGate(true)
+    return false
+  }
 
   const menuItems = [
     { name: 'Dashboard', label: t('nav.dashboard'), icon: LayoutDashboard, path: '/dashboard' },
@@ -154,6 +179,7 @@ const CopyTradePage = () => {
     fetchMyCopyTrades()
     fetchAccounts()
     fetchMyMasterProfile()
+    fetchKycStatus()
   }, [])
 
   useEffect(() => {
@@ -558,7 +584,7 @@ const CopyTradePage = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => setShowMasterModal(true)}
+                  onClick={() => { if (requireKyc('becomeMaster')) setShowMasterModal(true) }}
                   className={`bg-gradient-to-r from-blue-500 to-cyan-500 text-white ${isMobile ? 'px-4 py-2 text-sm w-full' : 'px-6 py-2'} rounded-lg font-medium hover:opacity-90 flex items-center justify-center gap-2`}
                 >
                   <Crown size={16} />
@@ -748,7 +774,7 @@ const CopyTradePage = () => {
                           </button>
                         ) : (
                           <button
-                            onClick={() => { setSelectedMaster(master); setShowFollowModal(true) }}
+                            onClick={() => { if (!requireKyc('followMaster')) return; setSelectedMaster(master); setShowFollowModal(true) }}
                             className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-2 rounded-lg font-medium hover:bg-accent-green/90"
                           >
                             {t('copytrade.follow')}
@@ -804,7 +830,7 @@ const CopyTradePage = () => {
                             className="p-2 bg-dark-700 rounded-lg hover:bg-blue-500/20"
                             title="Edit Settings"
                           >
-                            <Star size={16} className="text-blue-500" />
+                            <Pencil size={16} className="text-blue-500" />
                           </button>
                           <button
                             onClick={() => handlePauseResume(sub._id, sub.status)}
@@ -822,7 +848,17 @@ const CopyTradePage = () => {
                           </button>
                         </div>
                       </div>
-                      <div className={`grid grid-cols-2 sm:grid-cols-5 gap-3 mt-4 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                      <div className={`grid grid-cols-2 ${sub.copyMode === 'EQUITY_BASED' ? 'sm:grid-cols-6' : 'sm:grid-cols-5'} gap-3 mt-4 pt-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                        {sub.copyMode === 'EQUITY_BASED' && (
+                          <div>
+                            <p className="text-gray-500 text-xs">Master Equity</p>
+                            <p className="text-[#F0C96F] font-semibold">
+                              {sub.masterEquity != null
+                                ? `$${Number(sub.masterEquity).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                : '—'}
+                            </p>
+                          </div>
+                        )}
                         <div>
                           <p className="text-gray-500 text-xs">Total Trades</p>
                           <p className={`font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{sub.stats?.totalCopiedTrades || 0}</p>
@@ -1429,6 +1465,14 @@ const CopyTradePage = () => {
           </div>
         </div>
       )}
+
+      {/* KYC Gate Modal — blocks become-master / follow-master until KYC approved */}
+      <KycGateModal
+        open={showKycGate}
+        onClose={() => setShowKycGate(false)}
+        action={kycGateAction}
+        kycStatus={kycStatus}
+      />
     </div>
   )
 }

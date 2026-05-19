@@ -1844,7 +1844,24 @@ const TradingPage = () => {
                     )}
                   </>
                 )}
-                <span className="text-xs sm:text-sm text-gray-500">P/L: <span className={accountSummary.floatingPnl >= 0 ? 'text-green-500' : 'text-red-500'}>{accountSummary.floatingPnl >= 0 ? '+' : ''}${accountSummary.floatingPnl?.toFixed(2) || '0.00'}</span></span>
+                <span className="text-xs sm:text-sm text-gray-500">
+                  Equity:{' '}
+                  <span className={
+                    accountSummary.floatingPnl > 0
+                      ? 'text-green-500'
+                      : accountSummary.floatingPnl < 0
+                        ? 'text-red-500'
+                        : 'text-white'
+                  }>
+                    ${(accountSummary.equity ?? accountSummary.balance ?? 0).toFixed(2)}
+                  </span>
+                </span>
+                <span className="text-xs sm:text-sm text-gray-500">
+                  P/L:{' '}
+                  <span className={accountSummary.floatingPnl >= 0 ? 'text-green-500' : 'text-red-500'}>
+                    {accountSummary.floatingPnl >= 0 ? '+' : ''}${accountSummary.floatingPnl?.toFixed(2) || '0.00'}
+                  </span>
+                </span>
               </div>
             </div>
             
