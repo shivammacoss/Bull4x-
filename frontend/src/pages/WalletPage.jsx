@@ -89,6 +89,8 @@ const WalletPage = () => {
   // Crypto deposit states
   const [depositMethod, setDepositMethod] = useState('choice') // 'choice' (initial screen) | 'upi' | 'qr'
   const [submittingManualDeposit, setSubmittingManualDeposit] = useState(false)
+  const [selectedUpiMethodId, setSelectedUpiMethodId] = useState('')
+  const [selectedQrMethodId, setSelectedQrMethodId] = useState('')
   const [cryptoCurrencies, setCryptoCurrencies] = useState([])
   const [selectedCryptoCurrency, setSelectedCryptoCurrency] = useState('USDT')
   const [cryptoAmount, setCryptoAmount] = useState('')
@@ -469,9 +471,14 @@ const WalletPage = () => {
     if (!transactionRef?.trim()) { setError('Transaction ID is required'); return }
     if (!screenshot) { setError('Payment screenshot is required'); return }
 
-    const method = depositMethod === 'upi'
-      ? paymentMethods.find(m => m.type === 'UPI' && m.isActive)
-      : paymentMethods.find(m => m.type === 'QR Code' && m.isActive)
+    // If multiple methods are configured, use whichever the user selected; otherwise
+    // fall back to the first active method of that type.
+    const allMethodsOfType = depositMethod === 'upi'
+      ? paymentMethods.filter(m => m.type === 'UPI' && m.isActive)
+      : paymentMethods.filter(m => m.type === 'QR Code' && m.isActive)
+
+    const selectedId = depositMethod === 'upi' ? selectedUpiMethodId : selectedQrMethodId
+    const method = allMethodsOfType.find(m => m._id === selectedId) || allMethodsOfType[0]
 
     if (!method) {
       setError('This payment method is not configured. Please contact support.')
@@ -1083,8 +1090,13 @@ const WalletPage = () => {
 
       {/* Deposit Modal — UPI / QR manual flow */}
       {showDepositModal && (() => {
-        const upiMethod = paymentMethods.find(m => m.type === 'UPI' && m.isActive)
-        const qrMethod  = paymentMethods.find(m => m.type === 'QR Code' && m.isActive)
+        // All admin-configured active methods (dropdown-ready)
+        const upiMethods = paymentMethods.filter(m => m.type === 'UPI' && m.isActive)
+        const qrMethods  = paymentMethods.filter(m => m.type === 'QR Code' && m.isActive)
+
+        // Resolve currently picked method (or fall back to first one if user hasn't selected yet)
+        const upiMethod = upiMethods.find(m => m._id === selectedUpiMethodId) || upiMethods[0]
+        const qrMethod  = qrMethods.find(m => m._id === selectedQrMethodId) || qrMethods[0]
         const activeMethod = depositMethod === 'upi' ? upiMethod : depositMethod === 'qr' ? qrMethod : null
 
         const closeModal = () => {
@@ -1094,6 +1106,8 @@ const WalletPage = () => {
           setTransactionRef('')
           setScreenshot(null)
           setScreenshotPreview(null)
+          setSelectedUpiMethodId('')
+          setSelectedQrMethodId('')
           setError('')
         }
 
@@ -1179,12 +1193,29 @@ const WalletPage = () => {
               {/* UPI / QR FORM */}
               {depositMethod !== 'choice' && (
                 <div className="space-y-4">
-                  {/* UPI ID display block — only on UPI tab */}
+                  {/* UPI ID dropdown + display — only on UPI tab */}
                   {depositMethod === 'upi' && (
                     <div>
                       <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        UPI ID
+                        UPI ID {upiMethods.length > 1 && <span className="text-gray-500 normal-case font-normal">— pick one</span>}
                       </label>
+
+                      {/* Dropdown — only shown when admin has configured more than one UPI ID */}
+                      {upiMethods.length > 1 && (
+                        <select
+                          value={upiMethod?._id || ''}
+                          onChange={(e) => setSelectedUpiMethodId(e.target.value)}
+                          className={`w-full rounded-xl px-4 py-2.5 text-sm mb-2 focus:outline-none border transition-colors cursor-pointer ${isDarkMode
+                            ? 'bg-black/40 border-[#D9A136]/15 text-white focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20'
+                            : 'bg-gray-50 border-gray-300 text-gray-900 focus:border-[#D9A136]'}`}
+                        >
+                          {upiMethods.map(m => (
+                            <option key={m._id} value={m._id}>{m.upiId}</option>
+                          ))}
+                        </select>
+                      )}
+
+                      {/* Selected UPI ID with copy button */}
                       <div className={`flex items-center gap-2 rounded-xl px-4 py-3 border ${isDarkMode ? 'bg-black/40 border-[#D9A136]/20' : 'bg-gray-50 border-gray-300'}`}>
                         <span className={`font-mono text-sm flex-1 truncate ${isDarkMode ? 'text-[#F0C96F]' : 'text-gray-900'}`}>
                           {upiMethod?.upiId || '—'}
@@ -1201,12 +1232,31 @@ const WalletPage = () => {
                     </div>
                   )}
 
-                  {/* QR image display — only on QR tab */}
+                  {/* QR dropdown + image — only on QR tab */}
                   {depositMethod === 'qr' && (
                     <div>
                       <label className={`block text-xs font-semibold uppercase tracking-wider mb-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Scan QR Code
+                        Scan QR Code {qrMethods.length > 1 && <span className="text-gray-500 normal-case font-normal">— pick one</span>}
                       </label>
+
+                      {/* Dropdown — only shown when admin has configured more than one QR */}
+                      {qrMethods.length > 1 && (
+                        <select
+                          value={qrMethod?._id || ''}
+                          onChange={(e) => setSelectedQrMethodId(e.target.value)}
+                          className={`w-full rounded-xl px-4 py-2.5 text-sm mb-2 focus:outline-none border transition-colors cursor-pointer ${isDarkMode
+                            ? 'bg-black/40 border-[#D9A136]/15 text-white focus:border-[#D9A136]/60 focus:ring-2 focus:ring-[#D9A136]/20'
+                            : 'bg-gray-50 border-gray-300 text-gray-900 focus:border-[#D9A136]'}`}
+                        >
+                          {qrMethods.map((m, i) => (
+                            <option key={m._id} value={m._id}>
+                              {m.bankName || m.accountHolderName || `QR Code ${i + 1}`}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+
+                      {/* Selected QR image */}
                       <div className={`flex items-center justify-center p-4 rounded-xl border ${isDarkMode ? 'bg-white border-[#D9A136]/20' : 'bg-white border-gray-300'}`}>
                         {qrMethod?.qrCodeImage ? (
                           <img src={qrMethod.qrCodeImage} alt="QR Code" className="w-48 h-48 object-contain" />
