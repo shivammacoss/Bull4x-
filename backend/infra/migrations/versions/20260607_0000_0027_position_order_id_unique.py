@@ -28,7 +28,18 @@ def upgrade():
             WHERE rn > 1
         )
     """)
-    op.create_unique_constraint("uq_positions_order_id", "positions", ["order_id"])
+    # Idempotent: only add the constraint if it does not already exist
+    # (a partial/re-run deploy may have created it before the version was recorded).
+    op.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_constraint WHERE conname = 'uq_positions_order_id'
+            ) THEN
+                ALTER TABLE positions ADD CONSTRAINT uq_positions_order_id UNIQUE (order_id);
+            END IF;
+        END $$;
+    """)
 
 
 def downgrade():
