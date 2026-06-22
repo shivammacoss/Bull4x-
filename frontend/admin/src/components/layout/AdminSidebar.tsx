@@ -11,7 +11,7 @@ import {
   Settings, Sliders, BarChart3, Gift, Image, HeadphonesIcon,
   UserCog, ChevronDown, ChevronRight, Network, Share2,
   DollarSign, Percent, ArrowLeftRight, PanelLeftClose, PanelLeft,
-  Receipt, Layers, ShieldCheck, ScrollText, BookOpen, Activity,
+  Receipt, Layers, ShieldCheck, ScrollText, BookOpen, Activity, Bitcoin,
 } from 'lucide-react';
 
 /** Keys map nav items to live counts from pendingCountsStore. Static-table
@@ -43,6 +43,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Deposits', href: '/deposits', icon: Wallet, perm: 'deposits.view', countKey: 'depositsAndWithdrawals' },
   { label: 'Transactions', href: '/transactions', icon: Receipt, perm: 'deposits.view' },
   { label: 'Banks', href: '/banks', icon: Landmark, perm: 'banks.view' },
+  { label: 'Crypto Wallets', href: '/crypto-wallets', icon: Bitcoin, perm: 'banks.view' },
   { label: 'Account types', href: '/account-types', icon: Layers, perm: 'config.view' },
   {
     label: 'Config', icon: Sliders, perm: 'config.view',

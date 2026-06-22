@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)-5s [%(n
 logger = logging.getLogger("admin-api")
 
 from routes import (
-    auth, dashboard, users, trades, deposits, banks, book,
+    auth, dashboard, users, trades, deposits, banks, crypto_wallets, book,
     config as routes_config, instruments_admin, business, social, analytics, bonus, banners,
     support, employees, settings, transactions, kyc, account_types, user_audit_logs,
 )
@@ -71,6 +71,26 @@ async def _apply_startup_ddl():
             ))
             await conn.execute(text(
                 "ALTER TABLE algo_api_keys ADD COLUMN IF NOT EXISTS api_secret VARCHAR(128)"
+            ))
+            # Manual-crypto wallets (admin deposit addresses) + crypto markers on
+            # deposits/withdrawals. Auto-applied so the feature works without a
+            # separate migrate step.
+            await conn.execute(text("""
+                CREATE TABLE IF NOT EXISTS crypto_wallets (
+                    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                    coin VARCHAR(20) NOT NULL,
+                    network VARCHAR(40) NOT NULL,
+                    address VARCHAR(200) NOT NULL,
+                    is_active BOOLEAN DEFAULT true,
+                    sort_order INTEGER DEFAULT 0,
+                    created_at TIMESTAMPTZ DEFAULT now()
+                )
+            """))
+            await conn.execute(text(
+                "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS crypto_network VARCHAR(40)"
+            ))
+            await conn.execute(text(
+                "ALTER TABLE withdrawals ADD COLUMN IF NOT EXISTS crypto_network VARCHAR(40)"
             ))
             # spread_revenue mirrors migration 0026 — keeps the admin Analytics
             # "Spread" cell functional on hosts where alembic hasn't run yet.
@@ -144,6 +164,7 @@ app.include_router(trades.router, prefix=prefix)
 app.include_router(book.router, prefix=prefix)
 app.include_router(deposits.router, prefix=prefix)
 app.include_router(banks.router, prefix=prefix)
+app.include_router(crypto_wallets.router, prefix=prefix)
 app.include_router(routes_config.router, prefix=prefix)
 app.include_router(instruments_admin.router, prefix=prefix)
 app.include_router(business.router, prefix=prefix)

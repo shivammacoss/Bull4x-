@@ -31,6 +31,8 @@ interface Deposit {
   method: string;
   transaction_id: string;
   screenshot_url: string;
+  crypto_address?: string | null;
+  crypto_network?: string | null;
   status: 'pending' | 'approved' | 'auto_approved' | 'rejected';
   created_at: string;
   note?: string;
@@ -62,6 +64,8 @@ interface Withdrawal {
   account_number?: string;
   ifsc_code?: string;
   bank_details?: WithdrawalBankDetails | null;
+  crypto_address?: string | null;
+  crypto_network?: string | null;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
   note?: string;
@@ -192,6 +196,16 @@ function AuthImage({ src, token, alt, className }: { src: string; token: string 
 
 function withdrawalPayoutSummary(w: Withdrawal): string {
   const bd = w.bank_details;
+  // Crypto withdrawal — show network + address (the address admin must pay to).
+  if (w.crypto_address || (bd && typeof bd === 'object' && (bd as { crypto?: boolean }).crypto)) {
+    const net = w.crypto_network || (bd && typeof bd === 'object' ? String((bd as { crypto_network?: string }).crypto_network || '') : '');
+    const addr = w.crypto_address || (bd && typeof bd === 'object' ? String((bd as { crypto_address?: string }).crypto_address || '') : '');
+    const parts: string[] = [];
+    if (net) parts.push(net);
+    if (addr) parts.push(addr);
+    parts.push('QR attached');
+    return parts.join(' · ');
+  }
   if (!bd || typeof bd !== 'object') return '—';
   if (bd.oxapay_payout && typeof bd.oxapay_payout === 'string') return bd.oxapay_payout;
   if (bd.manual) {
@@ -574,7 +588,9 @@ export default function DepositsPage() {
                             <td className="px-4 py-2.5 text-xs text-text-primary text-right font-mono tabular-nums">
                               ${formatMoney(d.amount)}
                             </td>
-                            <td className="px-4 py-2.5 text-xs text-text-secondary">{d.method}</td>
+                            <td className="px-4 py-2.5 text-xs text-text-secondary">
+                              {d.crypto_network ? `Crypto · ${d.crypto_network}` : d.method}
+                            </td>
                             <td className="px-4 py-2.5 text-xs text-text-secondary font-mono tabular-nums">
                               {d.transaction_id}
                             </td>

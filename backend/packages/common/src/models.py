@@ -362,6 +362,20 @@ class BankAccount(Base):
     created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
 
 
+class CryptoWallet(Base):
+    """Admin-configured crypto deposit wallets. Users pay into these addresses;
+    the QR shown to users is generated client-side from `address`."""
+    __tablename__ = "crypto_wallets"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    coin = Column(String(20), nullable=False)       # e.g. USDT, BTC, ETH
+    network = Column(String(40), nullable=False)    # e.g. TRC20, ERC20, Bitcoin
+    address = Column(String(200), nullable=False)
+    is_active = Column(Boolean, default=True)
+    sort_order = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+
+
 class Deposit(Base):
     __tablename__ = "deposits"
 
@@ -377,6 +391,7 @@ class Deposit(Base):
     bank_account_id = Column(UUID(as_uuid=True), ForeignKey("bank_accounts.id"), nullable=True)
     crypto_tx_hash = Column(String(200))
     crypto_address = Column(String(200))
+    crypto_network = Column(String(40))   # set for manual-crypto deposits, e.g. "USDT-TRC20"
     rejection_reason = Column(Text)
     approved_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     approved_at = Column(DateTime(timezone=True))
@@ -397,6 +412,7 @@ class Withdrawal(Base):
     status = Column(String(20), default="pending")
     bank_details = Column(JSONB)
     crypto_address = Column(String(200))
+    crypto_network = Column(String(40))   # set for manual-crypto withdrawals, e.g. "USDT-TRC20"
     crypto_tx_hash = Column(String(200))
     rejection_reason = Column(Text)
     approved_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))

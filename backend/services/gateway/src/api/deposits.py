@@ -40,13 +40,25 @@ async def create_manual_deposit(
     amount: Decimal = Form(...),
     transaction_id: str = Form(...),
     file: UploadFile = File(...),
+    crypto_wallet_id: Optional[UUID] = Form(default=None),
 ):
-    """Bank / UPI manual deposit: user pays admin bank (see bank-details), uploads proof + reference."""
+    """Manual deposit (uploads proof + reference). If crypto_wallet_id is set the
+    user paid into an admin crypto wallet; otherwise it's a bank/UPI deposit."""
     return await wallet_service.create_manual_deposit(
         user_id=current_user["user_id"],
         account_id=account_id, amount=amount,
         transaction_id=transaction_id, file=file, db=db,
+        crypto_wallet_id=crypto_wallet_id,
     )
+
+
+@router.get("/crypto-wallets")
+async def list_crypto_wallets(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Active admin crypto deposit wallets (coin/network/address) for the user to pay into."""
+    return await wallet_service.list_crypto_wallets(db=db)
 
 
 @router.post("/withdraw", status_code=201)
@@ -67,12 +79,16 @@ async def create_manual_withdrawal(
     amount: Decimal = Form(...),
     upi_id: str = Form(default=""),
     bank_name: str = Form(default=""),
+    crypto_address: str = Form(default=""),
+    crypto_network: str = Form(default=""),
     file: UploadFile | None = File(default=None),
 ):
-    """Manual payout: user provides UPI ID + bank name (and/or a QR image) for finance to process (main wallet)."""
+    """Manual payout. Crypto: user provides their wallet address + network + QR image.
+    Bank/UPI: user provides UPI ID + bank name (and/or a QR image). Finance processes (main wallet)."""
     return await wallet_service.create_manual_withdrawal(
         user_id=current_user["user_id"],
         amount=amount, upi_id=upi_id, bank_name=bank_name,
+        crypto_address=crypto_address, crypto_network=crypto_network,
         file=file, db=db,
     )
 

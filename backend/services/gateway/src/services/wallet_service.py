@@ -13,7 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.common.src.models import (
-    BankAccount, BonusOffer, Deposit, FxRateConfig, Transaction, TradingAccount, User, Withdrawal,
+    BankAccount, BonusOffer, CryptoWallet, Deposit, FxRateConfig, Transaction, TradingAccount, User, Withdrawal,
 )
 from packages.common.src.notify import create_notification
 from packages.common.src.config import get_settings
@@ -370,6 +370,26 @@ async def create_deposit(req, user_id: UUID, db: AsyncSession) -> dict:
     return result
 
 
+async def list_crypto_wallets(db: AsyncSession) -> list[dict]:
+    """Active admin crypto deposit wallets shown to users (address + coin/network).
+    The QR is generated client-side from the address."""
+    rows = await db.execute(
+        select(CryptoWallet).where(CryptoWallet.is_active == True).order_by(
+            CryptoWallet.sort_order, CryptoWallet.created_at
+        )
+    )
+    return [
+        {
+            "id": str(w.id),
+            "coin": w.coin,
+            "network": w.network,
+            "address": w.address,
+            "label": f"{w.coin} · {w.network}",
+        }
+        for w in rows.scalars().all()
+    ]
+
+
 async def create_manual_deposit(
     user_id: UUID,
     account_id: UUID | None,
@@ -377,6 +397,7 @@ async def create_manual_deposit(
     transaction_id: str,
     file: UploadFile,
     db: AsyncSession,
+    crypto_wallet_id: UUID | None = None,
 ) -> dict:
     from packages.common.src.settings_store import get_bool_setting
     if not await get_bool_setting("allow_deposits", True):
@@ -410,7 +431,17 @@ async def create_manual_deposit(
     if len(content) > MAX_PROOF_BYTES:
         raise HTTPException(status_code=400, detail="File too large (max 10 MB)")
 
-    bank = await _get_bank_for_tier(amount, db)
+    # Crypto deposit → user paid into an admin crypto wallet. Bank deposit → tier routing.
+    crypto_wallet = None
+    bank = None
+    if crypto_wallet_id is not None:
+        cw = await db.execute(select(CryptoWallet).where(CryptoWallet.id == crypto_wallet_id))
+        crypto_wallet = cw.scalar_one_or_none()
+        if not crypto_wallet or not crypto_wallet.is_active:
+            raise HTTPException(status_code=400, detail="Selected crypto wallet is unavailable")
+    else:
+        bank = await _get_bank_for_tier(amount, db)
+
     try:
         user_dir = safe_join_under_base(_wallet_upload_root(), "deposits", str(user_id))
     except PathTraversalError:
@@ -435,6 +466,8 @@ async def create_manual_deposit(
         transaction_id=tid[:100],
         screenshot_url=str(out_path.resolve()),
         bank_account_id=bank.id if bank else None,
+        crypto_address=crypto_wallet.address if crypto_wallet else None,
+        crypto_network=(f"{crypto_wallet.coin}-{crypto_wallet.network}" if crypto_wallet else None),
         status="pending",
     )
     db.add(deposit)
@@ -677,6 +710,8 @@ async def create_manual_withdrawal(
     bank_name: str,
     file: UploadFile | None,
     db: AsyncSession,
+    crypto_address: str = "",
+    crypto_network: str = "",
 ) -> dict:
     from packages.common.src.settings_store import get_bool_setting
     if not await get_bool_setting("allow_withdrawals", True):
@@ -688,6 +723,9 @@ async def create_manual_withdrawal(
 
     upi = (upi_id or "").strip()
     bank = (bank_name or "").strip()
+    addr = (crypto_address or "").strip()
+    net = (crypto_network or "").strip()
+    is_crypto = bool(addr)
     qr_path_str: str | None = None
 
     if file and file.filename:
@@ -714,7 +752,13 @@ async def create_manual_withdrawal(
             raise HTTPException(status_code=503, detail="Could not save file") from e
         qr_path_str = str(out_path.resolve())
 
-    if not upi and not qr_path_str:
+    if is_crypto:
+        if not qr_path_str:
+            raise HTTPException(
+                status_code=400,
+                detail="Upload your wallet QR image for the crypto withdrawal.",
+            )
+    elif not upi and not qr_path_str:
         raise HTTPException(
             status_code=400,
             detail="Provide a UPI ID and/or upload a QR code image for manual payout.",
@@ -752,6 +796,10 @@ async def create_manual_withdrawal(
         "bank_name": bank or None,
         "user_payout_qr_path": qr_path_str,
     }
+    if is_crypto:
+        bank_details["crypto"] = True
+        bank_details["crypto_address"] = addr
+        bank_details["crypto_network"] = net or None
 
     withdrawal = Withdrawal(
         user_id=user_id,
@@ -759,6 +807,8 @@ async def create_manual_withdrawal(
         amount=amount,
         method="manual",
         bank_details=bank_details,
+        crypto_address=addr or None,
+        crypto_network=net or None,
         status="pending",
     )
     db.add(withdrawal)

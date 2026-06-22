@@ -34,6 +34,15 @@ class AdminRefreshRequest(BaseModel):
     access_token: str
 
 
+class CryptoWalletIn(BaseModel):
+    """Admin-configured crypto deposit wallet. QR is generated client-side from address."""
+    coin: str
+    network: str
+    address: str
+    is_active: bool = True
+    sort_order: int = 0
+
+
 class DashboardStats(BaseModel):
     total_users: int = 0
     active_traders: int = 0
@@ -274,6 +283,8 @@ class DepositOut(BaseModel):
     status: str
     transaction_id: Optional[str] = None
     screenshot_url: Optional[str] = None
+    crypto_address: Optional[str] = None
+    crypto_network: Optional[str] = None
     rejection_reason: Optional[str] = None
     created_at: Optional[datetime] = None
     user_email: Optional[str] = None
@@ -293,6 +304,7 @@ class WithdrawalOut(BaseModel):
     status: str
     bank_details: Optional[dict] = None
     crypto_address: Optional[str] = None
+    crypto_network: Optional[str] = None
     rejection_reason: Optional[str] = None
     created_at: Optional[datetime] = None
     user_email: Optional[str] = None

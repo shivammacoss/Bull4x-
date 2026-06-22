@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { clsx } from 'clsx';
 import toast from 'react-hot-toast';
+import { QRCodeCanvas } from 'qrcode.react';
 import { Card } from '@/components/ui/Card';
 import DashboardShell from '@/components/layout/DashboardShell';
 import DemoLockGate from '@/components/demo/DemoLockGate';
@@ -87,24 +88,27 @@ interface WalletListItem {
 const DEMO_FUNDING_MSG =
   'Demo accounts cannot deposit, withdraw, or transfer funds. Open a live account to use wallet funding.';
 
-const OXAPAY_METHOD = 'oxapay';
-
-/** UI grid — selection is sent with OxaPay / payout details for finance matching. */
-const CRYPTO_ASSETS = [
-  { id: 'BTC', label: 'BTC', sub: 'Bitcoin' },
-  { id: 'ETH', label: 'ETH', sub: 'Ethereum' },
-  { id: 'USDT_ERC', label: 'USDT', sub: 'ERC20' },
-  { id: 'USDC_ERC', label: 'USDC', sub: 'ERC20' },
-  { id: 'TRX', label: 'TRX', sub: 'Tron' },
-  { id: 'USDT_TRC', label: 'USDT', sub: 'TRC20' },
-  { id: 'USDC_TRC', label: 'USDC', sub: 'TRC20' },
-  { id: 'USDT_SOL', label: 'USDT', sub: 'SOL' },
-  { id: 'USDC_SOL', label: 'USDC', sub: 'SOL' },
-  { id: 'SOL', label: 'SOL', sub: 'Solana' },
-  { id: 'XRP', label: 'XRP', sub: 'XRP' },
+/** Fixed coin/network options for crypto withdrawals. Value matches the backend
+ *  crypto_network format ("COIN-NETWORK"). */
+const CRYPTO_NETWORKS = [
+  { value: 'USDT-TRC20', label: 'USDT · TRC20' },
+  { value: 'USDT-ERC20', label: 'USDT · ERC20' },
+  { value: 'USDC-ERC20', label: 'USDC · ERC20' },
+  { value: 'BTC-Bitcoin', label: 'BTC · Bitcoin' },
+  { value: 'ETH-ERC20', label: 'ETH · ERC20' },
+  { value: 'SOL-Solana', label: 'SOL · Solana' },
+  { value: 'XRP-XRP', label: 'XRP · XRP' },
 ] as const;
 
-type FundingChannel = 'oxapay' | 'manual';
+type FundingChannel = 'crypto' | 'manual';
+
+interface CryptoWallet {
+  id: string;
+  coin: string;
+  network: string;
+  address: string;
+  label: string;
+}
 
 interface ManualBankDetailsResponse {
   bank_name?: string;
@@ -222,10 +226,11 @@ function WalletPageContent() {
   const { limits: paymentLimits } = usePaymentLimits();
   const depositLimitsHint = formatLimitsHint(paymentLimits.deposit_min, paymentLimits.deposit_max);
   const withdrawLimitsHint = formatLimitsHint(paymentLimits.withdrawal_min, paymentLimits.withdrawal_max);
-  const [selectedCryptoDeposit, setSelectedCryptoDeposit] = useState<string>(CRYPTO_ASSETS[0].id);
-  const [selectedCryptoWithdraw, setSelectedCryptoWithdraw] = useState<string>(CRYPTO_ASSETS[0].id);
+  // Admin crypto deposit wallets + which one the user is paying into.
+  const [cryptoWallets, setCryptoWallets] = useState<CryptoWallet[]>([]);
+  const [selectedCryptoWalletId, setSelectedCryptoWalletId] = useState<string>('');
 
-  const [depositChannel, setDepositChannel] = useState<FundingChannel>('oxapay');
+  const [depositChannel, setDepositChannel] = useState<FundingChannel>('crypto');
   const [depositAmount, setDepositAmount] = useState('');
   const [depositTxId, setDepositTxId] = useState('');
   const [depositProofFile, setDepositProofFile] = useState<File | null>(null);
@@ -236,9 +241,10 @@ function WalletPageContent() {
   // disabled. The ref blocks the second call immediately.
   const depositInFlightRef = useRef(false);
 
-  const [withdrawChannel, setWithdrawChannel] = useState<FundingChannel>('oxapay');
+  const [withdrawChannel, setWithdrawChannel] = useState<FundingChannel>('crypto');
   const [withdrawAmount, setWithdrawAmount] = useState('');
-  const [withdrawOxapayDetails, setWithdrawOxapayDetails] = useState('');
+  const [withdrawCryptoNetwork, setWithdrawCryptoNetwork] = useState<string>(CRYPTO_NETWORKS[0].value);
+  const [withdrawCryptoAddress, setWithdrawCryptoAddress] = useState('');
   const [manualWithdrawUpi, setManualWithdrawUpi] = useState('');
   const [manualWithdrawBank, setManualWithdrawBank] = useState('');
   const [manualWithdrawAccNo, setManualWithdrawAccNo] = useState('');
@@ -387,16 +393,37 @@ function WalletPageContent() {
       currency: wallet?.currency || 'USD',
     }).format(n);
 
-  const selectedDepositCrypto = CRYPTO_ASSETS.find((c) => c.id === selectedCryptoDeposit) ?? CRYPTO_ASSETS[0];
-  const selectedWithdrawCrypto = CRYPTO_ASSETS.find((c) => c.id === selectedCryptoWithdraw) ?? CRYPTO_ASSETS[0];
+  const selectedCryptoWallet = cryptoWallets.find((w) => w.id === selectedCryptoWalletId) ?? null;
 
   useEffect(() => {
-    setDepositChannel(depositUiSection === 'crypto' ? 'oxapay' : 'manual');
+    setDepositChannel(depositUiSection === 'crypto' ? 'crypto' : 'manual');
   }, [depositUiSection]);
 
   useEffect(() => {
-    setWithdrawChannel(withdrawUiSection === 'crypto' ? 'oxapay' : 'manual');
+    setWithdrawChannel(withdrawUiSection === 'crypto' ? 'crypto' : 'manual');
   }, [withdrawUiSection]);
+
+  // Load admin crypto deposit wallets when the crypto deposit tab is shown.
+  useEffect(() => {
+    if (fundMainTab !== 'deposit' || depositUiSection !== 'crypto') return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const list = await api.get<CryptoWallet[]>('/wallet/crypto-wallets');
+        if (cancelled) return;
+        const wallets = Array.isArray(list) ? list : [];
+        setCryptoWallets(wallets);
+        setSelectedCryptoWalletId((prev) =>
+          prev && wallets.some((w) => w.id === prev) ? prev : (wallets[0]?.id ?? ''),
+        );
+      } catch {
+        if (!cancelled) setCryptoWallets([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [fundMainTab, depositUiSection]);
 
   const loadManualBankDetails = useCallback(async () => {
     try {
@@ -436,7 +463,7 @@ function WalletPageContent() {
       return;
     }
     setWithdrawAmount('');
-    setWithdrawOxapayDetails('');
+    setWithdrawCryptoAddress('');
     setWithdrawUiSection('crypto');
     setManualWithdrawUpi('');
     setManualWithdrawBank('');
@@ -470,7 +497,7 @@ function WalletPageContent() {
     setFundMainTab('withdraw');
     setWithdrawUiSection('crypto');
     setWithdrawAmount('');
-    setWithdrawOxapayDetails('');
+    setWithdrawCryptoAddress('');
     setManualWithdrawUpi('');
     setManualWithdrawBank('');
     setManualWithdrawAccNo('');
@@ -510,30 +537,50 @@ function WalletPageContent() {
     }
     withdrawInFlightRef.current = true;
     try {
-      if (withdrawChannel === 'oxapay') {
-        const detail = withdrawOxapayDetails.trim();
-        if (!detail) {
-          toast.error(
-            withdrawUiSection === 'crypto'
-              ? 'Enter your wallet address or payout details'
-              : 'Enter OxaPay payout details',
-          );
+      if (withdrawChannel === 'crypto') {
+        const addr = withdrawCryptoAddress.trim();
+        if (!addr) {
+          toast.error('Enter your crypto wallet address');
           return;
         }
-        const payout =
-          withdrawUiSection === 'crypto'
-            ? [`[${selectedCryptoWithdraw}]`, detail].join(' ').trim()
-            : detail;
+        if (!manualWithdrawQrFile) {
+          toast.error('Upload your wallet QR image');
+          return;
+        }
         setWithdrawSubmitting(true);
         try {
-          await api.post('/wallet/withdraw', {
-            amount: amt,
-            method: OXAPAY_METHOD,
-            bank_details: { oxapay_payout: payout },
+          const fd = new FormData();
+          fd.append('amount', String(amt));
+          fd.append('crypto_address', addr);
+          fd.append('crypto_network', withdrawCryptoNetwork);
+          fd.append('file', manualWithdrawQrFile);
+          const token = api.getToken();
+          const res = await fetch('/api/v1/wallet/withdraw/manual/', {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            body: fd,
           });
-          toast.success(`Withdrawal of $${amt.toLocaleString()} submitted — pending approval`);
+          const raw = await res.text();
+          let json: { detail?: unknown } = {};
+          try {
+            json = raw ? JSON.parse(raw) : {};
+          } catch {
+            throw new Error(raw.slice(0, 200) || `Request failed (${res.status})`);
+          }
+          if (!res.ok) {
+            const d = json.detail;
+            throw new Error(
+              typeof d === 'string'
+                ? d
+                : Array.isArray(d)
+                  ? d.map((x: { msg?: string }) => x.msg).join(', ')
+                  : 'Withdrawal failed',
+            );
+          }
+          toast.success(`Crypto withdrawal of $${amt.toLocaleString()} submitted — pending approval`);
           setWithdrawAmount('');
-          setWithdrawOxapayDetails('');
+          setWithdrawCryptoAddress('');
+          setManualWithdrawQrFile(null);
           void fetchData(true);
         } catch (err) {
           toast.error(err instanceof Error ? err.message : 'Withdrawal failed');
@@ -622,35 +669,16 @@ function WalletPageContent() {
     }
     depositInFlightRef.current = true;
     try {
-      if (depositChannel === 'oxapay') {
-        setDepositSubmitting(true);
-        try {
-          // Forward the user's crypto choice so OxaPay pre-selects the right
-          // pay currency on its checkout page. Without this OxaPay defaults
-          // to "all currencies" and the user has to pick again — losing the
-          // selection they already made on our deposit form.
-          const res = await api.post<{ id: string; status: string; amount: number; payment_url?: string }>(
-            '/wallet/deposit',
-            {
-              amount: amt,
-              method: OXAPAY_METHOD,
-              crypto_currency: selectedCryptoDeposit || undefined,
-            },
-          );
-          if (res.payment_url) {
-            toast.success('Redirecting to OxaPay…  Complete payment within 30 minutes.');
-            window.location.href = res.payment_url;
-            return;
-          }
-          toast.error('Failed to create OxaPay payment link. Please try again or contact support.');
-        } catch (err) {
-          toast.error(err instanceof Error ? err.message : 'Deposit failed');
-        }
+      if (depositChannel === 'crypto' && !selectedCryptoWalletId) {
+        toast.error('Select a crypto wallet to deposit into');
         return;
       }
-
       if (!depositTxId.trim()) {
-        toast.error('Enter your bank / UPI transaction or reference ID');
+        toast.error(
+          depositChannel === 'crypto'
+            ? 'Enter your transaction hash / ID'
+            : 'Enter your bank / UPI transaction or reference ID',
+        );
         return;
       }
       if (!depositProofFile) {
@@ -663,6 +691,9 @@ function WalletPageContent() {
         fd.append('amount', String(amt));
         fd.append('transaction_id', depositTxId.trim());
         fd.append('file', depositProofFile);
+        if (depositChannel === 'crypto' && selectedCryptoWalletId) {
+          fd.append('crypto_wallet_id', selectedCryptoWalletId);
+        }
         const token = api.getToken();
         const res = await fetch('/api/v1/wallet/deposit/manual', {
           method: 'POST',
@@ -1083,7 +1114,7 @@ function WalletPageContent() {
                               : 'border-transparent text-text-tertiary hover:text-text-primary'
                           )}
                         >
-                          {method === 'crypto' ? 'Crypto (OxaPay)' : 'Manual (Bank/UPI)'}
+                          {method === 'crypto' ? 'Crypto' : 'Bank / UPI'}
                         </button>
                       );
                     })}
@@ -1091,48 +1122,119 @@ function WalletPageContent() {
 
                   {depositUiSection === 'crypto' ? (
                     <>
-                      {/* Crypto deposit via OxaPay */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <label className="text-xs text-text-secondary">Amount (USD)</label>
-                          {depositLimitsHint ? (
-                            <span className="text-[10px] text-text-tertiary font-mono">{depositLimitsHint}</span>
+                      {/* Manual crypto deposit — pick wallet, pay to address/QR, upload proof */}
+                      {cryptoWallets.length === 0 ? (
+                        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
+                          <p className="text-xs text-amber-500/90">
+                            No crypto wallets are configured yet. Please contact support or use the Bank / UPI option.
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="space-y-1">
+                            <label className="text-xs text-text-secondary">Select coin / network</label>
+                            <select
+                              value={selectedCryptoWalletId}
+                              onChange={(e) => setSelectedCryptoWalletId(e.target.value)}
+                              className="w-full px-4 py-3 rounded-xl border border-border-primary bg-bg-secondary text-text-primary outline-none focus:border-accent/50 text-sm"
+                            >
+                              {cryptoWallets.map((w) => (
+                                <option key={w.id} value={w.id}>{w.label}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {selectedCryptoWallet ? (
+                            <div className="rounded-xl border border-border-primary bg-bg-secondary px-3 py-3 sm:px-4 space-y-3">
+                              <p className="text-xs font-bold text-text-primary">
+                                Send {selectedCryptoWallet.coin} ({selectedCryptoWallet.network}) to this address
+                              </p>
+                              <div className="flex justify-center">
+                                <div className="rounded-lg bg-white p-3">
+                                  <QRCodeCanvas value={selectedCryptoWallet.address} size={180} />
+                                </div>
+                              </div>
+                              <CopyField label="Wallet address" value={selectedCryptoWallet.address} wide />
+                              <p className="text-[11px] text-amber-500/90">
+                                Send only {selectedCryptoWallet.coin} on the {selectedCryptoWallet.network} network — wrong network means lost funds.
+                              </p>
+                            </div>
                           ) : null}
-                        </div>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary font-bold">$</span>
-                          <input
-                            type="number"
-                            min="1"
-                            step="0.01"
-                            value={depositAmount}
-                            onChange={(e) => setDepositAmount(e.target.value)}
-                            onWheel={(e) => e.currentTarget.blur()}
-                            placeholder="0.00"
-                            className="w-full pl-7 pr-4 py-3 rounded-xl border border-border-primary bg-bg-secondary text-text-primary placeholder:text-text-tertiary outline-none focus:border-accent/50 font-mono font-bold text-lg"
-                          />
-                        </div>
-                      </div>
 
-                      <div className="rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
-                        <p className="text-xs text-text-secondary leading-relaxed">
-                          You will be redirected to OxaPay to choose your cryptocurrency (BTC, ETH, USDT, USDC, etc.) and complete the payment securely.
-                        </p>
-                      </div>
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <label className="text-xs text-text-secondary">Amount (USD)</label>
+                              {depositLimitsHint ? (
+                                <span className="text-[10px] text-text-tertiary font-mono">{depositLimitsHint}</span>
+                              ) : null}
+                            </div>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary font-bold">$</span>
+                              <input
+                                type="number"
+                                min="1"
+                                step="0.01"
+                                value={depositAmount}
+                                onChange={(e) => setDepositAmount(e.target.value)}
+                                onWheel={(e) => e.currentTarget.blur()}
+                                placeholder="0.00"
+                                className="w-full pl-7 pr-4 py-3 rounded-xl border border-border-primary bg-bg-secondary text-text-primary placeholder:text-text-tertiary outline-none focus:border-accent/50 font-mono font-bold text-lg"
+                              />
+                            </div>
+                          </div>
 
-                      <button
-                        type="button"
-                        onClick={() => void submitDeposit()}
-                        disabled={demoFundingBlocked || depositSubmitting || !depositAmount}
-                        className={clsx(
-                          'w-full py-3.5 rounded-xl font-bold text-base transition-all active:scale-[0.99]',
-                          demoFundingBlocked || depositSubmitting || !depositAmount
-                            ? 'bg-bg-hover text-text-tertiary cursor-not-allowed'
-                            : 'bg-accent text-white hover:bg-[#5cffb8] shadow-neon-green-lg'
-                        )}
-                      >
-                        {depositSubmitting ? 'Processing…' : 'Pay with Crypto'}
-                      </button>
+                          <div className="space-y-1 min-w-0">
+                            <label className="text-xs text-text-secondary">
+                              Transaction hash / ID <span className="text-red-400">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={depositTxId}
+                              onChange={(e) => setDepositTxId(e.target.value)}
+                              placeholder="Paste the blockchain transaction hash"
+                              className="w-full px-4 py-3 rounded-xl border border-border-primary bg-bg-secondary text-text-primary placeholder:text-text-tertiary outline-none focus:border-accent/50 font-mono text-sm"
+                            />
+                          </div>
+
+                          <div className="space-y-1 min-w-0">
+                            <label className="text-xs text-text-secondary">
+                              Payment screenshot <span className="text-red-400">*</span>
+                            </label>
+                            <label
+                              className={clsx(
+                                'flex flex-col items-center justify-center w-full min-w-0 py-5 sm:py-6 px-2 rounded-xl border-2 border-dashed cursor-pointer transition-all',
+                                depositProofFile ? 'border-accent/40 bg-accent/5' : 'border-border-primary hover:border-accent/30',
+                              )}
+                            >
+                              <input
+                                type="file"
+                                accept=".jpg,.jpeg,.png,.pdf,.webp"
+                                className="hidden"
+                                onChange={(e) => setDepositProofFile(e.target.files?.[0] ?? null)}
+                              />
+                              {depositProofFile ? (
+                                <span className="text-sm font-medium text-[#2196f3] px-2 text-center">{depositProofFile.name}</span>
+                              ) : (
+                                <span className="text-xs text-[#666]">JPG, PNG, PDF, WEBP — max 10 MB</span>
+                              )}
+                            </label>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => void submitDeposit()}
+                            disabled={demoFundingBlocked || depositSubmitting || !depositAmount || !depositTxId.trim() || !depositProofFile}
+                            className={clsx(
+                              'w-full py-3.5 rounded-xl font-bold text-base transition-all active:scale-[0.99]',
+                              demoFundingBlocked || depositSubmitting || !depositAmount || !depositTxId.trim() || !depositProofFile
+                                ? 'bg-bg-hover text-text-tertiary cursor-not-allowed'
+                                : 'bg-accent text-white hover:bg-[#5cffb8] shadow-neon-green-lg',
+                            )}
+                          >
+                            {depositSubmitting ? 'Submitting…' : `Submit deposit${depositAmount ? ` — $${parseFloat(depositAmount || '0').toLocaleString()}` : ''}`}
+                          </button>
+                        </>
+                      )}
                     </>
                   ) : (
                     <>
@@ -1332,33 +1434,17 @@ function WalletPageContent() {
 
                   {withdrawUiSection === 'crypto' ? (
                     <>
-                      <div>
-                        <p className="text-xs text-text-tertiary mb-3 font-medium uppercase tracking-wide">Payment Method</p>
-                        {/* Featured selected coin */}
-                        <div className="rounded-xl border border-border-primary bg-bg-secondary p-4 mb-2">
-                          <p className="text-base font-bold text-text-primary font-mono flex items-center gap-2.5">
-                            <span className="text-xl leading-none" aria-hidden>
-                              {selectedWithdrawCrypto.id === 'BTC' ? '₿' : '◆'}
-                            </span>
-                            <span>
-                              {selectedWithdrawCrypto.label}{' '}
-                              <span className="text-text-tertiary text-sm font-normal">({selectedWithdrawCrypto.sub})</span>
-                            </span>
-                          </p>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          {CRYPTO_ASSETS.filter((c) => c.id !== selectedCryptoWithdraw).map((c) => (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={() => setSelectedCryptoWithdraw(c.id)}
-                              className="rounded-xl border border-border-primary bg-bg-secondary p-3.5 text-left transition-colors hover:border-border-secondary hover:bg-bg-hover"
-                            >
-                              <div className="font-bold text-text-primary font-mono text-sm">{c.label}</div>
-                              <div className="text-[11px] text-text-tertiary mt-0.5">({c.sub})</div>
-                            </button>
+                      <div className="space-y-1">
+                        <label className="text-xs text-text-secondary">Coin / network</label>
+                        <select
+                          value={withdrawCryptoNetwork}
+                          onChange={(e) => setWithdrawCryptoNetwork(e.target.value)}
+                          className="w-full px-4 py-3 rounded-xl border border-border-primary bg-bg-secondary text-text-primary outline-none focus:border-accent/50 text-sm"
+                        >
+                          {CRYPTO_NETWORKS.map((n) => (
+                            <option key={n.value} value={n.value}>{n.label}</option>
                           ))}
-                        </div>
+                        </select>
                       </div>
 
                       <div className="space-y-1">
@@ -1401,19 +1487,41 @@ function WalletPageContent() {
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <label className="text-xs text-text-secondary">Wallet address / payout details</label>
-                        <textarea
-                          value={withdrawOxapayDetails}
-                          onChange={(e) => setWithdrawOxapayDetails(e.target.value)}
-                          placeholder={
-                            withdrawUiSection === 'crypto'
-                              ? 'Your crypto wallet address or OxaPay payout details'
-                              : 'OxaPay ID, email, or instructions'
-                          }
-                          rows={3}
-                          className="w-full px-4 py-3 rounded-xl border border-border-primary bg-bg-secondary text-text-primary placeholder:text-text-tertiary outline-none focus:border-accent/50 text-sm resize-none"
+                      <div className="space-y-1 min-w-0">
+                        <label className="text-xs text-text-secondary">
+                          Your wallet address <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={withdrawCryptoAddress}
+                          onChange={(e) => setWithdrawCryptoAddress(e.target.value)}
+                          placeholder="Paste your crypto wallet address"
+                          className="w-full px-4 py-3 rounded-xl border border-border-primary bg-bg-secondary text-text-primary placeholder:text-text-tertiary outline-none focus:border-accent/50 font-mono text-sm"
                         />
+                      </div>
+
+                      <div className="space-y-1 min-w-0">
+                        <label className="text-xs text-text-secondary">
+                          Your wallet QR image <span className="text-red-400">*</span>
+                        </label>
+                        <label
+                          className={clsx(
+                            'flex flex-col items-center justify-center w-full min-w-0 py-5 sm:py-6 px-2 rounded-xl border-2 border-dashed cursor-pointer transition-all',
+                            manualWithdrawQrFile ? 'border-accent/40 bg-accent/5' : 'border-border-primary hover:border-accent/30',
+                          )}
+                        >
+                          <input
+                            type="file"
+                            accept=".jpg,.jpeg,.png,.pdf,.webp"
+                            className="hidden"
+                            onChange={(e) => setManualWithdrawQrFile(e.target.files?.[0] ?? null)}
+                          />
+                          {manualWithdrawQrFile ? (
+                            <span className="text-sm font-medium text-[#2196f3] px-2 text-center">{manualWithdrawQrFile.name}</span>
+                          ) : (
+                            <span className="text-xs text-[#666]">Upload your address QR — JPG, PNG, WEBP</span>
+                          )}
+                        </label>
                       </div>
                       <p className="text-[11px] text-text-tertiary">Processing time: up to 24 hours.</p>
 
@@ -1424,14 +1532,16 @@ function WalletPageContent() {
                           demoFundingBlocked ||
                           withdrawSubmitting ||
                           !withdrawAmount ||
-                          !withdrawOxapayDetails.trim()
+                          !withdrawCryptoAddress.trim() ||
+                          !manualWithdrawQrFile
                         }
                         className={clsx(
                           'w-full py-3.5 rounded-xl font-bold text-base transition-all active:scale-[0.99]',
                           demoFundingBlocked ||
                             withdrawSubmitting ||
                             !withdrawAmount ||
-                            !withdrawOxapayDetails.trim()
+                            !withdrawCryptoAddress.trim() ||
+                            !manualWithdrawQrFile
                             ? 'bg-bg-hover text-text-tertiary cursor-not-allowed'
                             : 'bg-accent text-white hover:bg-[#5cffb8] shadow-neon-green-lg',
                         )}
