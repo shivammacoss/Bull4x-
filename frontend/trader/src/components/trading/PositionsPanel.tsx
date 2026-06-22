@@ -1,0 +1,2498 @@
+'use client';
+
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { useTradingStore, type Position, type InstrumentInfo, type PendingOrder } from '@/stores/tradingStore';
+import { clsx } from 'clsx';
+import api from '@/lib/api/client';
+import toast from 'react-hot-toast';
+import { sounds, unlockAudio } from '@/lib/sounds';
+import {
+  RefreshCw,
+  Download,
+  Pencil,
+  Check,
+  X,
+  ChevronRight,
+  TrendingUp,
+  TrendingDown,
+  Layers,
+  Info,
+  LayoutGrid,
+  LayoutList,
+  ArrowRight,
+  Share2,
+} from 'lucide-react';
+import AccountSwitcher from '@/components/trading/AccountSwitcher';
+import ShareTradeModal from '@/components/trading/ShareTradeModal';
+import ModifyPositionCard from '@/components/trading/ModifyPositionCard';
+import { currencySymbol, formatMoney, formatMoneySign } from '@/lib/currency';
+
+interface ClosedTrade {
+  id: string;
+  symbol: string;
+  side: string;
+  lots: number;
+  open_price: number;
+  close_price: number;
+  pnl: number;
+  commission: number;
+  swap: number;
+  close_time: string;
+  close_reason?: string;
+  trade_type?: string;
+}
+
+type CloseModal = { id: string; symbol: string; side: string; lots: number; closeLots: string } | null;
+type SltpEdit = { positionId: string; sl: string; tp: string; field?: 'sl' | 'tp' } | null;
+type PendingEdit = {
+  orderId: string;
+  symbol: string;
+  side: 'buy' | 'sell';
+  /** Snapshot of order_type at edit-open time. Modify endpoint can't change
+   *  the type, so validation must use this original value. */
+  orderType: string;
+  price: string;
+  lots: string;
+  sl: string;
+  tp: string;
+} | null;
+type BulkCloseType = 'all' | 'profit' | 'loss';
+
+type TabId = 'open' | 'pending' | 'history';
+
+/** Maps API close_reason (sl, tp, manual, …) to a short label + badge style for history.
+ *  When a trigger price is available (SL/TP hits close at the level itself), the label
+ *  includes "@ <price>" so the user sees exactly where it fired. */
+function closeReasonBadge(
+  reason: string | null | undefined,
+  triggerPrice?: number,
+  digits: number = 5,
+): { label: string; className: string } {
+  const r = (reason || 'manual').toLowerCase();
+  const priceStr = triggerPrice != null && Number.isFinite(triggerPrice)
+    ? ` @ ${Number(triggerPrice).toFixed(digits)}`
+    : '';
+  if (r === 'sl' || r === 'stop_loss')
+    return { label: `Stop loss${priceStr}`, className: 'bg-sell/15 text-sell border border-sell/25' };
+  if (r === 'tp' || r === 'take_profit')
+    return { label: `Take profit${priceStr}`, className: 'bg-buy/15 text-buy border border-buy/25' };
+  if (r === 'admin')
+    return { label: 'Admin', className: 'bg-warning/15 text-warning border border-warning/25' };
+  if (r === 'margin' || r === 'liquidation' || r === 'margin_call' || r === 'stop_out')
+    return { label: 'Stop-out', className: 'bg-sell/20 text-sell border border-sell/30' };
+  if (r === 'master_deleted')
+    return { label: 'Master deleted', className: 'bg-warning/15 text-warning border border-warning/25' };
+  // Treat copy_close / copy / manual / anything else as manual close for clarity.
+  return { label: 'Manual close', className: 'bg-text-tertiary/15 text-text-tertiary border border-border-glass' };
+}
+
+function downloadCsv(filename: string, rows: (string | number)[][]) {
+  const esc = (c: string | number) => {
+    const s = String(c);
+    return `"${s.replace(/"/g, '""')}"`;
+  };
+  const body = rows.map((r) => r.map(esc).join(',')).join('\n');
+  const blob = new Blob([body], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+type PositionsPanelProps = {
+  /** Terminal: minimal borders / grid lines (clean table). */
+  variant?: 'default' | 'terminal';
+};
+
+function estimatePositionMargin(
+  pos: Position,
+  instruments: { symbol: string; contract_size: number }[],
+  leverage: number,
+): number | null {
+  const inst = instruments.find((i) => i.symbol === pos.symbol);
+  if (!inst || !leverage) return null;
+  const notional = pos.lots * inst.contract_size * pos.open_price;
+  return notional / leverage;
+}
+
+function formatPositionOpenedAt(iso: string | undefined): string {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleString(undefined, {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return '—';
+  }
+}
+
+function partitionCloneLots(pos: Position, instruments: InstrumentInfo[]): number {
+  const inst = instruments.find((i) => i.symbol === pos.symbol);
+  const step = inst?.lot_step ?? 0.01;
+  const minL = inst?.min_lot ?? 0.01;
+  const half = pos.lots / 2;
+  let snapped = Math.floor(half / step) * step;
+  snapped = Number(Math.max(minL, snapped).toFixed(8));
+  if (snapped >= pos.lots - 1e-12) return minL;
+  return snapped;
+}
+
+/** Lots for partial close by fraction of open size, snapped to instrument lot step. */
+function snapLotsForCloseFraction(
+  totalLots: number,
+  symbol: string,
+  instruments: InstrumentInfo[],
+  fraction: number,
+): number {
+  if (fraction >= 1 - 1e-12) return totalLots;
+  const inst = instruments.find((i) => i.symbol === symbol);
+  const step = inst?.lot_step ?? 0.01;
+  const minL = inst?.min_lot ?? 0.01;
+  const raw = totalLots * Math.min(1, Math.max(0, fraction));
+  let v = Math.floor(raw / step) * step;
+  v = Number(Math.max(minL, Math.min(v, totalLots)).toFixed(8));
+  if (v >= totalLots - 1e-12) {
+    const backoff = Number((totalLots - step).toFixed(8));
+    if (backoff >= minL - 1e-12) return backoff;
+    return totalLots;
+  }
+  return v;
+}
+
+function formatLotsInput(n: number): string {
+  const r = Number(n.toFixed(8));
+  return String(r);
+}
+
+/** Terminal card view: compact; close / partial close open the same modal as table layout. */
+function TerminalPositionStaticCard({
+  pos,
+  digits,
+  marginExposureLine,
+  swapsFeeLine,
+  sym,
+  onCloseFull,
+  onPartialClose,
+}: {
+  pos: Position;
+  digits: number;
+  marginExposureLine: string;
+  swapsFeeLine: string;
+  sym: string;
+  onCloseFull: () => void;
+  onPartialClose: () => void;
+}) {
+  const gross = pos.profit || 0;
+  const comm = pos.commission || 0;
+  const pnl = gross - comm;
+  const cur = pos.current_price;
+  const priceDown = cur != null && (pos.side === 'buy' ? cur < pos.open_price : cur > pos.open_price);
+
+  return (
+    <div className="w-full max-w-[300px] rounded-lg border border-border-primary bg-card overflow-hidden shadow-md">
+      <div className="px-2.5 pt-2 pb-2 flex justify-between gap-2 border-b border-border-primary">
+        <div className="min-w-0">
+          <div className="text-xs font-bold text-text-primary font-mono tracking-tight">{pos.symbol}</div>
+          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span
+              className={clsx(
+                'text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded',
+                pos.side === 'buy' ? 'bg-[#2196f3]/18 text-[#2196f3]' : 'bg-[#ff5252]/18 text-[#ff5252]',
+              )}
+            >
+              {pos.side}
+            </span>
+            <span className="text-[10px] text-text-tertiary tabular-nums">{pos.lots} Lots</span>
+            {comm > 0 && (
+              <span className="text-[9px] text-text-tertiary">comm: {sym}{comm.toFixed(2)}</span>
+            )}
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <div
+            className={clsx(
+              'inline-block px-2 py-0.5 rounded text-[10px] font-mono font-bold tabular-nums border',
+              pnl >= 0
+                ? 'bg-green-500/10 border-green-500/20 text-[#2196f3]'
+                : 'bg-red-500/10 border-red-500/20 text-[#ff5252]',
+            )}
+          >
+            {pnl >= 0 ? '+' : ''}{sym}{Math.abs(pnl).toFixed(2)}
+          </div>
+          <div className="flex justify-end gap-0.5 mt-1">
+            <span className="text-[8px] font-semibold uppercase px-1 py-0.5 rounded bg-bg-secondary text-text-tertiary">
+              SL
+            </span>
+            <span className="text-[8px] font-semibold uppercase px-1 py-0.5 rounded bg-bg-secondary text-text-tertiary">
+              TP
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-2.5 py-1.5 flex items-start justify-between gap-1.5">
+        <div className="min-w-0 flex-1">
+          <div className="text-[8px] font-bold uppercase tracking-wide text-text-tertiary">Entry price</div>
+          <div className="text-[11px] font-mono font-semibold text-text-primary tabular-nums leading-tight">
+            {pos.open_price.toFixed(digits)}
+          </div>
+          <div className="text-[8px] text-text-tertiary mt-0.5 leading-tight">{formatPositionOpenedAt(pos.created_at)}</div>
+        </div>
+        <ArrowRight className="w-3 h-3 text-text-tertiary shrink-0 mt-3" aria-hidden />
+        <div className="min-w-0 flex-1 text-right">
+          <div className="text-[8px] font-bold uppercase tracking-wide text-text-tertiary">Current price</div>
+          <div className="text-[11px] font-mono font-semibold tabular-nums inline-flex items-center justify-end gap-0.5 text-text-primary leading-tight">
+            {cur != null ? cur.toFixed(digits) : '—'}
+            {cur != null &&
+              (priceDown ? (
+                <TrendingDown className="w-3 h-3 text-[#ff5252]" aria-hidden />
+              ) : (
+                <TrendingUp className="w-3 h-3 text-[#2196f3]" aria-hidden />
+              ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="px-2.5 pb-1.5 grid grid-cols-2 gap-x-2 gap-y-1 text-[10px]">
+        <div>
+          <div className="text-[8px] font-semibold uppercase text-text-tertiary mb-px">Stop loss</div>
+          <div className="font-mono text-text-primary leading-tight">
+            {pos.stop_loss != null ? pos.stop_loss.toFixed(digits) : '—'}
+          </div>
+        </div>
+        <div>
+          <div className="text-[8px] font-semibold uppercase text-text-tertiary mb-px">Take profit</div>
+          <div className="font-mono text-text-primary leading-tight">
+            {pos.take_profit != null ? pos.take_profit.toFixed(digits) : '—'}
+          </div>
+        </div>
+        <div>
+          <div className="text-[8px] font-semibold uppercase text-text-tertiary mb-px">Swaps / Fee</div>
+          <div className="font-mono text-text-secondary tabular-nums text-[10px] leading-tight">{swapsFeeLine}</div>
+        </div>
+        <div>
+          <div className="text-[8px] font-semibold uppercase text-text-tertiary mb-px">Margin / Exposure</div>
+          <div className="font-mono text-text-secondary tabular-nums text-[10px] leading-tight break-all">
+            {marginExposureLine}
+          </div>
+        </div>
+      </div>
+
+      <p className="px-2.5 pb-1 text-[8px] text-text-tertiary font-mono truncate" title={pos.id}>
+        POSITION ID: {pos.id}
+      </p>
+
+      <div className="px-2.5 pb-2 pt-0.5 flex flex-col gap-1.5 border-t border-border-primary">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onCloseFull();
+          }}
+          className="w-full py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wide bg-[#ff5252]/12 text-[#ff5252] border border-[#ff5252]/35 hover:bg-[#ff5252]/18 transition-colors"
+        >
+          Close
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onPartialClose();
+          }}
+          className="w-full py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wide bg-bg-secondary text-text-primary border border-border-primary hover:bg-bg-hover transition-colors"
+        >
+          Partial close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function PositionsPanel({ variant = 'default' }: PositionsPanelProps) {
+  const isTerminal = variant === 'terminal';
+  const {
+    positions,
+    pendingOrders,
+    activeAccount,
+    accounts,
+    removePosition,
+    refreshPositions,
+    refreshPendingOrders,
+    refreshAccount,
+    instruments,
+    prices,
+  } = useTradingStore();
+  const sym = currencySymbol(activeAccount?.currency);
+  const [activeTab, setActiveTab] = useState<TabId>('open');
+  const [historyTrades, setHistoryTrades] = useState<ClosedTrade[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [closeModal, setCloseModal] = useState<CloseModal>(null);
+  const [closeSubmitting, setCloseSubmitting] = useState(false);
+  const [toolbarBusy, setToolbarBusy] = useState(false);
+  const [sltpEdit, setSltpEdit] = useState<SltpEdit>(null);
+  const [sltpSaving, setSltpSaving] = useState(false);
+  const [pendingEdit, setPendingEdit] = useState<PendingEdit>(null);
+  const [pendingEditSaving, setPendingEditSaving] = useState(false);
+  const [bulkMenuOpen, setBulkMenuOpen] = useState(false);
+  const [bulkConfirm, setBulkConfirm] = useState<BulkCloseType | null>(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  /** Anchor button + portal popover refs. We render the popover via createPortal
+   *  so an `overflow: hidden` ancestor (terminal panel chrome) can't clip it,
+   *  and we compute its position from the button's bounding rect. */
+  const bulkBtnRef = useRef<HTMLButtonElement>(null);
+  const bulkPopoverRef = useRef<HTMLDivElement>(null);
+  const [bulkMenuRect, setBulkMenuRect] = useState<{ top: number; right: number } | null>(null);
+  /** Terminal open tab: static trade cards vs compact table. */
+  const [terminalOpenCardView, setTerminalOpenCardView] = useState(false);
+  const [sharePosition, setSharePosition] = useState<Position | null>(null);
+  const [historyFilter, setHistoryFilter] = useState<'all' | 'self' | 'copy'>('all');
+
+  const filteredHistory = historyFilter === 'all'
+    ? historyTrades
+    : historyFilter === 'copy'
+      ? historyTrades.filter((t) => t.trade_type === 'copy_trade')
+      : historyTrades.filter((t) => t.trade_type !== 'copy_trade');
+
+  const totalPnl = positions.reduce((s, p) => s + (p.profit || 0), 0);
+
+  const profitPositions = positions.filter((p) => (p.profit || 0) > 0);
+  const lossPositions = positions.filter((p) => (p.profit || 0) < 0);
+
+  useEffect(() => {
+    if (!bulkMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Node;
+      // Click anywhere outside BOTH the trigger button and the portal popover closes the menu.
+      if (
+        (bulkBtnRef.current && bulkBtnRef.current.contains(target)) ||
+        (bulkPopoverRef.current && bulkPopoverRef.current.contains(target))
+      ) {
+        return;
+      }
+      setBulkMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    const onScrollOrResize = () => {
+      if (bulkBtnRef.current) {
+        const r = bulkBtnRef.current.getBoundingClientRect();
+        setBulkMenuRect({ top: r.bottom + 6, right: window.innerWidth - r.right });
+      }
+    };
+    window.addEventListener('scroll', onScrollOrResize, true);
+    window.addEventListener('resize', onScrollOrResize);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      window.removeEventListener('scroll', onScrollOrResize, true);
+      window.removeEventListener('resize', onScrollOrResize);
+    };
+  }, [bulkMenuOpen]);
+
+  useEffect(() => {
+    if (activeTab !== 'open') setBulkMenuOpen(false);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!closeModal && !bulkConfirm && !pendingEdit) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.preventDefault();
+      if (bulkConfirm) setBulkConfirm(null);
+      else if (pendingEdit && !pendingEditSaving) setPendingEdit(null);
+      else setCloseModal(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [closeModal, bulkConfirm, pendingEdit, pendingEditSaving]);
+
+  const getDigits = (symbol: string) => {
+    const inst = instruments.find((i) => i.symbol === symbol);
+    return inst?.digits ?? 5;
+  };
+
+  const accountLabel = (accountId: string) => {
+    const a = accounts.find((x) => x.id === accountId);
+    return a?.account_number ?? accountId.slice(0, 8);
+  };
+
+  const openPendingEdit = (order: PendingOrder) => {
+    const d = getDigits(order.symbol);
+    setPendingEdit({
+      orderId: order.id,
+      symbol: order.symbol,
+      side: order.side,
+      orderType: order.order_type,
+      price: Number.isFinite(order.price) ? order.price.toFixed(d) : '',
+      lots: Number.isFinite(order.lots) ? String(order.lots) : '',
+      sl: order.stop_loss != null ? order.stop_loss.toFixed(d) : '',
+      tp: order.take_profit != null ? order.take_profit.toFixed(d) : '',
+    });
+  };
+
+  const savePendingEdit = async () => {
+    if (!pendingEdit) return;
+    const { orderId, symbol, side, orderType, price, lots, sl, tp } = pendingEdit;
+
+    const priceNum = parseFloat(price);
+    const lotsNum = parseFloat(lots);
+    const slNum = sl.trim() === '' ? undefined : parseFloat(sl);
+    const tpNum = tp.trim() === '' ? undefined : parseFloat(tp);
+
+    if (!Number.isFinite(priceNum) || priceNum <= 0) {
+      toast.error('Enter a valid price');
+      return;
+    }
+    if (!Number.isFinite(lotsNum) || lotsNum <= 0) {
+      toast.error('Enter a valid lot size');
+      return;
+    }
+    if (slNum !== undefined && (!Number.isFinite(slNum) || slNum <= 0)) {
+      toast.error('Enter a valid stop loss (or clear the field)');
+      return;
+    }
+    if (tpNum !== undefined && (!Number.isFinite(tpNum) || tpNum <= 0)) {
+      toast.error('Enter a valid take profit (or clear the field)');
+      return;
+    }
+
+    // Price vs current market — same rules as place-order.
+    // stop_limit is rare and has a secondary price; leave its validation to the server.
+    const tick = prices[symbol];
+    if (tick && (orderType === 'limit' || orderType === 'stop')) {
+      if (orderType === 'limit') {
+        if (side === 'buy' && priceNum >= tick.ask) {
+          toast.error(`Buy limit must be below current ask (${tick.ask})`);
+          return;
+        }
+        if (side === 'sell' && priceNum <= tick.bid) {
+          toast.error(`Sell limit must be above current bid (${tick.bid})`);
+          return;
+        }
+      } else {
+        if (side === 'buy' && priceNum <= tick.ask) {
+          toast.error(`Buy stop must be above current ask (${tick.ask})`);
+          return;
+        }
+        if (side === 'sell' && priceNum >= tick.bid) {
+          toast.error(`Sell stop must be below current bid (${tick.bid})`);
+          return;
+        }
+      }
+    }
+
+    // SL / TP vs the new open price (backend skips these checks for pending).
+    if (slNum !== undefined) {
+      if (side === 'buy' && slNum >= priceNum) {
+        toast.error('Buy stop loss must be below the open price');
+        return;
+      }
+      if (side === 'sell' && slNum <= priceNum) {
+        toast.error('Sell stop loss must be above the open price');
+        return;
+      }
+    }
+    if (tpNum !== undefined) {
+      if (side === 'buy' && tpNum <= priceNum) {
+        toast.error('Buy take profit must be above the open price');
+        return;
+      }
+      if (side === 'sell' && tpNum >= priceNum) {
+        toast.error('Sell take profit must be below the open price');
+        return;
+      }
+    }
+
+    setPendingEditSaving(true);
+    try {
+      await api.put(`/orders/${orderId}`, {
+        price: priceNum,
+        lots: lotsNum,
+        stop_loss: slNum,
+        take_profit: tpNum,
+      });
+      toast.success('Order updated');
+      setPendingEdit(null);
+      void refreshPendingOrders();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Failed to update order');
+    } finally {
+      setPendingEditSaving(false);
+    }
+  };
+
+  // `silent` skips the loading spinner — used by the background poll / trade
+  // events so an auto-refresh doesn't flash a spinner over data that's already
+  // on screen. The first manual/tab-switch load still shows the spinner.
+  const loadHistory = useCallback(async (silent = false) => {
+    // Without an active account we can't sensibly scope history — bail early
+    // rather than fetch every account (which would dump old MAM-follower
+    // copy mirrors into the terminal's Closed Positions tab while the user
+    // is sitting on a real/live account).
+    if (!activeAccount?.id) {
+      setHistoryTrades([]);
+      return;
+    }
+    if (!silent) setHistoryLoading(true);
+    try {
+      const res = await api.get<{ items?: ClosedTrade[] } | ClosedTrade[]>('/portfolio/trades', {
+        page: '1',
+        per_page: '200',
+        account_id: activeAccount.id,
+      });
+      setHistoryTrades(
+        (res && typeof res === 'object' && 'items' in res ? res.items : Array.isArray(res) ? res : []) || [],
+      );
+    } catch {
+      /* keep whatever is on screen on a transient failure — don't blank it */
+    } finally {
+      if (!silent) setHistoryLoading(false);
+    }
+  }, [activeAccount?.id]);
+
+  // Re-run when the user switches accounts too, so the history pane never
+  // shows trades from a previously-selected account.
+  useEffect(() => {
+    if (activeTab === 'history') void loadHistory();
+  }, [activeTab, loadHistory, activeAccount?.id]);
+
+  // Robust fallback: while the user is viewing Closed Positions, silently
+  // re-pull history every 2s. The trade socket already pushes instant updates,
+  // but if it's disconnected (proxy/idle drop) this guarantees TP/SL/manual
+  // closes still land in History fast without a manual refresh.
+  useEffect(() => {
+    if (activeTab !== 'history' || !activeAccount?.id) return;
+    const id = setInterval(() => void loadHistory(true), 2000);
+    return () => clearInterval(id);
+  }, [activeTab, activeAccount?.id, loadHistory]);
+
+  // Instant history refresh: the trading layout dispatches 'trade:update' the
+  // moment a position closes (TP/SL/manual/stop-out) or a pending order fills.
+  // Reload the closed-positions list right away when the user is viewing it,
+  // so executed trades show up without a manual refresh or tab switch.
+  useEffect(() => {
+    const onTradeUpdate = () => {
+      if (activeTab === 'history') void loadHistory(true);
+    };
+    window.addEventListener('trade:update', onTradeUpdate);
+    return () => window.removeEventListener('trade:update', onTradeUpdate);
+  }, [activeTab, loadHistory]);
+
+  const closePosition = (id: string, lots?: number) => {
+    unlockAudio();
+    // Close modal instantly — don't wait for API
+    setCloseModal(null);
+    setCloseSubmitting(false);
+
+    const body: Record<string, unknown> = {};
+    if (lots) body.lots = lots;
+
+    // Optimistic: remove from UI immediately for full close
+    if (!lots) removePosition(id);
+
+    void (async () => {
+      try {
+        const res = await api.post<{ profit?: number; close_price?: number; remaining_lots?: number }>(
+          `/positions/${id}/close`,
+          body,
+          { timeoutMs: 8_000 },
+        );
+        const pnl = res.profit ?? 0;
+        const sign = pnl >= 0 ? '+' : '';
+        pnl >= 0 ? sounds.profit() : sounds.loss();
+
+        if (res.remaining_lots && res.remaining_lots > 0) {
+          toast.success(`Partial @ ${res.close_price} | P&L: ${sign}${sym}${Math.abs(pnl).toFixed(2)} | ${res.remaining_lots} lots left`);
+        } else {
+          toast.success(`Closed @ ${res.close_price} | P&L: ${sign}${sym}${Math.abs(pnl).toFixed(2)}`);
+        }
+        Promise.all([refreshPositions(), refreshAccount(), loadHistory()]).catch(() => {});
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Close failed';
+        // Distinguish transient price-feed issues from real failures so the
+        // user knows it's worth retrying instead of contacting support.
+        const isTransient = /unavailable|temporarily|timeout|503/i.test(msg);
+        toast.error(
+          isTransient
+            ? `${msg} — please try Close again`
+            : msg,
+          { duration: 5000 },
+        );
+        // Optimistic removal will be undone by the refetch below if the
+        // position is still open server-side.
+        refreshPositions().catch(() => {});
+      }
+    })();
+  };
+
+  const executeBulkClose = async (type: BulkCloseType) => {
+    setBulkConfirm(null);
+    setBulkBusy(true);
+    const targets =
+      type === 'all' ? positions : type === 'profit' ? profitPositions : lossPositions;
+    if (targets.length === 0) {
+      toast(
+        type === 'profit'
+          ? 'No profitable positions to close'
+          : type === 'loss'
+            ? 'No losing positions to close'
+            : 'No open positions',
+        { icon: 'ℹ️' },
+      );
+      setBulkBusy(false);
+      return;
+    }
+
+    // Optimistic: clear from UI immediately so the user sees the close happen
+    // without waiting for the network. The final toast at the bottom fires
+    // once with a P&L summary — no per-position toasts, no spinner toast.
+    for (const pos of targets) removePosition(pos.id);
+
+    const results = await Promise.allSettled(
+      targets.map((pos) =>
+        api.post<{ profit?: number; close_price?: number }>(
+          `/positions/${pos.id}/close`,
+          {},
+          { timeoutMs: 10_000 },
+        ),
+      ),
+    );
+
+    let closed = 0;
+    let failed = 0;
+    let totalPnl = 0;
+    // Track which symbols failed so the user can see them in the toast
+    // instead of having to scroll the table to figure out what didn't close.
+    const failedSymbols: string[] = [];
+    results.forEach((r, idx) => {
+      if (r.status === 'fulfilled') {
+        closed++;
+        totalPnl += r.value.profit ?? 0;
+      } else {
+        failed++;
+        const sym = targets[idx]?.symbol;
+        if (sym) failedSymbols.push(sym);
+      }
+    });
+
+    // One sound, one toast — bulk close is a single user action, not N.
+    if (closed > 0) (totalPnl >= 0 ? sounds.profit() : sounds.loss());
+    if (failed === 0) {
+      const sign = totalPnl >= 0 ? '+' : '';
+      toast.success(
+        `${closed} position${closed > 1 ? 's' : ''} closed | P&L: ${sign}${sym}${Math.abs(totalPnl).toFixed(2)}`,
+      );
+    } else if (closed === 0) {
+      toast.error(
+        `Failed to close ${failed} position${failed > 1 ? 's' : ''}: ${failedSymbols.slice(0, 5).join(', ')}${failedSymbols.length > 5 ? '…' : ''}`,
+        { duration: 6000 },
+      );
+    } else {
+      toast.success(
+        `${closed} closed · ${failed} failed (${failedSymbols.slice(0, 3).join(', ')}${failedSymbols.length > 3 ? '…' : ''})`,
+        { duration: 5000 },
+      );
+    }
+
+    // Background reconcile — restores any positions that failed to close server-side.
+    Promise.all([refreshPositions(), refreshAccount(), loadHistory()]).catch(() => {});
+    setBulkBusy(false);
+  };
+
+  /** Modify SL/TP from the draggable card. Returns false on validation failure
+   *  so the card stays open (user can correct the value). Returns true on
+   *  success → card closes itself. */
+  const submitModifyCard = async (positionId: string, sl: number | null, tp: number | null): Promise<boolean> => {
+    const pos = positions.find((p) => p.id === positionId);
+    if (!pos) { toast.error('Position not found'); return false; }
+    const isBuy = pos.side === 'buy';
+    const ref = pos.current_price ?? pos.open_price;
+
+    // Only the current price matters for placement — open price is irrelevant
+    // once a position is live. Traders routinely move SL into profit
+    // (trailing stop / move-to-breakeven) which the old open-price check
+    // wrongly blocked. The real constraint is "must not trigger immediately".
+    if (sl != null) {
+      if (sl <= 0) { toast.error('SL must be greater than 0'); return false; }
+      if (isBuy && sl >= ref) { toast.error(`BUY Stop Loss must be below current price (${ref})`); return false; }
+      if (!isBuy && sl <= ref) { toast.error(`SELL Stop Loss must be above current price (${ref})`); return false; }
+    }
+    if (tp != null) {
+      if (tp <= 0) { toast.error('TP must be greater than 0'); return false; }
+      if (isBuy && tp <= ref) { toast.error(`BUY Take Profit must be above current price (${ref})`); return false; }
+      if (!isBuy && tp >= ref) { toast.error(`SELL Take Profit must be below current price (${ref})`); return false; }
+    }
+
+    const body: Record<string, unknown> = {};
+    if (sl != null) body.stop_loss = sl;
+    if (tp != null) body.take_profit = tp;
+    if (Object.keys(body).length === 0) {
+      toast.error('Enter a value before saving');
+      return false;
+    }
+    setSltpSaving(true);
+    try {
+      await api.put(`/positions/${positionId}`, body);
+      toast.success('Position modified');
+      refreshPositions();
+      return true;
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to update');
+      return false;
+    } finally {
+      setSltpSaving(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setToolbarBusy(true);
+    try {
+      if (activeTab === 'history') {
+        await loadHistory();
+        toast.success('History updated');
+      } else {
+        await refreshPositions();
+        await refreshAccount();
+        toast.success('Updated');
+      }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Refresh failed');
+    } finally {
+      setToolbarBusy(false);
+    }
+  };
+
+  const exportOpenCsv = () => {
+    const rows: (string | number)[][] = [
+      [
+        'Account',
+        'Symbol',
+        'Side',
+        'Qty',
+        'Open Price',
+        'Current',
+        'P&L',
+        'SL',
+        'TP',
+      ],
+    ];
+    for (const pos of positions) {
+      const d = getDigits(pos.symbol);
+      const comm = pos.commission || 0;
+      const gross = pos.profit || 0;
+      rows.push([
+        accountLabel(pos.account_id),
+        pos.symbol,
+        pos.side,
+        pos.lots,
+        pos.open_price.toFixed(d),
+        (pos.current_price ?? '').toString() ? Number(pos.current_price).toFixed(d) : '',
+        gross - comm,
+        pos.stop_loss != null ? pos.stop_loss : '',
+        pos.take_profit != null ? pos.take_profit : '',
+      ]);
+    }
+    downloadCsv(`open-positions-${Date.now()}.csv`, rows);
+    toast.success('CSV downloaded');
+  };
+
+  const exportPendingCsv = () => {
+    const rows: (string | number)[][] = [
+      ['Account', 'Symbol', 'Side', 'Type', 'Qty', 'Price', 'SL', 'TP'],
+    ];
+    for (const o of pendingOrders) {
+      const d = getDigits(o.symbol);
+      rows.push([
+        accountLabel(o.account_id),
+        o.symbol,
+        o.side,
+        o.order_type,
+        o.lots,
+        o.price.toFixed(d),
+        o.stop_loss != null ? o.stop_loss : '',
+        o.take_profit != null ? o.take_profit : '',
+      ]);
+    }
+    downloadCsv(`pending-orders-${Date.now()}.csv`, rows);
+    toast.success('CSV downloaded');
+  };
+
+  const exportHistoryCsv = () => {
+    const rows: (string | number)[][] = [
+      [
+        'Symbol',
+        'Side',
+        'Qty',
+        'Open Price',
+        'Close Price',
+        'P&L',
+        'Close reason',
+        'Closed At',
+      ],
+    ];
+    for (const t of historyTrades) {
+      const d = getDigits(t.symbol);
+      const comm = t.commission || 0;
+      const gross = t.pnl || 0;
+      rows.push([
+        t.symbol,
+        t.side,
+        t.lots,
+        t.open_price.toFixed(d),
+        t.close_price.toFixed(d),
+        gross - comm,
+        closeReasonBadge(t.close_reason, t.close_price, d).label,
+        t.close_time,
+      ]);
+    }
+    downloadCsv(`trade-history-${Date.now()}.csv`, rows);
+    toast.success('CSV downloaded');
+  };
+
+  const tabs: { id: TabId; label: string; count: number }[] = [
+    { id: 'open', label: 'Open', count: positions.length },
+    { id: 'pending', label: 'Pending', count: pendingOrders.length },
+    { id: 'history', label: 'History', count: filteredHistory.length },
+  ];
+
+  const exportCurrentCsv = () => {
+    if (activeTab === 'open') exportOpenCsv();
+    else if (activeTab === 'pending') exportPendingCsv();
+    else exportHistoryCsv();
+  };
+
+  const accountMetrics = activeAccount
+    ? [
+        { label: 'Balance', value: activeAccount.balance as number },
+        { label: 'Equity', value: activeAccount.balance + (activeAccount.credit || 0) + totalPnl },
+        { label: 'Credit', value: activeAccount.credit || 0 },
+        { label: 'Used Margin', value: activeAccount.margin_used },
+        {
+          label: 'Free Margin',
+          value: activeAccount.balance + (activeAccount.credit || 0) + totalPnl - activeAccount.margin_used,
+          color: 'text-info' as const,
+        },
+        {
+          label: 'Floating PL',
+          value: totalPnl,
+          color: totalPnl >= 0 ? 'text-buy' : 'text-sell',
+          signed: true as const,
+        },
+      ]
+    : [];
+
+  const th = 'text-left text-[11px] font-bold uppercase tracking-wider text-text-tertiary px-2 py-2.5 whitespace-nowrap';
+  const td = 'px-2 py-2.5 text-xs sm:text-[13px] font-medium text-text-primary tabular-nums align-middle';
+  const theadRowClass = clsx(!isTerminal && 'border-b border-border-glass/50');
+  const tbodyRowClass = clsx(
+    isTerminal
+      ? 'hover:bg-white/[0.04] transition-colors'
+      : 'border-b border-border-glass/30 hover:bg-bg-hover/25 transition-colors',
+  );
+
+  const tabTitle = (id: TabId) =>
+    id === 'open' ? 'Positions' : id === 'history' ? 'Closed Positions' : 'Pending';
+
+  const equity =
+    activeAccount != null
+      ? activeAccount.balance + (activeAccount.credit || 0) + totalPnl
+      : 0;
+  const freeMarginCalc =
+    activeAccount != null ? equity - activeAccount.margin_used : 0;
+  const marginLevelDisplay =
+    activeAccount != null && activeAccount.margin_level > 0
+      ? `${activeAccount.margin_level % 1 === 0 ? activeAccount.margin_level.toFixed(0) : activeAccount.margin_level.toFixed(2)}%`
+      : '—';
+
+  return (
+    <div className={clsx('h-full w-full min-w-0 flex flex-col min-h-0', isTerminal ? 'bg-bg-base' : 'bg-bg-primary')}>
+      {!isTerminal && activeAccount && (
+        <div className="px-3 py-2.5 shrink-0 space-y-2 border-b border-border-primary bg-bg-secondary/50">
+          {/* Account switcher */}
+          <AccountSwitcher compact={false} />
+
+          {/* Account metrics — 2 cols on mobile, 3 cols on sm+ */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2">
+            {accountMetrics.map((item) => (
+              <div key={item.label} className="flex items-baseline gap-1.5">
+                <span className="text-[11px] font-semibold text-text-tertiary whitespace-nowrap">{item.label}</span>
+                <span
+                  className={clsx(
+                    'text-xs sm:text-[13px] font-mono font-bold tabular-nums',
+                    'color' in item && item.color ? item.color : 'text-text-primary',
+                  )}
+                >
+                  {'signed' in item && item.signed
+                    ? formatMoneySign(item.value, activeAccount?.currency)
+                    : formatMoney(item.value, activeAccount?.currency)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className={clsx('flex-1 flex flex-col min-h-0 w-full min-w-0', isTerminal ? 'p-0' : 'p-1.5 sm:p-2')}>
+        <div
+          className={clsx(
+            'flex flex-col flex-1 min-h-0 overflow-hidden w-full min-w-0',
+            isTerminal
+              ? 'rounded-none border-0 bg-transparent shadow-none'
+              : 'rounded-xl border border-border-glass bg-bg-secondary/25 shadow-sm',
+          )}
+        >
+          {isTerminal ? (
+            <div className="flex shrink-0 items-end justify-between gap-2 sm:gap-4 min-w-0 px-2 sm:px-3 py-2 border-b border-border-primary">
+              <div className="flex items-end gap-0 sm:gap-1 min-w-0 overflow-x-auto scrollbar-none no-scrollbar">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={clsx(
+                      'shrink-0 px-2 sm:px-2.5 pb-1 text-left transition-colors border-b-2 -mb-px',
+                      activeTab === tab.id
+                        ? 'text-text-primary border-accent font-semibold text-xs sm:text-sm'
+                        : 'text-text-tertiary border-transparent font-medium text-xs sm:text-sm hover:text-text-secondary',
+                    )}
+                  >
+                    <span className="whitespace-nowrap">
+                      {tabTitle(tab.id)}
+                      <span className="tabular-nums opacity-75 font-normal"> ({tab.count})</span>
+                    </span>
+                  </button>
+                ))}
+                <ChevronRight
+                  className="w-4 h-4 text-text-tertiary shrink-0 mb-0.5 ml-0.5 opacity-80"
+                  aria-hidden
+                />
+              </div>
+              <div className="flex items-end gap-3 sm:gap-4 md:gap-5 shrink-0 min-w-0 overflow-x-auto scrollbar-none no-scrollbar">
+                {activeAccount ? (
+                  <>
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-text-tertiary leading-none">
+                        Balance
+                      </span>
+                      <span className="text-[13px] font-mono font-bold text-text-primary tabular-nums leading-tight">
+                        {formatMoney(activeAccount.balance, activeAccount.currency)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-text-tertiary leading-none">
+                        Floating P&amp;L
+                      </span>
+                      <span
+                        className={clsx(
+                          'text-[13px] font-mono font-bold tabular-nums leading-tight',
+                          totalPnl >= 0 ? 'text-[#2196f3]' : 'text-[#ef5350]',
+                        )}
+                      >
+                        {formatMoneySign(totalPnl, activeAccount.currency)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-text-tertiary leading-none">
+                        Equity
+                      </span>
+                      <span className="text-[13px] font-mono font-bold text-text-primary tabular-nums leading-tight">
+                        {formatMoney(equity, activeAccount.currency)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-text-tertiary leading-none">
+                        Margin Used
+                      </span>
+                      <span className="text-[13px] font-mono font-bold text-text-primary tabular-nums leading-tight">
+                        {formatMoney(activeAccount.margin_used, activeAccount.currency)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-text-tertiary leading-none">
+                        Free Margin
+                      </span>
+                      <span className="text-[13px] font-mono font-bold text-text-primary tabular-nums leading-tight">
+                        {formatMoney(freeMarginCalc, activeAccount.currency)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wide text-text-tertiary leading-none inline-flex items-center gap-0.5">
+                        Margin Level
+                        <Info className="w-3 h-3 text-text-tertiary" aria-label="Margin level info" />
+                      </span>
+                      <span className="text-[13px] font-mono font-bold text-text-primary tabular-nums leading-tight">
+                        {marginLevelDisplay}
+                      </span>
+                    </div>
+                  </>
+                ) : null}
+                {isTerminal && activeTab === 'open' && (
+                  <div className="flex items-center gap-1 shrink-0 pb-0.5 border-l border-border-primary ml-1 pl-2">
+                    {positions.length > 0 && (
+                      <button
+                        ref={bulkBtnRef}
+                        type="button"
+                        onClick={() => {
+                          if (bulkBtnRef.current) {
+                            const r = bulkBtnRef.current.getBoundingClientRect();
+                            setBulkMenuRect({ top: r.bottom + 6, right: window.innerWidth - r.right });
+                          }
+                          setBulkMenuOpen((v) => !v);
+                        }}
+                        disabled={bulkBusy}
+                        aria-haspopup="menu"
+                        aria-expanded={bulkMenuOpen}
+                        className={clsx(
+                          'flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-semibold text-white bg-sell hover:bg-sell/90 border border-sell shadow-sm transition-colors disabled:opacity-50',
+                          bulkMenuOpen && 'bg-sell/90',
+                        )}
+                        title={`Bulk close menu — ${positions.length} open position${positions.length !== 1 ? 's' : ''}`}
+                      >
+                        Close ({positions.length})
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setTerminalOpenCardView((v) => !v)}
+                      className={clsx(
+                        'p-1.5 rounded-md transition-colors border',
+                        terminalOpenCardView
+                          ? 'text-accent bg-accent/15 border-accent/35'
+                          : 'text-text-secondary hover:text-text-primary hover:bg-bg-hover border-transparent hover:border-border-primary',
+                      )}
+                      title={terminalOpenCardView ? 'Table view' : 'Card view'}
+                      aria-pressed={terminalOpenCardView}
+                    >
+                      {terminalOpenCardView ? (
+                        <LayoutList className="w-4 h-4" strokeWidth={1.75} />
+                      ) : (
+                        <LayoutGrid className="w-4 h-4" strokeWidth={1.75} />
+                      )}
+                    </button>
+                  </div>
+                )}
+                <div className="flex items-center gap-0.5 shrink-0 pb-0.5 ml-1 pl-1">
+                  <button
+                    type="button"
+                    onClick={() => void handleRefresh()}
+                    disabled={toolbarBusy || (activeTab === 'history' && historyLoading)}
+                    className="p-1.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-hover disabled:opacity-40 transition-colors"
+                    title="Refresh"
+                  >
+                    <RefreshCw className={clsx('w-4 h-4', toolbarBusy && 'animate-spin')} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={exportCurrentCsv}
+                    className="p-1.5 rounded-md text-text-secondary hover:text-text-primary hover:bg-bg-hover transition-colors"
+                    title="Download CSV"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className={clsx('flex shrink-0 border-b border-border-glass', isTerminal ? 'bg-bg-secondary' : 'bg-bg-primary/40')}>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={clsx(
+                      'flex-1 min-w-0 py-2.5 px-1 sm:px-2 text-[10px] sm:text-xs font-bold transition-colors border-b-2 -mb-px',
+                      activeTab === tab.id
+                        ? clsx('text-text-primary border-[#2196f3]', 'bg-bg-secondary/70')
+                        : clsx(
+                            'text-text-tertiary border-transparent hover:text-text-secondary',
+                            'hover:bg-bg-hover/40',
+                          ),
+                    )}
+                  >
+                    <span className="block truncate text-center">{tab.label}</span>
+                    <span className="block text-center tabular-nums opacity-90">({tab.count})</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className={clsx('flex items-center justify-between gap-2 px-2 py-1.5 shrink-0 border-b border-border-glass/60', isTerminal ? 'bg-bg-secondary' : 'bg-bg-primary/20')}>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => void handleRefresh()}
+                    disabled={toolbarBusy || (activeTab === 'history' && historyLoading)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-semibold text-text-secondary bg-bg-secondary/80 border border-border-glass hover:bg-bg-hover hover:text-text-primary disabled:opacity-50"
+                  >
+                    <RefreshCw className={clsx('w-3.5 h-3.5', toolbarBusy && 'animate-spin')} />
+                    Refresh
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={exportCurrentCsv}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] sm:text-xs font-semibold text-text-secondary bg-bg-secondary/80 border border-border-glass hover:bg-bg-hover hover:text-text-primary"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Download CSV
+                </button>
+              </div>
+            </>
+          )}
+
+          <div
+            className={clsx(
+              'flex-1 overflow-auto min-h-0 flex flex-col w-full min-w-0',
+              isTerminal ? 'bg-transparent' : 'bg-bg-primary/30',
+            )}
+          >
+            {activeTab === 'open' && (
+              <div className="min-w-0 w-full flex-1 flex flex-col min-h-0">
+                {isTerminal && terminalOpenCardView ? (
+                  <div className="flex-1 overflow-y-auto min-h-0 p-2 sm:p-3">
+                    {positions.length === 0 ? (
+                      <div className="px-4 py-12 text-center text-sm text-text-tertiary">No open positions</div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2 content-start items-start">
+                        {positions.map((pos) => {
+                          const d = getDigits(pos.symbol);
+                          const lev = activeAccount?.leverage ?? 100;
+                          const m = estimatePositionMargin(pos, instruments, lev);
+                          const inst = instruments.find((i) => i.symbol === pos.symbol);
+                          const notional =
+                            inst != null ? pos.lots * inst.contract_size * pos.open_price : null;
+                          const marginExposureLine =
+                            m != null && notional != null
+                              ? `${sym}${m.toFixed(2)} / ${sym}${notional.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+                              : notional != null
+                                ? `— / ${sym}${notional.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
+                                : '— / —';
+                          const swapsFeeLine =
+                            pos.swap === 0
+                              ? `— / ${sym}${pos.commission.toFixed(2)}`
+                              : `${sym}${pos.swap.toFixed(2)} / ${sym}${pos.commission.toFixed(2)}`;
+
+                          return (
+                            <TerminalPositionStaticCard
+                              key={pos.id}
+                              pos={pos}
+                              digits={d}
+                              marginExposureLine={marginExposureLine}
+                              swapsFeeLine={swapsFeeLine}
+                              sym={sym}
+                              onCloseFull={() =>
+                                setCloseModal({
+                                  id: pos.id,
+                                  symbol: pos.symbol,
+                                  side: pos.side,
+                                  lots: pos.lots,
+                                  closeLots: String(pos.lots),
+                                })
+                              }
+                              onPartialClose={() => {
+                                const partLots = partitionCloneLots(pos, instruments);
+                                if (partLots >= pos.lots - 1e-12) {
+                                  toast.error('Position too small for partial close');
+                                  return;
+                                }
+                                setCloseModal({
+                                  id: pos.id,
+                                  symbol: pos.symbol,
+                                  side: pos.side,
+                                  lots: pos.lots,
+                                  closeLots: String(partLots),
+                                });
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                {/* Mobile card layout */}
+                <div className="md:hidden flex-1 overflow-y-auto space-y-2 p-2">
+                  {positions.length === 0 ? (
+                    <div className="px-4 py-12 text-center text-sm text-text-tertiary">No open positions</div>
+                  ) : (
+                    positions.map((pos) => {
+                      const d = getDigits(pos.symbol);
+                      const pnl = pos.profit || 0;
+                      const charges = pos.commission || 0;
+                      const net = pnl - charges;
+                      return (
+                        <div key={pos.id} className="rounded-xl border border-border-glass bg-bg-secondary/40 p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-text-primary">{pos.symbol}</span>
+                              <span className={clsx('text-[10px] font-bold uppercase', pos.side === 'buy' ? 'text-buy' : 'text-sell')}>{pos.side}</span>
+                              <span className={clsx('text-[10px] px-1.5 py-0.5 rounded-sm font-medium', pos.trade_type === 'copy_trade' ? 'bg-info/15 text-info' : 'bg-success/15 text-success')}>
+                                {pos.trade_type === 'copy_trade' ? 'Copy' : 'Real'}
+                              </span>
+                            </div>
+                            <span className="font-mono text-sm font-bold tabular-nums" style={{ color: net >= 0 ? '#2962FF' : '#FF2440' }}>
+                              {net >= 0 ? '+' : ''}{sym}{Math.abs(net).toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-x-3 gap-y-1.5 text-xs">
+                            <div><span className="text-text-tertiary font-semibold">Qty</span> <span className="text-text-primary font-mono font-bold">{pos.lots}</span></div>
+                            <div><span className="text-text-tertiary font-semibold">Open</span> <span className="text-text-primary font-mono font-bold">{pos.open_price.toFixed(d)}</span></div>
+                            <div><span className="text-text-tertiary font-semibold">Now</span> <span className="text-text-primary font-mono font-bold">{pos.current_price != null ? pos.current_price.toFixed(d) : '—'}</span></div>
+                            <div><span className="text-text-tertiary font-semibold">Acct</span> <span className="text-text-secondary font-semibold">{accountLabel(pos.account_id)}</span></div>
+                          </div>
+                          <div className="flex items-center justify-between pt-1 border-t border-border-glass/40">
+                            <div className="text-xs">
+                              <button
+                                type="button"
+                                onClick={() => setSltpEdit({
+                                  positionId: pos.id,
+                                  sl: pos.stop_loss != null ? pos.stop_loss.toFixed(d) : '',
+                                  tp: pos.take_profit != null ? pos.take_profit.toFixed(d) : '',
+                                })}
+                                className="text-text-secondary active:text-text-primary font-semibold"
+                              >
+                                <span className="text-[10px] font-bold text-text-tertiary">SL</span> <span className="font-mono font-bold">{pos.stop_loss != null ? pos.stop_loss.toFixed(d) : '—'}</span>
+                                {' · '}
+                                <span className="text-[10px] font-bold text-text-tertiary">TP</span> <span className="font-mono font-bold">{pos.take_profit != null ? pos.take_profit.toFixed(d) : '—'}</span>
+                                <Pencil className="w-3 h-3 inline ml-1 opacity-60" />
+                              </button>
+                            </div>
+                            <div className="inline-flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setSharePosition(pos)}
+                                className="p-1.5 rounded-lg text-text-tertiary active:text-text-primary"
+                                aria-label="Share trade"
+                              >
+                                <Share2 className="w-4 h-4" />
+                              </button>
+                              {pos.trade_type === 'copy_trade' ? (
+                                <span className="px-2 py-1.5 rounded-lg text-[10px] font-bold uppercase bg-info/15 text-info border border-info/30" title="MAM trade — only master can close">
+                                  MAM
+                                </span>
+                              ) : (
+                                <button type="button" onClick={() => setCloseModal({ id: pos.id, symbol: pos.symbol, side: pos.side, lots: pos.lots, closeLots: String(pos.lots) })} className="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase bg-sell/15 text-sell border border-sell/30 active:bg-sell/25">
+                                  Close
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+                {/* Desktop table layout — block + full width so table aligns left, not centered in flex */}
+                <div className="hidden md:block w-full min-w-0 flex-1 overflow-x-auto">
+                  <table className="w-full min-w-[860px] border-collapse">
+                    <thead>
+                      <tr className={theadRowClass}>
+                        <th className={th}>Account</th>
+                        <th className={th}>Symbol</th>
+                        <th className={th}>Type</th>
+                        <th className={th}>Side</th>
+                        <th className={th}>Qty</th>
+                        <th className={th}>Open</th>
+                        <th className={th}>Current</th>
+                        <th className={th}>
+                          <span className="block">P&amp;L</span>
+                        </th>
+                        <th className={th}>T/P</th>
+                        <th className={th}>S/L</th>
+                        <th className={clsx(th, 'text-right pr-3')}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {positions.map((pos) => {
+                        const d = getDigits(pos.symbol);
+                        const pnl = pos.profit || 0;
+                        const charges = pos.commission || 0;
+                        const net = pnl - charges;
+                        return (
+                          <tr key={pos.id} className={tbodyRowClass}>
+                            <td className={td}>{accountLabel(pos.account_id)}</td>
+                            <td className={clsx(td, 'font-bold')}>{pos.symbol}</td>
+                            <td className={td}>
+                              <span className={clsx('text-[10px] px-1.5 py-0.5 rounded-sm font-medium', pos.trade_type === 'copy_trade' ? 'bg-info/15 text-info' : 'bg-success/15 text-success')}>
+                                {pos.trade_type === 'copy_trade' ? 'Copy' : 'Real'}
+                              </span>
+                            </td>
+                            <td className={td}>
+                              <span
+                                className={clsx(
+                                  'font-bold uppercase',
+                                  pos.side === 'buy' ? 'text-buy' : 'text-sell',
+                                )}
+                              >
+                                {pos.side}
+                              </span>
+                            </td>
+                            <td className={clsx(td, 'font-mono font-bold')}>{pos.lots}</td>
+                            <td className={clsx(td, 'font-mono font-bold')}>{pos.open_price.toFixed(d)}</td>
+                            <td className={clsx(td, 'font-mono font-bold')}>
+                              {pos.current_price != null ? pos.current_price.toFixed(d) : '—'}
+                            </td>
+                            <td className={clsx(td, 'font-mono font-bold tabular-nums')} style={{ color: net >= 0 ? '#2962FF' : '#FF2440' }}>
+                              {net >= 0 ? '+' : ''}{sym}{Math.abs(net).toFixed(2)}
+                            </td>
+                            <td className={td}>
+                              <button
+                                type="button"
+                                onClick={() => setSltpEdit({
+                                  positionId: pos.id,
+                                  sl: pos.stop_loss != null ? pos.stop_loss.toFixed(d) : '',
+                                  tp: pos.take_profit != null ? pos.take_profit.toFixed(d) : '',
+                                  field: 'tp',
+                                })}
+                                className="text-left cursor-pointer"
+                                title="Click to set Take Profit"
+                              >
+                                {pos.take_profit != null ? (
+                                  <span className="font-mono font-bold text-text-primary hover:text-accent">{pos.take_profit.toFixed(d)}</span>
+                                ) : (
+                                  <span className="font-semibold text-text-tertiary border-b border-dashed border-text-tertiary/60 hover:text-text-primary hover:border-text-primary/60">Add</span>
+                                )}
+                              </button>
+                            </td>
+                            <td className={td}>
+                              <button
+                                type="button"
+                                onClick={() => setSltpEdit({
+                                  positionId: pos.id,
+                                  sl: pos.stop_loss != null ? pos.stop_loss.toFixed(d) : '',
+                                  tp: pos.take_profit != null ? pos.take_profit.toFixed(d) : '',
+                                  field: 'sl',
+                                })}
+                                className="text-left cursor-pointer"
+                                title="Click to set Stop Loss"
+                              >
+                                {pos.stop_loss != null ? (
+                                  <span className="font-mono font-bold text-text-primary hover:text-accent">{pos.stop_loss.toFixed(d)}</span>
+                                ) : (
+                                  <span className="font-semibold text-text-tertiary border-b border-dashed border-text-tertiary/60 hover:text-text-primary hover:border-text-primary/60">Add</span>
+                                )}
+                              </button>
+                            </td>
+                            <td className={clsx(td, 'text-right pr-2')}>
+                              <div className="inline-flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setSharePosition(pos)}
+                                  title="Share trade"
+                                  className="p-1 rounded-md text-text-tertiary hover:bg-bg-hover hover:text-text-primary transition-fast"
+                                >
+                                  <Share2 className="w-3.5 h-3.5" />
+                                </button>
+                                {pos.trade_type === 'copy_trade' ? (
+                                  <span
+                                    className="px-2 py-1 rounded-md text-[9px] font-bold uppercase bg-info/15 text-info border border-info/30"
+                                    title="MAM trade — only master can close"
+                                  >
+                                    MAM
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setCloseModal({
+                                        id: pos.id,
+                                        symbol: pos.symbol,
+                                        side: pos.side,
+                                        lots: pos.lots,
+                                        closeLots: String(pos.lots),
+                                      })
+                                    }
+                                    className="px-3 py-1.5 rounded-md text-[11px] font-bold uppercase bg-sell/15 text-sell border border-sell/30 hover:bg-sell/25"
+                                  >
+                                    Close
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {positions.length === 0 && (
+                        <tr>
+                          <td colSpan={11} className="px-4 py-12 text-center text-sm text-text-tertiary">
+                            No open positions
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'pending' && (
+              <div className="min-w-0 w-full flex-1 flex flex-col min-h-0">
+                {/* Mobile card layout */}
+                <div className="md:hidden flex-1 overflow-y-auto space-y-2 p-2">
+                  {pendingOrders.length === 0 ? (
+                    <div className="px-4 py-12 text-center text-sm text-text-tertiary">No pending orders</div>
+                  ) : (
+                    pendingOrders.map((order) => {
+                      const d = getDigits(order.symbol);
+                      return (
+                        <div key={order.id} className="rounded-xl border border-border-glass bg-bg-secondary/40 p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-text-primary">{order.symbol}</span>
+                              <span className={clsx('text-[10px] font-bold uppercase', order.side === 'buy' ? 'text-buy' : 'text-sell')}>{order.side}</span>
+                              <span className="text-[10px] text-text-tertiary">{order.order_type.replace(/_/g, ' ')}</span>
+                            </div>
+                            <span className="text-xs font-mono font-bold text-text-primary tabular-nums">@ {order.price.toFixed(d)}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-x-3 gap-y-1 text-xs">
+                            <div><span className="text-text-tertiary font-semibold">Qty</span> <span className="text-text-primary font-mono font-bold">{order.lots}</span></div>
+                            <div><span className="text-text-tertiary font-semibold">SL</span> <span className="text-text-primary font-mono font-bold">{order.stop_loss != null ? order.stop_loss.toFixed(d) : '—'}</span></div>
+                            <div><span className="text-text-tertiary font-semibold">TP</span> <span className="text-text-primary font-mono font-bold">{order.take_profit != null ? order.take_profit.toFixed(d) : '—'}</span></div>
+                          </div>
+                          <div className="flex items-center justify-between pt-1 border-t border-border-glass/40">
+                            <span className="text-[10px] text-text-tertiary">{accountLabel(order.account_id)}</span>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => openPendingEdit(order)}
+                                className="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase bg-accent/10 text-accent border border-accent/30 active:bg-accent/20"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    await api.delete(`/orders/${order.id}`);
+                                    toast.success('Order cancelled');
+                                    void refreshPendingOrders();
+                                  } catch (e: unknown) {
+                                    toast.error(e instanceof Error ? e.message : 'Failed');
+                                  }
+                                }}
+                                className="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase bg-sell/15 text-sell border border-sell/30 active:bg-sell/25"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+                {/* Desktop table layout */}
+                <div className="hidden md:block w-full min-w-0 flex-1 overflow-x-auto">
+                  <table className="w-full min-w-[560px] border-collapse">
+                    <thead>
+                      <tr className={theadRowClass}>
+                        <th className={th}>Account</th>
+                        <th className={th}>Symbol</th>
+                        <th className={th}>Side</th>
+                        <th className={th}>Type</th>
+                        <th className={th}>Qty</th>
+                        <th className={th}>Price</th>
+                        <th className={th}>SL / TP</th>
+                        <th className={clsx(th, 'text-right pr-3')}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pendingOrders.map((order) => {
+                        const d = getDigits(order.symbol);
+                        return (
+                          <tr key={order.id} className={tbodyRowClass}>
+                            <td className={td}>{accountLabel(order.account_id)}</td>
+                            <td className={clsx(td, 'font-bold')}>{order.symbol}</td>
+                            <td className={td}>
+                              <span
+                                className={clsx(
+                                  'font-bold uppercase',
+                                  order.side === 'buy' ? 'text-buy' : 'text-sell',
+                                )}
+                              >
+                                {order.side}
+                              </span>
+                            </td>
+                            <td className={clsx(td, 'text-text-tertiary')}>
+                              {order.order_type.replace(/_/g, ' ')}
+                            </td>
+                            <td className={clsx(td, 'font-mono font-bold')}>{order.lots}</td>
+                            <td className={clsx(td, 'font-mono font-bold')}>{order.price.toFixed(d)}</td>
+                            <td className={td}>
+                              <div className="leading-relaxed">
+                                <span className="text-[10px] font-bold uppercase text-text-tertiary">SL</span>{' '}
+                                <span className="font-mono font-bold text-text-primary">{order.stop_loss != null ? order.stop_loss.toFixed(d) : '—'}</span>
+                                <br />
+                                <span className="text-[10px] font-bold uppercase text-text-tertiary">TP</span>{' '}
+                                <span className="font-mono font-bold text-text-primary">{order.take_profit != null ? order.take_profit.toFixed(d) : '—'}</span>
+                              </div>
+                            </td>
+                            <td className={clsx(td, 'text-right pr-2')}>
+                              <div className="inline-flex items-center gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => openPendingEdit(order)}
+                                  className="px-3 py-1.5 rounded-md text-[11px] font-bold uppercase bg-accent/10 text-accent border border-accent/30 hover:bg-accent/20"
+                                  title="Edit pending order"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      await api.delete(`/orders/${order.id}`);
+                                      toast.success('Order cancelled');
+                                      void refreshPendingOrders();
+                                    } catch (e: unknown) {
+                                      toast.error(e instanceof Error ? e.message : 'Failed');
+                                    }
+                                  }}
+                                  className="px-3 py-1.5 rounded-md text-[11px] font-bold uppercase bg-sell/15 text-sell border border-sell/30 hover:bg-sell/25"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {pendingOrders.length === 0 && (
+                        <tr>
+                          <td colSpan={8} className="px-4 py-12 text-center text-sm text-text-tertiary">
+                            No pending orders
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'history' && (
+              <div className="min-w-0 w-full flex-1 flex flex-col min-h-0 overflow-hidden">
+                {/* Trade type filter pills */}
+                <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 border-b border-border-glass/30">
+                  {(['all', 'self', 'copy'] as const).map((f) => {
+                    const label = f === 'all' ? 'All' : f === 'self' ? 'My Trades' : 'Copy Trades';
+                    const count = f === 'all' ? historyTrades.length : f === 'copy' ? historyTrades.filter((t) => t.trade_type === 'copy_trade').length : historyTrades.filter((t) => t.trade_type !== 'copy_trade').length;
+                    return (
+                      <button
+                        key={f}
+                        type="button"
+                        onClick={() => setHistoryFilter(f)}
+                        className={clsx(
+                          'px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide transition-colors',
+                          historyFilter === f
+                            ? 'bg-accent/15 text-accent border border-accent/30'
+                            : 'text-text-tertiary hover:text-text-secondary hover:bg-bg-hover border border-transparent',
+                        )}
+                      >
+                        {label} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+                {historyLoading ? (
+                  <div className="px-4 py-12 text-center text-text-tertiary animate-pulse text-sm flex-1 flex items-center justify-center min-h-[120px]">
+                    Loading history…
+                  </div>
+                ) : (
+                  <>
+                  {/* Mobile card layout */}
+                  <div className="md:hidden flex-1 overflow-y-auto space-y-2 p-2">
+                    {filteredHistory.length === 0 ? (
+                      <div className="px-4 py-12 text-center text-sm text-text-tertiary">No trade history</div>
+                    ) : (
+                      filteredHistory.map((trade) => {
+                        const d = getDigits(trade.symbol);
+                        const pnl = trade.pnl || 0;
+                        const charges = trade.commission || 0;
+                        const net = pnl - charges;
+                        const exitBadge = closeReasonBadge(trade.close_reason, trade.close_price, d);
+                        return (
+                          <div key={trade.id} className="rounded-xl border border-border-glass bg-bg-secondary/40 p-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-bold text-text-primary">{trade.symbol}</span>
+                                <span className={clsx('text-[11px] font-bold uppercase', trade.side === 'buy' ? 'text-buy' : 'text-sell')}>{trade.side}</span>
+                                <span className={clsx('text-[10px] px-1.5 py-0.5 rounded-sm font-semibold', trade.trade_type === 'copy_trade' ? 'bg-info/15 text-info' : 'bg-success/15 text-success')}>
+                                  {trade.trade_type === 'copy_trade' ? 'Copy' : 'Real'}
+                                </span>
+                              </div>
+                              <span className="font-mono text-sm font-bold tabular-nums" style={{ color: net >= 0 ? '#2962FF' : '#FF2440' }}>
+                                {net >= 0 ? '+' : ''}{sym}{Math.abs(net).toFixed(2)}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-x-3 gap-y-1.5 text-xs">
+                              <div><span className="text-text-tertiary font-semibold">Qty</span> <span className="text-text-primary font-mono font-bold">{trade.lots}</span></div>
+                              <div><span className="text-text-tertiary font-semibold">Open</span> <span className="text-text-primary font-mono font-bold">{trade.open_price.toFixed(d)}</span></div>
+                              <div><span className="text-text-tertiary font-semibold">Close</span> <span className="text-text-primary font-mono font-bold">{trade.close_price.toFixed(d)}</span></div>
+                              <div>
+                                <span className={clsx('inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide', exitBadge.className)}>
+                                  {exitBadge.label}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="text-[10px] text-text-tertiary pt-1 border-t border-border-glass/40">
+                              {new Date(trade.close_time).toLocaleString()}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                  {/* Desktop table layout */}
+                  <div className="hidden md:block w-full min-w-0 overflow-auto flex-1 min-h-0">
+                  <table className="w-full min-w-[900px] border-collapse">
+                    <thead>
+                      <tr className={theadRowClass}>
+                        <th className={th}>Symbol</th>
+                        <th className={th}>Type</th>
+                        <th className={th}>Side</th>
+                        <th className={th}>Qty</th>
+                        <th className={th}>Open</th>
+                        <th className={th}>Close</th>
+                        <th className={th}>Comm.</th>
+                        <th className={th}>
+                          <span className="block">Net P&amp;L</span>
+                        </th>
+                        <th className={th}>
+                          <span className="block">Close</span>
+                          <span className="block text-[9px] font-normal normal-case text-text-tertiary tracking-normal">SL / TP / …</span>
+                        </th>
+                        <th className={th}>Closed</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredHistory.map((trade) => {
+                        const d = getDigits(trade.symbol);
+                        const pnl = trade.pnl || 0;
+                        const charges = trade.commission || 0;
+                        const net = pnl - charges;
+                        const exitBadge = closeReasonBadge(trade.close_reason, trade.close_price, d);
+                        return (
+                          <tr key={trade.id} className={tbodyRowClass}>
+                            <td className={clsx(td, 'font-bold')}>{trade.symbol}</td>
+                            <td className={td}>
+                              <span className={clsx('text-[10px] px-1.5 py-0.5 rounded-sm font-medium', trade.trade_type === 'copy_trade' ? 'bg-info/15 text-info' : 'bg-success/15 text-success')}>
+                                {trade.trade_type === 'copy_trade' ? 'Copy' : 'Real'}
+                              </span>
+                            </td>
+                            <td className={td}>
+                              <span
+                                className={clsx(
+                                  'font-bold uppercase',
+                                  trade.side === 'buy' ? 'text-buy' : 'text-sell',
+                                )}
+                              >
+                                {trade.side}
+                              </span>
+                            </td>
+                            <td className={clsx(td, 'font-mono font-bold')}>{trade.lots}</td>
+                            <td className={clsx(td, 'font-mono font-bold')}>{trade.open_price.toFixed(d)}</td>
+                            <td className={clsx(td, 'font-mono font-bold')}>{trade.close_price.toFixed(d)}</td>
+                            <td className={clsx(td, 'font-mono font-bold text-text-secondary tabular-nums')}>
+                              {charges > 0 ? `${sym}${charges.toFixed(2)}` : '—'}
+                            </td>
+                            <td className={clsx(td, 'font-mono font-bold tabular-nums')} style={{ color: net >= 0 ? '#2962FF' : '#FF2440' }}>
+                              {net >= 0 ? '+' : ''}{sym}{Math.abs(net).toFixed(2)}
+                            </td>
+                            <td className={td}>
+                              <span
+                                className={clsx(
+                                  'inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
+                                  exitBadge.className,
+                                )}
+                              >
+                                {exitBadge.label}
+                              </span>
+                            </td>
+                            <td className={clsx(td, 'text-[10px] text-text-tertiary')}>
+                              {new Date(trade.close_time).toLocaleString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {historyTrades.length === 0 && (
+                        <tr>
+                          <td colSpan={11} className="px-4 py-12 text-center text-sm text-text-tertiary">
+                            No trade history
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                  </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {bulkMenuOpen && bulkMenuRect && typeof document !== 'undefined' &&
+        createPortal(
+          (() => {
+            const allPnl = positions.reduce((s, p) => s + (p.profit ?? 0) - (p.commission ?? 0), 0);
+            const profitPnl = profitPositions.reduce((s, p) => s + (p.profit ?? 0) - (p.commission ?? 0), 0);
+            const lossPnl = lossPositions.reduce((s, p) => s + (p.profit ?? 0) - (p.commission ?? 0), 0);
+            const options = [
+              { key: 'all' as const, label: 'Close All', count: positions.length, pnl: allPnl, icon: X, tone: 'all' as const, desc: 'Every open position' },
+              { key: 'profit' as const, label: 'Close Profit', count: profitPositions.length, pnl: profitPnl, icon: TrendingUp, tone: 'profit' as const, desc: 'Only trades in profit' },
+              { key: 'loss' as const, label: 'Close Loss', count: lossPositions.length, pnl: lossPnl, icon: TrendingDown, tone: 'loss' as const, desc: 'Only trades in loss' },
+            ];
+            return (
+              <div
+                ref={bulkPopoverRef}
+                role="menu"
+                aria-label="Bulk close options"
+                style={{
+                  position: 'fixed',
+                  top: bulkMenuRect.top,
+                  right: bulkMenuRect.right,
+                  zIndex: 2147483647,
+                }}
+                className="w-60 rounded-lg border border-border-primary bg-card shadow-2xl overflow-hidden animate-fade-in"
+              >
+                {options.map((opt) => {
+                  const Icon = opt.icon;
+                  const disabled = bulkBusy || opt.count === 0;
+                  const pnlSign = opt.pnl >= 0 ? '+' : '';
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      role="menuitem"
+                      disabled={disabled}
+                      onClick={() => {
+                        setBulkMenuOpen(false);
+                        setBulkConfirm(opt.key);
+                      }}
+                      className={clsx(
+                        'w-full flex items-center gap-2.5 px-3 py-2.5 text-left border-b border-border-primary last:border-b-0 transition-colors',
+                        disabled
+                          ? 'opacity-40 cursor-not-allowed'
+                          : opt.tone === 'profit'
+                          ? 'hover:bg-buy/10'
+                          : opt.tone === 'loss'
+                          ? 'hover:bg-sell/10'
+                          : 'hover:bg-bg-hover',
+                      )}
+                    >
+                      <span
+                        className={clsx(
+                          'shrink-0 w-7 h-7 rounded-md flex items-center justify-center border',
+                          opt.tone === 'profit'
+                            ? 'bg-buy/15 border-buy/30 text-buy'
+                            : opt.tone === 'loss'
+                            ? 'bg-sell/15 border-sell/30 text-sell'
+                            : 'bg-bg-tertiary border-border-primary text-text-secondary',
+                        )}
+                      >
+                        <Icon className="w-3.5 h-3.5" strokeWidth={2.25} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-1.5">
+                          <span className="text-xs font-bold text-text-primary">{opt.label}</span>
+                          <span className="text-[10px] font-mono font-bold tabular-nums text-text-tertiary">
+                            ({opt.count})
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-1.5 mt-0.5">
+                          <span className="text-[10px] text-text-tertiary leading-tight">{opt.desc}</span>
+                          {opt.count > 0 && (
+                            <span
+                              className={clsx(
+                                'text-[10px] font-mono font-bold tabular-nums shrink-0',
+                                opt.pnl >= 0 ? 'text-buy' : 'text-sell',
+                              )}
+                            >
+                              {pnlSign}{sym}{Math.abs(opt.pnl).toFixed(2)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })(),
+          document.body,
+        )}
+
+      {bulkConfirm &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          (() => {
+            const targetsMap = { all: positions, profit: profitPositions, loss: lossPositions };
+            const countMap = { all: positions.length, profit: profitPositions.length, loss: lossPositions.length };
+            const labelMap = {
+              all: 'Close All Positions',
+              profit: 'Close Profitable Positions',
+              loss: 'Close Losing Positions',
+            };
+            const descMap = {
+              all: `Close all ${positions.length} open position${positions.length !== 1 ? 's' : ''} at market price.`,
+              profit: `Close ${profitPositions.length} profitable position${profitPositions.length !== 1 ? 's' : ''} at market price.`,
+              loss: `Close ${lossPositions.length} losing position${lossPositions.length !== 1 ? 's' : ''} at market price.`,
+            };
+            const count = countMap[bulkConfirm];
+            const targetList = targetsMap[bulkConfirm];
+            const targetTotalPnl = targetList.reduce(
+              (sum, p) => sum + (p.profit ?? 0) - (p.commission ?? 0),
+              0,
+            );
+            const shell = clsx(
+              'relative w-full max-w-[280px] rounded-xl border p-3.5 shadow-2xl overflow-hidden pointer-events-auto',
+              'bg-card border-border-primary',
+            );
+            const titleCls = clsx('text-sm font-bold pr-2 text-text-primary');
+            const bodyCls = clsx('text-xs text-text-secondary');
+            return (
+              <div className="fixed inset-0 p-0" style={{ zIndex: 2147483646, isolation: 'isolate' }}>
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Dismiss"
+                  className="absolute inset-0 z-0 m-0 h-full w-full cursor-default border-0 bg-black/60 p-0 backdrop-blur-sm"
+                  onClick={() => setBulkConfirm(null)}
+                />
+                <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-4">
+                  <div
+                    role="dialog"
+                    aria-modal="true"
+                    className={shell}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <h3 id="bulk-close-title" className={titleCls}>
+                      {labelMap[bulkConfirm]}
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setBulkConfirm(null);
+                      }}
+                      className={clsx(
+                        'shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors',
+                        'bg-bg-hover text-text-tertiary hover:text-text-primary',
+                      )}
+                      aria-label="Close"
+                    >
+                      <X className="w-4 h-4" strokeWidth={2.5} />
+                    </button>
+                  </div>
+                  <p className={clsx(bodyCls, 'mb-2')}>{descMap[bulkConfirm]}</p>
+                  {count === 0 ? (
+                    <>
+                      <p className={clsx('text-[11px] mb-3 text-text-tertiary')}>
+                        No matching positions found.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setBulkConfirm(null)}
+                        className={clsx(
+                          'w-full py-2.5 font-bold rounded-lg text-sm',
+                          'bg-bg-hover text-text-primary',
+                        )}
+                      >
+                        OK
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="mb-3 max-h-[180px] overflow-y-auto rounded-lg border border-border-primary bg-bg-secondary divide-y divide-border-primary/60">
+                        {targetList.map((pos) => {
+                          const net = (pos.profit ?? 0) - (pos.commission ?? 0);
+                          const sign = net >= 0 ? '+' : '';
+                          return (
+                            <div
+                              key={pos.id}
+                              className="flex items-center justify-between gap-2 px-2.5 py-1.5 text-[11px]"
+                            >
+                              <span className="font-mono font-semibold text-text-primary truncate">
+                                {pos.symbol}
+                              </span>
+                              <span
+                                className={clsx(
+                                  'font-bold uppercase tracking-wide text-[10px] shrink-0',
+                                  pos.side === 'buy' ? 'text-buy' : 'text-sell',
+                                )}
+                              >
+                                {pos.side}
+                              </span>
+                              <span className="font-mono text-text-secondary tabular-nums shrink-0">
+                                {pos.lots}
+                              </span>
+                              <span
+                                className={clsx(
+                                  'font-mono font-semibold tabular-nums shrink-0 ml-auto',
+                                  net >= 0 ? 'text-accent' : 'text-sell',
+                                )}
+                              >
+                                {sign}{sym}{Math.abs(net).toFixed(2)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex items-center justify-between mb-3 text-[11px] font-semibold">
+                        <span className="text-text-tertiary">Total P&L</span>
+                        <span
+                          className={clsx(
+                            'font-mono tabular-nums',
+                            targetTotalPnl >= 0 ? 'text-accent' : 'text-sell',
+                          )}
+                        >
+                          {targetTotalPnl >= 0 ? '+' : ''}{sym}{Math.abs(targetTotalPnl).toFixed(2)}
+                        </span>
+                      </div>
+                      <p className={clsx('text-[11px] mb-4 text-text-tertiary')}>
+                        This action cannot be undone.
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setBulkConfirm(null)}
+                          className={clsx(
+                            'flex-1 py-2.5 font-bold rounded-lg text-sm active:scale-[0.98] transition-all',
+                            'bg-bg-hover text-text-primary',
+                          )}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void executeBulkClose(bulkConfirm)}
+                          disabled={bulkBusy}
+                          className="flex-1 py-2.5 bg-sell text-white font-bold rounded-lg shadow-lg shadow-sell/20 active:scale-[0.98] transition-all disabled:opacity-50 text-sm"
+                        >
+                          {bulkBusy ? 'Closing…' : 'Confirm'}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                  </div>
+                </div>
+              </div>
+            );
+          })(),
+          document.body,
+        )}
+
+      {closeModal &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div className="fixed inset-0 p-0" style={{ zIndex: 2147483646, isolation: 'isolate' }}>
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label="Dismiss"
+              className="absolute inset-0 z-0 m-0 h-full w-full cursor-default border-0 bg-black/60 p-0 backdrop-blur-sm"
+              onClick={() => { if (!closeSubmitting) setCloseModal(null); }}
+            />
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-4">
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="close-position-title"
+                className="pointer-events-auto relative w-full max-w-[280px] rounded-xl border border-border-primary p-3.5 shadow-2xl overflow-hidden"
+                style={{ background: 'var(--bg-card)' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <h3 id="close-position-title" className="text-sm font-bold text-text-primary">
+                  Close Position
+                </h3>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setCloseModal(null);
+                  }}
+                  className={clsx(
+                    'shrink-0 w-7 h-7 flex items-center justify-center rounded-lg transition-colors',
+                    'bg-bg-hover text-text-tertiary hover:text-text-primary',
+                  )}
+                  aria-label="Close dialog"
+                >
+                  <X className="w-4 h-4" strokeWidth={2.5} />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div
+                  className={clsx(
+                    'rounded-lg p-3 space-y-1.5 border',
+                    'bg-bg-secondary border-border-primary',
+                  )}
+                >
+                  <div className="flex justify-between text-[11px] font-medium">
+                    <span className="text-text-tertiary">Symbol</span>
+                    <span className="font-mono text-text-primary">{closeModal.symbol}</span>
+                  </div>
+                  <div className="flex justify-between text-[11px] font-medium">
+                    <span className="text-text-tertiary">Side</span>
+                    <span className={clsx('font-bold', closeModal.side === 'buy' ? 'text-buy' : 'text-sell')}>
+                      {closeModal.side.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[11px] font-medium">
+                    <span className="text-text-tertiary">Open lots</span>
+                    <span className="font-mono text-text-primary">{closeModal.lots}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    className={clsx(
+                      'text-[9px] font-bold uppercase tracking-wider block mb-1.5',
+                      'text-text-tertiary',
+                    )}
+                  >
+                    Lots to close
+                  </label>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {([25, 50, 75] as const).map((pct) => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => {
+                          setCloseModal((m) => {
+                            if (!m) return m;
+                            const v = snapLotsForCloseFraction(m.lots, m.symbol, instruments, pct / 100);
+                            return { ...m, closeLots: formatLotsInput(v) };
+                          });
+                        }}
+                        className={clsx(
+                          'cursor-pointer px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border transition-colors',
+                          'bg-bg-secondary border-border-primary text-text-primary hover:bg-bg-hover',
+                        )}
+                      >
+                        {pct}%
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCloseModal((m) =>
+                          m ? { ...m, closeLots: formatLotsInput(m.lots) } : m,
+                        );
+                      }}
+                      className={clsx(
+                        'cursor-pointer px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border transition-colors',
+                        'bg-accent/10 border-accent/25 text-accent hover:bg-accent/15',
+                      )}
+                    >
+                      Full
+                    </button>
+                  </div>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    max={closeModal.lots}
+                    value={closeModal.closeLots}
+                    onChange={(e) => setCloseModal({ ...closeModal, closeLots: e.target.value })}
+                    className={clsx(
+                      'w-full px-3 py-2 rounded-lg font-mono text-sm outline-none transition-all border',
+                      'bg-bg-secondary border-border-primary text-text-primary focus:border-sell',
+                    )}
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCloseModal(null)}
+                    className={clsx(
+                      'flex-1 py-2.5 font-bold rounded-lg text-sm active:scale-[0.98] transition-all',
+                      'bg-bg-hover text-text-primary',
+                    )}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    disabled={closeSubmitting}
+                    onClick={() => {
+                      const cl = parseFloat(closeModal.closeLots);
+                      if (Number.isNaN(cl) || cl <= 0) {
+                        toast.error('Invalid lots');
+                        return;
+                      }
+                      if (cl > closeModal.lots + 1e-9) {
+                        toast.error(`Cannot exceed ${closeModal.lots} lots`);
+                        return;
+                      }
+                      closePosition(closeModal.id, cl < closeModal.lots - 1e-9 ? cl : undefined);
+                    }}
+                    className="flex-1 py-2.5 bg-sell text-white font-bold rounded-lg shadow-lg shadow-sell/20 active:scale-[0.98] transition-all text-sm flex items-center justify-center gap-2 disabled:opacity-70 disabled:pointer-events-none"
+                  >
+                    {closeSubmitting ? (
+                      <>
+                        <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                        Closing…
+                      </>
+                    ) : 'Close'}
+                  </button>
+                </div>
+
+                <div className={clsx('pt-3 mt-1 border-t border-border-primary')}>
+                  <p
+                    className={clsx(
+                      'text-[9px] font-semibold uppercase tracking-wider text-center mb-2',
+                      'text-text-tertiary',
+                    )}
+                  >
+                    Bulk close
+                  </p>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCloseModal(null);
+                        setBulkConfirm('all');
+                      }}
+                      disabled={bulkBusy || positions.length === 0}
+                      className={clsx(
+                        'flex flex-col items-center gap-0.5 py-2 px-0.5 rounded-lg border active:scale-[0.98] transition-all disabled:opacity-40',
+                        'bg-bg-secondary border-border-primary hover:bg-bg-hover',
+                      )}
+                    >
+                      <Layers className="w-3.5 h-3.5 text-text-secondary" />
+                      <span className="text-[9px] font-bold text-text-primary">All</span>
+                      <span className="text-[9px] tabular-nums text-text-tertiary">
+                        ({positions.length})
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCloseModal(null);
+                        setBulkConfirm('profit');
+                      }}
+                      disabled={bulkBusy || profitPositions.length === 0}
+                      className={clsx(
+                        'flex flex-col items-center gap-0.5 py-2 px-0.5 rounded-lg border active:scale-[0.98] transition-all disabled:opacity-40',
+                        'bg-accent/5 border-accent/20 hover:bg-accent/10',
+                      )}
+                    >
+                      <TrendingUp className="w-3.5 h-3.5 text-accent" />
+                      <span className="text-[9px] font-bold text-accent">
+                        Profit
+                      </span>
+                      <span className="text-[9px] tabular-nums text-text-tertiary">
+                        ({profitPositions.length})
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCloseModal(null);
+                        setBulkConfirm('loss');
+                      }}
+                      disabled={bulkBusy || lossPositions.length === 0}
+                      className={clsx(
+                        'flex flex-col items-center gap-0.5 py-2 px-0.5 rounded-lg border active:scale-[0.98] transition-all disabled:opacity-40',
+                        'bg-sell/5 border-sell/20 hover:bg-sell/10',
+                      )}
+                    >
+                      <TrendingDown className="w-3.5 h-3.5 text-sell" />
+                      <span className="text-[9px] font-bold text-sell">
+                        Loss
+                      </span>
+                      <span className="text-[9px] tabular-nums text-text-tertiary">
+                        ({lossPositions.length})
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>,
+          document.body,
+        )}
+
+      {pendingEdit &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          (() => {
+            const d = getDigits(pendingEdit.symbol);
+            const tick = prices[pendingEdit.symbol];
+            const priceNum = parseFloat(pendingEdit.price) || 0;
+            const pip =
+              instruments.find((i) => i.symbol === pendingEdit.symbol)?.pip_size ||
+              (d >= 5 ? 0.00001 : d === 2 ? 0.01 : 0.0001);
+            const pipsFromMarket =
+              tick && priceNum > 0
+                ? (priceNum - (pendingEdit.side === 'buy' ? tick.ask : tick.bid)) / pip
+                : null;
+            // Inline preview of validity for the live tick so the user can see
+            // a bad price before submitting.
+            let priceWarning: string | null = null;
+            if (tick && priceNum > 0) {
+              if (pendingEdit.orderType === 'limit') {
+                if (pendingEdit.side === 'buy' && priceNum >= tick.ask)
+                  priceWarning = `Buy limit must be below ask (${tick.ask})`;
+                if (pendingEdit.side === 'sell' && priceNum <= tick.bid)
+                  priceWarning = `Sell limit must be above bid (${tick.bid})`;
+              } else if (pendingEdit.orderType === 'stop') {
+                if (pendingEdit.side === 'buy' && priceNum <= tick.ask)
+                  priceWarning = `Buy stop must be above ask (${tick.ask})`;
+                if (pendingEdit.side === 'sell' && priceNum >= tick.bid)
+                  priceWarning = `Sell stop must be below bid (${tick.bid})`;
+              }
+            }
+            return (
+              <div className="fixed inset-0 p-0" style={{ zIndex: 2147483646, isolation: 'isolate' }}>
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-label="Dismiss"
+                  className="absolute inset-0 z-0 m-0 h-full w-full cursor-default border-0 bg-black/60 p-0 backdrop-blur-sm"
+                  onClick={() => { if (!pendingEditSaving) setPendingEdit(null); }}
+                />
+                <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center p-4">
+                  <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="pending-edit-title"
+                    className="pointer-events-auto relative w-full max-w-[320px] rounded-xl border border-border-primary p-3.5 shadow-2xl overflow-hidden"
+                    style={{ background: 'var(--bg-card)' }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <h3 id="pending-edit-title" className="text-sm font-bold text-text-primary">
+                        Edit Pending Order
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => { if (!pendingEditSaving) setPendingEdit(null); }}
+                        className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-bg-hover text-text-tertiary hover:text-text-primary transition-colors"
+                        aria-label="Close dialog"
+                      >
+                        <X className="w-4 h-4" strokeWidth={2.5} />
+                      </button>
+                    </div>
+
+                    <div className="rounded-lg p-3 mb-3 bg-bg-secondary border border-border-primary">
+                      <div className="flex items-center justify-between text-[11px] font-medium mb-1">
+                        <span className="text-text-tertiary">Symbol</span>
+                        <span className="font-mono text-text-primary">{pendingEdit.symbol}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] font-medium mb-1">
+                        <span className="text-text-tertiary">Side</span>
+                        <span className={clsx('font-bold uppercase', pendingEdit.side === 'buy' ? 'text-buy' : 'text-sell')}>
+                          {pendingEdit.side}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px] font-medium">
+                        <span className="text-text-tertiary">Type</span>
+                        <span className="text-text-primary uppercase tracking-wider">
+                          {pendingEdit.orderType.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                      {tick && (
+                        <div className="flex items-center justify-between text-[10px] font-medium mt-2 pt-2 border-t border-border-primary">
+                          <span className="text-text-tertiary">Market</span>
+                          <span className="font-mono text-text-secondary">
+                            {tick.bid.toFixed(d)} / {tick.ask.toFixed(d)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-[9px] font-bold uppercase tracking-wider block mb-1.5 text-text-tertiary">
+                          Open price
+                        </label>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cur = parseFloat(pendingEdit.price) || 0;
+                              setPendingEdit({ ...pendingEdit, price: Math.max(0, cur - pip).toFixed(d) });
+                            }}
+                            className="w-9 h-9 rounded-lg flex items-center justify-center bg-bg-secondary border border-border-primary text-text-secondary hover:text-text-primary"
+                            aria-label="Decrease price"
+                          >
+                            <span className="text-base leading-none">−</span>
+                          </button>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={pendingEdit.price}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (v === '' || /^\d+(\.\d*)?$/.test(v)) {
+                                setPendingEdit({ ...pendingEdit, price: v });
+                              }
+                            }}
+                            className="flex-1 px-3 py-2 rounded-lg text-center font-mono text-sm bg-bg-secondary border border-border-primary text-text-primary focus:outline-none focus:border-accent"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cur = parseFloat(pendingEdit.price) || 0;
+                              setPendingEdit({ ...pendingEdit, price: (cur + pip).toFixed(d) });
+                            }}
+                            className="w-9 h-9 rounded-lg flex items-center justify-center bg-bg-secondary border border-border-primary text-text-secondary hover:text-text-primary"
+                            aria-label="Increase price"
+                          >
+                            <span className="text-base leading-none">+</span>
+                          </button>
+                        </div>
+                        {pipsFromMarket !== null && Number.isFinite(pipsFromMarket) && (
+                          <div className="mt-1 text-[10px] font-mono text-text-tertiary">
+                            {pipsFromMarket > 0 ? '+' : ''}{pipsFromMarket.toFixed(1)} pips from market
+                          </div>
+                        )}
+                        {priceWarning && (
+                          <div className="mt-1 text-[10px] text-red-400">{priceWarning}</div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="text-[9px] font-bold uppercase tracking-wider block mb-1.5 text-text-tertiary">
+                          Lots
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={pendingEdit.lots}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (v === '' || /^\d+(\.\d{0,2})?$/.test(v)) {
+                              setPendingEdit({ ...pendingEdit, lots: v });
+                            }
+                          }}
+                          className="w-full px-3 py-2 rounded-lg font-mono text-sm bg-bg-secondary border border-border-primary text-text-primary focus:outline-none focus:border-accent"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[9px] font-bold uppercase tracking-wider block mb-1.5 text-sell">
+                            Stop loss
+                          </label>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={pendingEdit.sl}
+                            placeholder="—"
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (v === '' || /^\d+(\.\d*)?$/.test(v)) {
+                                setPendingEdit({ ...pendingEdit, sl: v });
+                              }
+                            }}
+                            className="w-full px-3 py-2 rounded-lg font-mono text-sm bg-bg-secondary border border-sell/30 text-sell focus:outline-none focus:border-sell"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[9px] font-bold uppercase tracking-wider block mb-1.5 text-buy">
+                            Take profit
+                          </label>
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={pendingEdit.tp}
+                            placeholder="—"
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (v === '' || /^\d+(\.\d*)?$/.test(v)) {
+                                setPendingEdit({ ...pendingEdit, tp: v });
+                              }
+                            }}
+                            className="w-full px-3 py-2 rounded-lg font-mono text-sm bg-bg-secondary border border-buy/30 text-buy focus:outline-none focus:border-buy"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => { if (!pendingEditSaving) setPendingEdit(null); }}
+                          disabled={pendingEditSaving}
+                          className="flex-1 py-2 rounded-lg text-[11px] font-bold uppercase bg-bg-secondary border border-border-primary text-text-secondary hover:bg-bg-hover disabled:opacity-50"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void savePendingEdit()}
+                          disabled={pendingEditSaving}
+                          className="flex-1 py-2 rounded-lg text-[11px] font-bold uppercase bg-accent text-white hover:bg-accent/90 disabled:opacity-50"
+                        >
+                          {pendingEditSaving ? 'Saving…' : 'Save'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })(),
+          document.body,
+        )}
+
+      <ShareTradeModal
+        open={!!sharePosition}
+        onClose={() => setSharePosition(null)}
+        position={sharePosition}
+        leverage={Number(activeAccount?.leverage) || 100}
+      />
+
+      {sltpEdit ? (() => {
+        const pos = positions.find((p) => p.id === sltpEdit.positionId);
+        if (!pos) return null;
+        const inst = instruments.find((i) => i.symbol === pos.symbol);
+        const digits = inst?.digits ?? 5;
+        const contractSize = Number(inst?.contract_size ?? 100000);
+        return (
+          <ModifyPositionCard
+            position={{
+              id: pos.id,
+              symbol: pos.symbol,
+              side: pos.side === 'buy' ? 'buy' : 'sell',
+              lots: Number(pos.lots),
+              open_price: Number(pos.open_price),
+              current_price: pos.current_price != null ? Number(pos.current_price) : null,
+              stop_loss: pos.stop_loss != null ? Number(pos.stop_loss) : null,
+              take_profit: pos.take_profit != null ? Number(pos.take_profit) : null,
+              profit: pos.profit ?? 0,
+            }}
+            digits={digits}
+            contractSize={contractSize}
+            initialField={sltpEdit.field ?? 'tp'}
+            onClose={() => setSltpEdit(null)}
+            onSave={({ sl, tp }) => submitModifyCard(sltpEdit.positionId, sl, tp)}
+            onPartialClose={pos.trade_type === 'copy_trade' ? undefined : async (lots) => {
+              closePosition(pos.id, lots);
+              return true;
+            }}
+          />
+        );
+      })() : null}
+    </div>
+  );
+}

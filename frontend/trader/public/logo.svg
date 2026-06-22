@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" role="img" aria-label="Bull4x">
+  <defs>
+    <linearGradient id="b4x-shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1f4a78"/>
+      <stop offset="100%" stop-color="#132940"/>
+    </linearGradient>
+    <linearGradient id="b4x-silver" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eef1f5"/>
+      <stop offset="100%" stop-color="#aeb6c0"/>
+    </linearGradient>
+    <linearGradient id="b4x-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f3d27a"/>
+      <stop offset="100%" stop-color="#cf9c2c"/>
+    </linearGradient>
+  </defs>
+  <!-- shield mark -->
+  <g transform="translate(8 8)">
+    <path d="M32 2 L60 12 L60 34 C60 50 47 60 32 64 C17 60 4 50 4 34 L4 12 Z"
+          fill="url(#b4x-shield)" stroke="url(#b4x-silver)" stroke-width="2.5"/>
+    <text x="32" y="42" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
+          font-weight="900" font-size="26" fill="url(#b4x-silver)">B<tspan fill="url(#b4x-gold)">4</tspan></text>
+  </g>
+  <!-- wordmark -->
+  <g transform="translate(86 53)" font-family="Inter, system-ui, -apple-system, sans-serif" font-weight="900" font-size="34" letter-spacing="-0.5">
+    <text x="0" y="0" fill="url(#b4x-silver)">BULL</text>
+    <text x="138" y="0" fill="url(#b4x-gold)">4X</text>
+  </g>
+</svg>

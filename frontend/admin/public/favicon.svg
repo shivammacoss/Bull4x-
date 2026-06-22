@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Bull4x">
+  <defs>
+    <linearGradient id="b4x-shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1f4a78"/>
+      <stop offset="100%" stop-color="#132940"/>
+    </linearGradient>
+    <linearGradient id="b4x-silver" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#eef1f5"/>
+      <stop offset="100%" stop-color="#aeb6c0"/>
+    </linearGradient>
+    <linearGradient id="b4x-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f3d27a"/>
+      <stop offset="100%" stop-color="#cf9c2c"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0f2236"/>
+  <path d="M32 9 L52 16 L52 33 C52 44 43 51 32 55 C21 51 12 44 12 33 L12 16 Z"
+        fill="url(#b4x-shield)" stroke="url(#b4x-silver)" stroke-width="2"/>
+  <text x="32" y="39" text-anchor="middle" font-family="Inter, system-ui, sans-serif"
+        font-weight="900" font-size="18" letter-spacing="-1" fill="url(#b4x-silver)">B<tspan fill="url(#b4x-gold)">4</tspan></text>
+</svg>
