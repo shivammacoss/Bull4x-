@@ -263,25 +263,52 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
         .filter((p) => !recentlyClosedIds.has(String(p.id)));
 
       // Preserve recently-placed optimistic positions that the server's
-      // order→position pipeline hasn't reflected yet. Without this, a refresh
-      // fired right after placeOrder briefly wipes the new trade row, then it
-      // reappears on the next refresh — a visible flicker.
+      // order→position pipeline hasn't reflected yet — without this, a refresh
+      // fired right after placeOrder briefly wipes the new trade row.
+      //
+      // Reconciliation is COUNT-BASED per (symbol|side|lots) bucket, NOT
+      // timestamp-based: comparing client `created_at` to server `created_at`
+      // breaks under clock skew and leaves the optimistic row sitting next to
+      // the real one (the "2 trades open, 1 closes a second later" flicker).
+      // Instead: each NEW server position in a bucket cancels one optimistic
+      // row in that bucket. Any optimistic not yet covered is kept (real fill
+      // still pending); anything older than 8s is given up on.
       const now = Date.now();
-      const carry = get().positions.filter((p) => {
-        if (typeof p.id !== 'string' || !p.id.startsWith('optim-')) return false;
-        const age = now - new Date(p.created_at).getTime();
-        if (age > 10_000) return false; // give up after 10s — server clearly didn't ack
-        // Drop the optimistic row only once a server position with the same
-        // symbol/side/lots created near the same time appears.
-        const optimTs = new Date(p.created_at).getTime();
-        const matched = mapped.some(
-          (m) =>
-            m.symbol === p.symbol &&
-            m.side === p.side &&
-            Math.abs(m.lots - p.lots) < 0.001 &&
-            Math.abs(new Date(m.created_at).getTime() - optimTs) < 30_000,
-        );
-        return !matched;
+      const keyOf = (p: { symbol: string; side: string; lots: number }) =>
+        `${p.symbol}|${p.side}|${(Number(p.lots) || 0).toFixed(3)}`;
+      const isOptim = (id: unknown) => typeof id === 'string' && id.startsWith('optim-');
+
+      const store = get().positions;
+      const prevServer = new Map<string, number>();
+      for (const p of store) {
+        if (isOptim(p.id)) continue;
+        prevServer.set(keyOf(p), (prevServer.get(keyOf(p)) || 0) + 1);
+      }
+      const newServer = new Map<string, number>();
+      for (const m of mapped) newServer.set(keyOf(m), (newServer.get(keyOf(m)) || 0) + 1);
+
+      const optimRows = store
+        .filter((p) => isOptim(p.id) && now - new Date(p.created_at).getTime() <= 8_000)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      const optimCount = new Map<string, number>();
+      for (const p of optimRows) optimCount.set(keyOf(p), (optimCount.get(keyOf(p)) || 0) + 1);
+
+      const keepBudget = new Map<string, number>();
+      for (const [k, oc] of optimCount) {
+        const appeared = Math.max(0, (newServer.get(k) || 0) - (prevServer.get(k) || 0));
+        keepBudget.set(k, Math.max(0, oc - appeared));
+      }
+
+      const taken = new Map<string, number>();
+      const carry = optimRows.filter((p) => {
+        const k = keyOf(p);
+        const used = taken.get(k) || 0;
+        if (used < (keepBudget.get(k) || 0)) {
+          taken.set(k, used + 1);
+          return true;
+        }
+        return false;
       });
 
       set({ positions: carry.length ? [...carry, ...mapped] : mapped });

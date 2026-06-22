@@ -61,6 +61,9 @@ export default function OrderPanel() {
   const [takeProfit, setTakeProfit] = useState('');
   const [openPrice, setOpenPrice] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  // Synchronous double-submit gate — `submitting` state updates between renders,
+  // so a fast double-tap can fire two orders before the button re-disables.
+  const submitInFlightRef = useRef(false);
   const [symbolPickerOpen, setSymbolPickerOpen] = useState(false);
   const [wsStatus, setWsStatus] = useState<'connected' | 'connecting' | 'disconnected'>('disconnected');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -207,8 +210,7 @@ export default function OrderPanel() {
 
   const handleSubmit = async () => {
     unlockAudio();
-    if (!activeAccount || submitting) return;
-    setSubmitting(true);
+    if (!activeAccount || submitting || submitInFlightRef.current) return;
 
     // Lots: backend has its own caps but a 0 / NaN submission isn't worth a round-trip.
     if (!Number.isFinite(lotsNum) || lotsNum <= 0) {
@@ -307,6 +309,12 @@ export default function OrderPanel() {
       toast.error(`Insufficient margin`);
       return;
     }
+
+    // All validation passed — lock now. The ref blocks double-taps synchronously;
+    // setSubmitting drives the disabled button. (Both reset in the api .finally.)
+    submitInFlightRef.current = true;
+    setSubmitting(true);
+
     // Optimistic: instant feedback, API fires in background.
     sounds.orderPlaced();
     const sideLabel =
@@ -363,6 +371,7 @@ export default function OrderPanel() {
       toast.error(e.message || 'Order failed');
     }).finally(() => {
       setSubmitting(false);
+      submitInFlightRef.current = false;
     });
   };
 
