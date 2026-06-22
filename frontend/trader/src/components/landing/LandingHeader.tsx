@@ -9,7 +9,7 @@ export default function LandingHeader() {
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <img src="/images/bull4x-logo.svg" alt="Bull4x" className="h-9 sm:h-10 w-auto object-contain" />
+            <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="h-9 sm:h-10 w-auto object-contain" />
             <span className="font-bold italic tracking-tight text-lg select-none">
               <span className="text-gray-800">Trust</span><span className="text-blue-600">Edge</span><span className="text-amber-500">FX</span>
             </span>

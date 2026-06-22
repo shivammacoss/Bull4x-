@@ -60,7 +60,7 @@ export default function LoginPage() {
         {/* Branding */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
-            <img src="/logo.svg" alt="Bull4x" className="w-16 h-16 object-contain" />
+            <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="w-16 h-16 object-contain" />
           </div>
           <h1 className="text-xl font-bold text-text-primary">
             <span>Bull</span><span style={{ color: '#00e676' }}>4x</span> Admin

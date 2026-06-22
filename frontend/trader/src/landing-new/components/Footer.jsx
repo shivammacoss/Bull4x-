@@ -38,7 +38,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <a href="#home" className="flex items-center gap-2 mb-4 group">
               <img
-                src="/logo.svg"
+                src="/images/bull4x_logo.jpeg"
                 alt="Bull4x"
                 className="h-9 w-auto"
               />

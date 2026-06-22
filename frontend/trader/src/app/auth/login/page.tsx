@@ -258,7 +258,7 @@ export default function LoginPage() {
                 {activeStep === 1 && (
                   <form className="auth-form" onSubmit={handleSignIn} noValidate>
                     <motion.div {...fadeUp(0.2)} className="flex justify-center mb-2">
-                      <img src="/images/bull4x-logo.svg" alt="Bull4x" className="w-16 h-16 object-contain" />
+                      <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="w-16 h-16 object-contain" />
                     </motion.div>
                     <motion.div {...fadeUp(0.3)}>
                       <h2 className="auth-form__title">Sign In</h2>
@@ -336,7 +336,7 @@ export default function LoginPage() {
                 {activeStep === 2 && (
                   <div className="auth-form">
                     <motion.div {...fadeUp(0.2)} className="flex justify-center mb-2">
-                      <img src="/images/bull4x-logo.svg" alt="Bull4x" className="w-16 h-16 object-contain" />
+                      <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="w-16 h-16 object-contain" />
                     </motion.div>
                     <motion.div {...fadeUp(0.3)}>
                       <h2 className="auth-form__title">Demo Account</h2>

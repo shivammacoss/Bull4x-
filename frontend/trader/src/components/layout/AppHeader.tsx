@@ -82,7 +82,7 @@ export default function AppHeader() {
           aria-label="Toggle menu"
         >
           <img
-            src="/images/bull4x-logo.svg"
+            src="/images/bull4x_logo.jpeg"
             alt="Bull4x"
             className="w-10 h-10 object-contain"
           />

@@ -48,7 +48,7 @@ const Footer = () => {
           <div className="col-span-2 md:col-span-3 lg:col-span-1">
             <ScrollReveal variant="fadeLeft">
               <Link to="/" className="inline-block mb-4">
-                <img src="/logo.svg" alt="Bull4x" className="h-10 w-auto" />
+                <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="h-10 w-auto" />
               </Link>
               <p className="text-text-secondary text-sm mb-6">
                 Trade with confidence. Trade with Bull4x.

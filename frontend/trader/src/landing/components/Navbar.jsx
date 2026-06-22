@@ -100,7 +100,7 @@ const Navbar = () => {
             {/* Logo */}
             <Link href="/" className="flex items-center flex-shrink-0 group">
               <img
-                src="/logo.svg"
+                src="/images/bull4x_logo.jpeg"
                 alt="Bull4x"
                 className="h-12 w-auto object-contain transition-all duration-300 group-hover:drop-shadow-[0_0_12px_rgba(26,86,255,0.6)]"
               />

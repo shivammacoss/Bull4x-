@@ -191,7 +191,7 @@ function RegisterContent() {
               >
                 <form className="auth-form" onSubmit={handleSubmit} noValidate>
                   <motion.div {...fadeUp(0.2)} className="flex justify-center mb-2">
-                    <img src="/images/bull4x-logo.svg" alt="Bull4x" className="w-16 h-16 object-contain" />
+                    <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="w-16 h-16 object-contain" />
                   </motion.div>
                   <motion.div {...fadeUp(0.3)}>
                     <h2 className="auth-form__title">Sign Up Account</h2>

@@ -30,14 +30,14 @@ export function Bull4xWordmark({
           className,
         )}
       >
-        <img src="/images/bull4x-logo.svg" alt="Bull4x" className="w-7 h-7 object-contain" />
+        <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="w-7 h-7 object-contain" />
       </Link>
     );
   }
 
   const mark = (
     <span className={cn('inline-flex items-center gap-2 select-none', className)}>
-      <img src="/images/bull4x-logo.svg" alt="Bull4x" className="w-8 h-8 object-contain shrink-0" />
+      <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="w-8 h-8 object-contain shrink-0" />
       <span
         className={cn(
           'inline-flex items-baseline font-bold tracking-tight',
