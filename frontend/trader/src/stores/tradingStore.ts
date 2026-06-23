@@ -381,7 +381,15 @@ export const useTradingStore = create<TradingState>()((set, get) => ({
         const inst =
           state.instruments.find((i) => i.symbol === sym) ||
           state.instruments.find((i) => String(i.symbol).toUpperCase() === sym);
-        const cs = inst?.contract_size || 100000;
+        const cs = inst?.contract_size;
+        // Without the instrument's real contract size we cannot compute P&L
+        // correctly. Keep the server-provided profit (just refresh the live
+        // price) instead of guessing with a forex default (100000) — that
+        // default briefly inflated P&L ~100x for non-forex symbols until the
+        // instrument metadata finished loading (the "glitchy huge P&L" bug).
+        if (!cs || cs <= 0) {
+          return { ...pos, current_price: cp };
+        }
         let pnl = pos.side === 'buy'
           ? (cp - pos.open_price) * pos.lots * cs
           : (pos.open_price - cp) * pos.lots * cs;
