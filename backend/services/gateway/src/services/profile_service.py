@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.common.src.models import User, UserSession, KYCDocument
-from packages.common.src.auth import hash_password, verify_password
+from packages.common.src.auth import hash_password_async, verify_password_async
 from packages.common.src.config import get_settings
 from packages.common.src.path_safety import PathTraversalError, safe_join_under_base
 from packages.common.src.notify import create_notification
@@ -142,13 +142,13 @@ async def change_password(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    if not verify_password(current_password, user.password_hash):
+    if not await verify_password_async(current_password, user.password_hash):
         raise HTTPException(status_code=400, detail="Current password is incorrect")
 
     if current_password == new_password:
         raise HTTPException(status_code=400, detail="New password must be different")
 
-    user.password_hash = hash_password(new_password)
+    user.password_hash = await hash_password_async(new_password)
     await db.commit()
 
     return {"message": "Password changed successfully"}

@@ -8,7 +8,7 @@ from sqlalchemy import select, func
 from sqlalchemy.exc import DBAPIError, OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from packages.common.src.auth import verify_password
+from packages.common.src.auth import verify_password_async, hash_password_async
 from packages.common.src.config import get_settings
 from packages.common.src.models import User, Employee
 from packages.common.src.admin_schemas import AdminLoginRequest, AdminLoginResponse, AdminRefreshRequest
@@ -62,7 +62,7 @@ async def admin_login(body: AdminLoginRequest, db: AsyncSession) -> AdminLoginRe
     if admin is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    password_ok = verify_password(body.password, admin.password_hash)
+    password_ok = await verify_password_async(body.password, admin.password_hash)
     if not password_ok:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
@@ -117,12 +117,11 @@ async def admin_refresh(body: AdminRefreshRequest, db: AsyncSession) -> AdminLog
 
 
 async def change_admin_password(admin: User, current_password: str, new_password: str, db: AsyncSession) -> dict:
-    if not verify_password(current_password, admin.password_hash):
+    if not await verify_password_async(current_password, admin.password_hash):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
     if len(new_password) < 8:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="New password must be at least 8 characters")
-    from packages.common.src.auth import hash_password
-    admin.password_hash = hash_password(new_password)
+    admin.password_hash = await hash_password_async(new_password)
     await db.commit()
     return {"message": "Password changed successfully"}
 

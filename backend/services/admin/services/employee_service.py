@@ -6,7 +6,7 @@ from fastapi import HTTPException
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from packages.common.src.auth import hash_password
+from packages.common.src.auth import hash_password_async
 from packages.common.src.models import User, Employee, AuditLog
 from packages.common.src.admin_schemas import (
     EmployeeIn, EmployeeUpdate, AuditLogOut, PaginatedResponse,
@@ -64,7 +64,7 @@ async def create_employee(
 
     import secrets
     raw_password = body.password or secrets.token_urlsafe(12)
-    password_hash = hash_password(raw_password)
+    password_hash = await hash_password_async(raw_password)
 
     first_name = body.first_name
     last_name = body.last_name

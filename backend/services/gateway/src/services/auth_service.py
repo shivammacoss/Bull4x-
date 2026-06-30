@@ -22,6 +22,7 @@ from packages.common.src.schemas import TokenResponse
 from packages.common.src.auth import (
     hash_password, verify_password, create_access_token,
     hash_token, decode_token,
+    hash_password_async, verify_password_async,
 )
 
 logger = logging.getLogger("auth_service")
@@ -249,7 +250,7 @@ async def register_user(
 
     user = User(
         email=email,
-        password_hash=hash_password(password),
+        password_hash=await hash_password_async(password),
         first_name=first_name,
         last_name=last_name,
         phone=phone,
@@ -297,7 +298,7 @@ async def login_user(
             "This account uses Google sign-in. Click 'Continue with Google' to sign in.",
             401,
         )
-    if not verify_password(password, user.password_hash):
+    if not await verify_password_async(password, user.password_hash):
         raise AuthServiceError("Invalid credentials", 401)
 
     if user.status == "banned":
@@ -346,7 +347,7 @@ async def _ensure_shared_demo_user(db: AsyncSession) -> User:
     demo_password = secrets.token_urlsafe(32)
     user = User(
         email=DEMO_SHARED_EMAIL,
-        password_hash=hash_password(demo_password),
+        password_hash=await hash_password_async(demo_password),
         first_name="Demo", last_name="Trader",
         role="user", status="active", kyc_status="pending",
         is_demo=True, two_factor_enabled=False, two_factor_secret=None,
@@ -513,7 +514,7 @@ async def reset_password(token: str, new_password: str, request: Request, db: As
     user = await db.get(User, row.user_id)
     if not user:
         raise AuthServiceError("Invalid or expired reset link")
-    user.password_hash = hash_password(new_password)
+    user.password_hash = await hash_password_async(new_password)
     row.used = True
     await db.commit()
     return {"message": "Password has been reset. You can sign in now."}
@@ -588,7 +589,7 @@ async def verify_reset_otp(email: str, otp: str, new_password: str, request: Req
     if not row:
         return invalid
 
-    user.password_hash = hash_password(new_password)
+    user.password_hash = await hash_password_async(new_password)
     row.used = True
     await db.commit()
     return {"success": True, "message": "Password has been reset. You can sign in now."}
@@ -625,9 +626,9 @@ async def verify_2fa(user_id: UUID, code: str, db: AsyncSession) -> dict:
 async def change_password(user_id: UUID, old_password: str, new_password: str, db: AsyncSession) -> dict:
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
-    if not verify_password(old_password, user.password_hash):
+    if not await verify_password_async(old_password, user.password_hash):
         raise AuthServiceError("Current password is incorrect")
-    user.password_hash = hash_password(new_password)
+    user.password_hash = await hash_password_async(new_password)
     await db.commit()
     return {"message": "Password changed successfully"}
 

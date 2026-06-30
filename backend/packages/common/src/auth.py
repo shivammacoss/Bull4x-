@@ -1,4 +1,5 @@
 """JWT authentication and password utilities."""
+import asyncio
 import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -26,6 +27,19 @@ def verify_password(password: str, hashed: str) -> bool:
         return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
     except (ValueError, TypeError):
         return False
+
+
+# bcrypt is CPU-bound and takes ~250-400ms at the default cost factor. Calling
+# it directly inside an async request handler blocks the entire event loop for
+# that duration — every other API request and WebSocket tick stalls. These
+# async variants offload the hash to a worker thread so the event loop stays
+# responsive. Use them in all async (request-handling) code paths.
+async def hash_password_async(password: str) -> str:
+    return await asyncio.to_thread(hash_password, password)
+
+
+async def verify_password_async(password: str, hashed: str) -> bool:
+    return await asyncio.to_thread(verify_password, password, hashed)
 
 
 def create_access_token(
