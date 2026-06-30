@@ -134,7 +134,10 @@ function TradingSession({ children }: { children: React.ReactNode }) {
       }
     };
     void pollPricesFromApi();
-    const pricePoll = setInterval(pollPricesFromApi, 1500);
+    // Live prices stream over the WebSocket (/ws/prices); this REST poll is only
+    // a reconciliation fallback. Polling it every 1.5s per client hammered the
+    // gateway, so keep it infrequent.
+    const pricePoll = setInterval(pollPricesFromApi, 10_000);
 
     const fxPoll = setInterval(() => { refreshFxRate(); }, 60_000);
 
@@ -182,7 +185,7 @@ function TradingSession({ children }: { children: React.ReactNode }) {
           /* ignore */
         }
       }
-    }, 1500);
+    }, 5000);
 
     return () => {
       cancelled = true;

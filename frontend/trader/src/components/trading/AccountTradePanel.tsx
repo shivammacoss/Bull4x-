@@ -126,7 +126,8 @@ export default function AccountTradePanel({ account, onClose }: AccountTradePane
       } catch {}
     };
     void pollPrices();
-    const pricePoll = setInterval(pollPrices, 1500);
+    // WebSocket streams live prices; this is a fallback poll — keep it light.
+    const pricePoll = setInterval(pollPrices, 10_000);
 
     return () => {
       pollActive = false;
@@ -161,7 +162,7 @@ export default function AccountTradePanel({ account, onClose }: AccountTradePane
 
   useEffect(() => {
     void fetchPositions();
-    const poll = setInterval(fetchPositions, 2000);
+    const poll = setInterval(fetchPositions, 6000);
     return () => clearInterval(poll);
   }, [fetchPositions]);
 

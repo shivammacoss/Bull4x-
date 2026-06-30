@@ -78,13 +78,28 @@ async def get_symbol_market_status(symbol: str, db: AsyncSession) -> dict:
     )
 
 
+_all_prices_cache: dict = {"data": None, "ts": 0.0}
+_ALL_PRICES_TTL = 1.0  # seconds — every client polls this; share one computation
+
+
 async def get_all_prices() -> list[dict]:
+    # Short in-process cache: this endpoint is polled by every client a few times
+    # a second. Without the cache the gateway recomputes (MGET + json.loads of
+    # every tick) per request and the CPU pegs. 1s freshness is fine — live
+    # prices stream over the WebSocket anyway.
+    import time as _time
+    now = _time.monotonic()
+    if _all_prices_cache["data"] is not None and (now - _all_prices_cache["ts"]) < _ALL_PRICES_TTL:
+        return _all_prices_cache["data"]
+
     # Read the live-symbol index set (maintained by publish_price) and MGET
     # exactly those tick keys. Avoids SCAN over the entire Redis keyspace,
     # which had grown to ~18s and pegged the gateway CPU — starving every other
     # request (the platform-wide slowness + login/trade failures).
     members = await redis_client.smembers("prices:symbols")
     if not members:
+        _all_prices_cache["data"] = []
+        _all_prices_cache["ts"] = now
         return []
     symbols = [m.decode() if isinstance(m, (bytes, bytearray)) else m for m in members]
     keys = [PriceChannel.tick_key(s) for s in symbols]
@@ -98,6 +113,8 @@ async def get_all_prices() -> list[dict]:
             except (ValueError, TypeError):
                 pass
 
+    _all_prices_cache["data"] = prices
+    _all_prices_cache["ts"] = now
     return prices
 
 
