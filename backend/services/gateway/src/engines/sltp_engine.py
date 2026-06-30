@@ -85,9 +85,15 @@ class SLTPEngine:
     async def _load_prices(self):
         """Load latest prices directly from Redis keys instead of pubsub."""
         try:
-            keys = await redis_client.keys("tick:*")
-            if not keys:
+            # Use the live-symbol index set (maintained by publish_price) instead
+            # of the blocking `KEYS tick:*` command. KEYS scans the entire Redis
+            # keyspace and BLOCKS Redis for every other service — running it on
+            # this 1s loop stalled the whole platform.
+            members = await redis_client.smembers("prices:symbols")
+            if not members:
                 return
+            symbols = [m.decode() if isinstance(m, (bytes, bytearray)) else m for m in members]
+            keys = [PriceChannel.tick_key(s) for s in symbols]
             values = await redis_client.mget(keys)
             for val in values:
                 if val:

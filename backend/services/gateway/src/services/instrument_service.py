@@ -79,18 +79,24 @@ async def get_symbol_market_status(symbol: str, db: AsyncSession) -> dict:
 
 
 async def get_all_prices() -> list[dict]:
-    keys = []
-    async for key in redis_client.scan_iter(f"{PriceChannel.TICK_PREFIX}*"):
-        keys.append(key)
-
-    if not keys:
+    # Read the live-symbol index set (maintained by publish_price) and MGET
+    # exactly those tick keys. Avoids SCAN over the entire Redis keyspace,
+    # which had grown to ~18s and pegged the gateway CPU — starving every other
+    # request (the platform-wide slowness + login/trade failures).
+    members = await redis_client.smembers("prices:symbols")
+    if not members:
         return []
+    symbols = [m.decode() if isinstance(m, (bytes, bytearray)) else m for m in members]
+    keys = [PriceChannel.tick_key(s) for s in symbols]
 
     values = await redis_client.mget(keys)
     prices = []
     for v in values:
         if v:
-            prices.append(json.loads(v))
+            try:
+                prices.append(json.loads(v))
+            except (ValueError, TypeError):
+                pass
 
     return prices
 

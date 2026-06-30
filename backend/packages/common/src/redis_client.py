@@ -40,6 +40,10 @@ async def publish_price(symbol: str, bid: float, ask: float, timestamp: str):
         "spread": round(ask - bid, 8),
     })
     await redis_client.set(PriceChannel.tick_key(symbol), data)
+    # Maintain a small index set of live symbols so readers (get_all_prices)
+    # MGET exactly these keys instead of SCAN-ing the whole Redis keyspace —
+    # the scan grew to ~18s with the bars cache and pegged the gateway CPU.
+    await redis_client.sadd("prices:symbols", symbol)
     await redis_client.publish(PriceChannel.price_channel(symbol), data)
     await redis_client.publish(PriceChannel.PRICE_CHANNEL, data)
 
