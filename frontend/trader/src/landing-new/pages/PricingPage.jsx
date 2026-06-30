@@ -7,7 +7,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import TopBanner from '../components/TopBanner';
 import PricingTierCard from '../components/PricingTierCard';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Map admin stepsCount → tab name shown on the pricing page.
 const STEP_TO_TAB = { 0: 'Standard', 1: 'Pro', 2: 'ECN' };

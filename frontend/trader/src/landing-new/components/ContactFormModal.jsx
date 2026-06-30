@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { X, Send, Mail, CheckCircle2 } from 'lucide-react';
 
 const SUPPORT_EMAIL = 'support@bull4x.com';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 /**
  * Reusable contact modal — opens from any "Talk to expert" / "Get in touch" CTA.

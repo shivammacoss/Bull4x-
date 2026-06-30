@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 
 const SUPPORT_EMAIL = 'support@bull4x.com';
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 const contactMethods = [
   {
