@@ -1,0 +1,44 @@
+# Normalize line endings across all platforms.
+# Text files use LF in the repo AND the working tree — correct for the
+# Linux/Docker builds and shell scripts, and it silences the
+# "LF will be replaced by CRLF" warnings on Windows.
+* text=auto eol=lf
+
+# Explicit text types (kept LF)
+*.ts    text eol=lf
+*.tsx   text eol=lf
+*.js    text eol=lf
+*.jsx   text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+*.json  text eol=lf
+*.css   text eol=lf
+*.scss  text eol=lf
+*.html  text eol=lf
+*.md    text eol=lf
+*.py    text eol=lf
+*.sql   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.svg   text eol=lf
+*.env   text eol=lf
+
+# Shell scripts must stay LF to run in Linux containers
+*.sh    text eol=lf
+Dockerfile text eol=lf
+
+# Binary files — never modified by Git
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.mp4   binary
+*.mov   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.eot   binary

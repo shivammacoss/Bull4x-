@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect } from 'react';
-import { AlertTriangle, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { AlertTriangle, Eye, EyeOff, Loader2, Zap, ShieldCheck, TrendingUp, Globe } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { usePlatformStatusStore } from '@/stores/platformStatusStore';
 import toast from 'react-hot-toast';
@@ -224,20 +224,37 @@ export default function LoginPage() {
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             />
             <div className="auth-left__content">
-              <motion.h1 className="auth-left__title" {...fadeUp(0.3)}>{cfg.title}</motion.h1>
-              <motion.p className="auth-left__subtitle" {...fadeUp(0.4)}>{cfg.subtitle}</motion.p>
-              <div className="auth-left__steps">
-                {STEPS.map((s, i) => (
-                  <motion.div key={s.number} {...fadeUp(0.45 + i * 0.08)}>
-                    <div
-                      className={`auth-step ${activeStep === s.number ? 'auth-step--active' : 'auth-step--inactive'}`}
-                      onClick={() => handleStepClick(s.number)}
-                    >
-                      <span className="auth-step__num">{s.number}</span>
-                      <span className="auth-step__label">{s.label}</span>
-                    </div>
-                  </motion.div>
-                ))}
+              {/* Brand */}
+              <motion.div className="auth-left__brand" {...fadeUp(0.2)}>
+                <img src="/bull4x-logo.png" alt="Bull4X" className="auth-left__logo" />
+                <span className="auth-left__wordmark">BULL<span>4X</span></span>
+              </motion.div>
+
+              {/* Feature highlights — fills the panel */}
+              <motion.ul className="auth-left__features" {...fadeUp(0.3)}>
+                <li className="auth-feature"><span className="auth-feature__icon"><Zap size={17} /></span> Ultra-fast execution, zero requotes</li>
+                <li className="auth-feature"><span className="auth-feature__icon"><TrendingUp size={17} /></span> Tight spreads from 0.0 pips</li>
+                <li className="auth-feature"><span className="auth-feature__icon"><ShieldCheck size={17} /></span> Segregated &amp; secured client funds</li>
+                <li className="auth-feature"><span className="auth-feature__icon"><Globe size={17} /></span> 60+ global instruments, 24/5</li>
+              </motion.ul>
+
+              {/* Welcome + steps */}
+              <div className="auth-left__welcome">
+                <motion.h1 className="auth-left__title" {...fadeUp(0.4)}>{cfg.title}</motion.h1>
+                <motion.p className="auth-left__subtitle" {...fadeUp(0.45)}>{cfg.subtitle}</motion.p>
+                <div className="auth-left__steps">
+                  {STEPS.map((s, i) => (
+                    <motion.div key={s.number} {...fadeUp(0.5 + i * 0.08)}>
+                      <div
+                        className={`auth-step ${activeStep === s.number ? 'auth-step--active' : 'auth-step--inactive'}`}
+                        onClick={() => handleStepClick(s.number)}
+                      >
+                        <span className="auth-step__num">{s.number}</span>
+                        <span className="auth-step__label">{s.label}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -258,7 +275,7 @@ export default function LoginPage() {
                 {activeStep === 1 && (
                   <form className="auth-form" onSubmit={handleSignIn} noValidate>
                     <motion.div {...fadeUp(0.2)} className="flex justify-center mb-2">
-                      <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="w-16 h-16 object-contain" />
+                      <img src="/bull4x-logo.png" alt="Bull4X" className="w-16 h-16 object-contain" />
                     </motion.div>
                     <motion.div {...fadeUp(0.3)}>
                       <h2 className="auth-form__title">Sign In</h2>
@@ -336,7 +353,7 @@ export default function LoginPage() {
                 {activeStep === 2 && (
                   <div className="auth-form">
                     <motion.div {...fadeUp(0.2)} className="flex justify-center mb-2">
-                      <img src="/images/bull4x_logo.jpeg" alt="Bull4x" className="w-16 h-16 object-contain" />
+                      <img src="/bull4x-logo.png" alt="Bull4X" className="w-16 h-16 object-contain" />
                     </motion.div>
                     <motion.div {...fadeUp(0.3)}>
                       <h2 className="auth-form__title">Demo Account</h2>

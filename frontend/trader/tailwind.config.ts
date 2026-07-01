@@ -78,6 +78,28 @@ const config: Config = {
           accent: '#1A56FF',
           purple: '#7B2FFF',
         },
+        /* Bull4X "Cyber-Samurai" landing palette (src/landing-b4x) */
+        'red-accent': '#D9A136',
+        'red-light': '#F0C96F',
+        'red-dark': '#b8892a',
+        'green-accent': '#00d4aa',
+        'green-light': '#00f5c4',
+        bull: {
+          900: '#0d1117',
+          800: '#111820',
+          700: '#151d27',
+          600: '#1a232e',
+          500: '#1f2935',
+          400: '#252f3c',
+        },
+        gold: {
+          dark: '#B9974B',
+          DEFAULT: '#CFAF63',
+          light: '#E6D6A3',
+          400: '#F0C96F',
+          500: '#D9A136',
+          600: '#b8892a',
+        },
       },
       backgroundImage: {
         'gradient-primary': 'linear-gradient(135deg, #0158c6 0%, #0199c6 40%, #4dbe51 70%, #81ce65 100%)',

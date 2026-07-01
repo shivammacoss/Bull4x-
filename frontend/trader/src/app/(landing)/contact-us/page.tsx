@@ -1,7 +1,11 @@
-'use client'
+import Bull4xShell from '@/landing-b4x/Bull4xShell'
+import Contact from '@/landing-b4x/pages/Contact'
 
-import ContactPage from '@/landing-new/pages/ContactPage'
-
-export default function Page() {
-  return <ContactPage />
+// Bull4X-styled Contact page (navbar "Contact").
+export default function ContactUsPage() {
+  return (
+    <Bull4xShell>
+      <Contact />
+    </Bull4xShell>
+  )
 }
