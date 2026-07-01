@@ -33,7 +33,10 @@ function Navbar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  useEffect(() => { setIsOpen(false) }, [location])
+  // Close the mobile menu on route change. Depend on the pathname STRING —
+  // the shim's useLocation() returns a fresh object each render, so depending
+  // on `location` itself would fire every render and instantly close the menu.
+  useEffect(() => { setIsOpen(false) }, [location.pathname])
 
   useEffect(() => {
     const handleClickOutside = (e) => {
