@@ -8,7 +8,7 @@ import { Link, NavLink, useLocation } from '../router-shim'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Menu, X, TrendingUp, BarChart2, Monitor,
-  User, DollarSign, Wrench, Book, Info, Mail
+  User, DollarSign, Wrench, Book, Info, Mail, Download
 } from 'lucide-react'
 
 const navItems = [
@@ -88,6 +88,13 @@ function Navbar() {
 
           {/* ── CTA + Mobile Toggle ── */}
           <div className="flex items-center gap-3">
+            <a
+              href="/bull4x.apk"
+              download="Bull4X.apk"
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-[#D9A136] font-semibold text-sm rounded-lg border border-[#D9A136]/40 hover:bg-[#D9A136]/10 hover:border-[#D9A136]/70 transition-all duration-200"
+            >
+              <Download size={14} /> Get App
+            </a>
             <Link
               to="/auth/login"
               className="hidden sm:inline-flex items-center gap-2 px-3 py-2 text-slate-300 font-medium text-sm rounded-lg border border-white/15 hover:text-white hover:border-white/30 hover:bg-white/5 transition-all duration-200"
@@ -186,6 +193,14 @@ function Navbar() {
                   <User size={14} />
                   Open Live Account
                 </Link>
+                <a
+                  href="/bull4x.apk"
+                  download="Bull4X.apk"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-3 text-[#D9A136] font-semibold text-sm rounded-lg border border-[#D9A136]/40 hover:bg-[#D9A136]/10 transition-all duration-200"
+                >
+                  <Download size={15} />
+                  Download Android App
+                </a>
               </motion.div>
             </div>
           </motion.div>
