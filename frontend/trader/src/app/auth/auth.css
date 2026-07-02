@@ -22,7 +22,11 @@
   height: 100vh;
   width: 100%;
   padding: 24px;
-  background: #111111 !important;
+  /* Laptop/desktop: BULL4X bull artwork behind the auth card (dark scrim for contrast) */
+  background:
+    linear-gradient(rgba(4, 9, 25, 0.55), rgba(4, 9, 25, 0.72)),
+    url('/auth-bull-wide.png') center / cover no-repeat,
+    #050912 !important;
   color: #ffffff;
   color-scheme: dark;
   overflow: hidden;
@@ -139,11 +143,14 @@
   left: 0;
   right: 0;
   bottom: -50px;
-  background:
-    radial-gradient(ellipse 65% 45% at 28% 18%, rgba(192, 132, 252, 0.55) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 45% at 80% 65%, rgba(99, 102, 241, 0.45) 0%, transparent 55%),
-    radial-gradient(ellipse 95% 60% at 50% 35%, #7c3aed 0%, #4c1d95 35%, #1a0533 68%, transparent 90%),
-    var(--auth-bg);
+  /* BULL4X bull artwork + dark scrim so the feature text stays readable */
+  background-image:
+    linear-gradient(180deg, rgba(4, 9, 25, 0.35) 0%, rgba(4, 9, 25, 0.72) 100%),
+    url('/auth-bull.png');
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+  background-color: var(--auth-bg);
 }
 
 /* Floating glow orb */
@@ -682,6 +689,9 @@
     min-height: 100vh;
     align-items: stretch;
     overflow: auto;
+    /* Mobile keeps the plain backdrop; the card fills the screen and the
+       left panel already shows the portrait bull banner. */
+    background: #111111 !important;
   }
 
   .auth-card-wrapper {
@@ -708,7 +718,7 @@
   .auth-left {
     width: 100%;
     height: auto;
-    min-height: 140px;
+    min-height: 220px;
     border-radius: 0;
     flex-shrink: 0;
   }

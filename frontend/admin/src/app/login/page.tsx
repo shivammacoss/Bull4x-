@@ -144,6 +144,15 @@ export default function LoginPage() {
             radial-gradient(ellipse 70% 60% at 50% -10%, rgba(0, 230, 118, 0.10) 0%, transparent 55%),
             #06090a;
         }
+        /* Laptop/desktop: BULL4X bull artwork behind the login card */
+        @media (min-width: 768px) {
+          .admin-login {
+            background:
+              linear-gradient(rgba(4, 9, 25, 0.62), rgba(4, 9, 25, 0.80)),
+              url('/auth-bull-wide.png') center / cover no-repeat,
+              #06090a;
+          }
+        }
         .admin-login__orb {
           position: absolute;
           border-radius: 50%;
