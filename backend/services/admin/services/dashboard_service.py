@@ -10,9 +10,25 @@ from packages.common.src.models import (
 from packages.common.src.admin_schemas import (
     DashboardStats, DashboardRevenueSeries, DashboardRevenuePoint,
 )
+from packages.common.src.redis_client import redis_client
+
+# The stats below run ~9 sequential aggregate queries; recomputing them on every
+# dashboard load / auto-refresh / concurrent admin made the admin panel slow.
+# Cache the result in Redis for a short window — these figures don't need
+# per-second freshness. Revenue series changes even less often.
+_STATS_CACHE_KEY = "admin:dashboard:stats"
+_STATS_CACHE_TTL = 20  # seconds
+_REVENUE_CACHE_TTL = 120  # seconds
 
 
 async def get_dashboard_stats(db: AsyncSession) -> DashboardStats:
+    try:
+        cached = await redis_client.get(_STATS_CACHE_KEY)
+        if cached:
+            return DashboardStats.model_validate_json(cached)
+    except Exception:
+        pass
+
     today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     from packages.common.src.models import TradingAccount
 
@@ -162,7 +178,7 @@ async def get_dashboard_stats(db: AsyncSession) -> DashboardStats:
     )
     open_tickets_count = open_tickets_q.scalar() or 0
 
-    return DashboardStats(
+    stats = DashboardStats(
         total_users=total_users,
         active_traders=active_traders,
         deposits_today=deposits_today,
@@ -172,9 +188,22 @@ async def get_dashboard_stats(db: AsyncSession) -> DashboardStats:
         pending_deposits_count=pending_deposits_count,
         open_tickets_count=open_tickets_count,
     )
+    try:
+        await redis_client.set(_STATS_CACHE_KEY, stats.model_dump_json(), ex=_STATS_CACHE_TTL)
+    except Exception:
+        pass
+    return stats
 
 
 async def dashboard_revenue_series(days: int, db: AsyncSession) -> DashboardRevenueSeries:
+    cache_key = f"admin:dashboard:revenue:{days}"
+    try:
+        cached = await redis_client.get(cache_key)
+        if cached:
+            return DashboardRevenueSeries.model_validate_json(cached)
+    except Exception:
+        pass
+
     end_d: date = datetime.utcnow().date()
     start_d: date = end_d - timedelta(days=days - 1)
     cutoff = datetime.combine(start_d, datetime.min.time())
@@ -239,4 +268,9 @@ async def dashboard_revenue_series(days: int, db: AsyncSession) -> DashboardReve
         )
         cur += timedelta(days=1)
 
-    return DashboardRevenueSeries(points=points)
+    series = DashboardRevenueSeries(points=points)
+    try:
+        await redis_client.set(cache_key, series.model_dump_json(), ex=_REVENUE_CACHE_TTL)
+    except Exception:
+        pass
+    return series
