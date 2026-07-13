@@ -3,15 +3,40 @@
 // BULL4X - TradingView Widget
 // ============================================
 
-import React, { useEffect, useRef, memo } from 'react'
+import React, { useEffect, useRef, useState, memo } from 'react'
 
 const CHART_HEIGHT = 700
 
 function TradingViewWidget({ symbol = 'FX:EURUSD' }) {
   const container = useRef(null)
+  // Defer the heavy external TradingView embed (s3.tradingview.com script +
+  // iframe) until the chart scrolls near the viewport. Loading it on mount
+  // made the landing page pull ~hundreds of KB + external requests during
+  // first paint even when the section was far below the fold.
+  const [inView, setInView] = useState(false)
 
   useEffect(() => {
-    if (!container.current) return
+    const el = container.current
+    if (!el || inView) return
+    if (typeof IntersectionObserver === 'undefined') {
+      setInView(true)
+      return
+    }
+    const obs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setInView(true)
+          obs.disconnect()
+        }
+      },
+      { rootMargin: '300px' }, // start loading just before it's visible
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [inView])
+
+  useEffect(() => {
+    if (!container.current || !inView) return
 
     // Clear previous widget
     container.current.innerHTML = ''
@@ -44,7 +69,7 @@ function TradingViewWidget({ symbol = 'FX:EURUSD' }) {
     
     container.current.appendChild(widgetContainer)
     container.current.appendChild(script)
-  }, [symbol])
+  }, [symbol, inView])
 
   return (
     <div

@@ -50,12 +50,14 @@ export const useAuthStore = create<AuthState>()((set) => ({
   login: async (email, password, totpCode) => {
     set({ isLoading: true });
     try {
-      await api.post<{ access_token: string; user_id: string; role: string }>('/auth/login', {
+      const res = await api.post<{ access_token: string; user_id: string; role: string; user?: User }>('/auth/login', {
         email,
         password,
         totp_code: totpCode,
       });
-      const user = await api.get<User>('/auth/me');
+      // Backend now embeds the user in the auth response — skip the extra
+      // /auth/me round-trip when it's present (older backends won't send it).
+      const user = res?.user ?? (await api.get<User>('/auth/me'));
       set({ user, isAuthenticated: true, isLoading: false, token: null });
     } catch (e) {
       set({ isLoading: false });
@@ -66,8 +68,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
   demoLogin: async () => {
     set({ isLoading: true });
     try {
-      await api.post<{ access_token: string; user_id: string; role: string }>('/auth/demo-login', {});
-      const user = await api.get<User>('/auth/me');
+      const res = await api.post<{ access_token: string; user_id: string; role: string; user?: User }>('/auth/demo-login', {});
+      const user = res?.user ?? (await api.get<User>('/auth/me'));
       set({ user, isAuthenticated: true, isLoading: false, token: null });
     } catch (e) {
       set({ isLoading: false });
@@ -82,8 +84,8 @@ export const useAuthStore = create<AuthState>()((set) => ({
   register: async (data) => {
     set({ isLoading: true });
     try {
-      await api.post<{ access_token: string }>('/auth/register', data);
-      const user = await api.get<User>('/auth/me');
+      const res = await api.post<{ access_token: string; user?: User }>('/auth/register', data);
+      const user = res?.user ?? (await api.get<User>('/auth/me'));
       set({ user, isAuthenticated: true, isLoading: false, token: null });
     } catch (e) {
       set({ isLoading: false });

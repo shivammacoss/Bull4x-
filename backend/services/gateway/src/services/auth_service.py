@@ -18,7 +18,7 @@ from packages.common.src.models import (
     User, UserSession, TradingAccount, AccountGroup,
     IBProfile, Referral, PasswordResetToken, UserRefreshToken, UserAuditLog,
 )
-from packages.common.src.schemas import TokenResponse
+from packages.common.src.schemas import TokenResponse, UserResponse
 from packages.common.src.auth import (
     hash_password, verify_password, create_access_token,
     hash_token, decode_token,
@@ -208,7 +208,15 @@ async def issue_auth_json_response(
         role=user.role,
         expires_at=expires,
     )
-    resp = JSONResponse(content=body.model_dump(mode="json"), status_code=status_code)
+    content = body.model_dump(mode="json")
+    # Embed the full user so login/register/demo callers don't need a second
+    # round-trip to /auth/me. Non-fatal: if serialization ever fails the client
+    # still falls back to GET /auth/me.
+    try:
+        content["user"] = UserResponse.model_validate(user).model_dump(mode="json")
+    except Exception:
+        pass
+    resp = JSONResponse(content=content, status_code=status_code)
     attach_auth_cookies(
         resp, request,
         access_token=token,
