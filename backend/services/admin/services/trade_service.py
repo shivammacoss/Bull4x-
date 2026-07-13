@@ -8,6 +8,7 @@ from decimal import Decimal
 import redis.asyncio as aioredis
 from fastapi import HTTPException
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.common.src.models import (
@@ -37,6 +38,26 @@ async def _get_live_price(symbol: str) -> dict | None:
     return None
 
 
+async def _load_accounts_and_users(account_ids, db: AsyncSession):
+    """Batch-load trading accounts + their owners in two queries, avoiding the
+    per-row account/user lookups (N+1) that made the Trades tabs slow."""
+    ids = {a for a in account_ids if a}
+    if not ids:
+        return {}, {}
+    acc_rows = (await db.execute(
+        select(TradingAccount).where(TradingAccount.id.in_(ids))
+    )).scalars().all()
+    accounts_by_id = {a.id: a for a in acc_rows}
+    user_ids = {a.user_id for a in acc_rows if a.user_id}
+    users_by_id = {}
+    if user_ids:
+        usr_rows = (await db.execute(
+            select(User).where(User.id.in_(user_ids))
+        )).scalars().all()
+        users_by_id = {u.id: u for u in usr_rows}
+    return accounts_by_id, users_by_id
+
+
 async def list_positions(
     page: int, per_page: int, status_filter: str, db: AsyncSession,
 ):
@@ -54,14 +75,24 @@ async def list_positions(
     count_q = select(func.count()).select_from(query.subquery())
     total = (await db.execute(count_q)).scalar() or 0
 
-    query = query.order_by(Position.created_at.desc()).offset((page - 1) * per_page).limit(per_page)
+    # Eager-load account → user and instrument in bulk. Previously each row ran
+    # 3 extra sequential SQL round-trips (account, user, instrument) — an N+1
+    # that made a full page ~150 queries and the Trades page slow to load.
+    query = (
+        query.order_by(Position.created_at.desc())
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+        .options(
+            selectinload(Position.account).selectinload(TradingAccount.user),
+            selectinload(Position.instrument),
+        )
+    )
     result = await db.execute(query)
     positions = result.scalars().all()
 
     items = []
     for pos in positions:
-        acc_q = await db.execute(select(TradingAccount).where(TradingAccount.id == pos.account_id))
-        acc = acc_q.scalar_one_or_none()
+        acc = pos.account
 
         user_email = None
         account_number = None
@@ -70,8 +101,7 @@ async def list_positions(
         if acc:
             account_number = acc.account_number
             is_demo = bool(acc.is_demo)
-            user_q = await db.execute(select(User).where(User.id == acc.user_id))
-            usr = user_q.scalar_one_or_none()
+            usr = acc.user
             if usr:
                 user_email = usr.email
                 book_type = (usr.book_type or "B").upper()
@@ -79,8 +109,7 @@ async def list_positions(
         # demo trades always stay internal (b-book engine), never hit LP.
         is_lp_forwarded = (book_type == "A") and not is_demo
 
-        inst_q = await db.execute(select(Instrument).where(Instrument.id == pos.instrument_id))
-        inst = inst_q.scalar_one_or_none()
+        inst = pos.instrument
 
         side_val = pos.side.value if hasattr(pos.side, "value") else str(pos.side)
         status_val = pos.status.value if hasattr(pos.status, "value") else str(pos.status)
@@ -146,21 +175,20 @@ async def list_orders(
     result = await db.execute(query)
     orders = result.scalars().all()
 
+    accounts_by_id, users_by_id = await _load_accounts_and_users({o.account_id for o in orders}, db)
+
     items = []
     for o in orders:
-        acc_q = await db.execute(select(TradingAccount).where(TradingAccount.id == o.account_id))
-        acc = acc_q.scalar_one_or_none()
+        acc = accounts_by_id.get(o.account_id)
         user_email = None
         account_number = None
         if acc:
             account_number = acc.account_number
-            user_q = await db.execute(select(User).where(User.id == acc.user_id))
-            usr = user_q.scalar_one_or_none()
+            usr = users_by_id.get(acc.user_id)
             if usr:
                 user_email = usr.email
 
-        inst_q = await db.execute(select(Instrument).where(Instrument.id == o.instrument_id))
-        inst = inst_q.scalar_one_or_none()
+        inst = o.instrument  # lazy="selectin" — auto-batched, no per-row query
 
         items.append(OrderOut(
             id=str(o.id),
@@ -199,19 +227,18 @@ async def list_trade_history(page: int, per_page: int, db: AsyncSession):
     result = await db.execute(query)
     trades = result.scalars().all()
 
+    accounts_by_id, users_by_id = await _load_accounts_and_users({t.account_id for t in trades}, db)
+
     items = []
     for t in trades:
-        inst_q = await db.execute(select(Instrument).where(Instrument.id == t.instrument_id))
-        inst = inst_q.scalar_one_or_none()
+        inst = t.instrument  # lazy="selectin" — auto-batched, no per-row query
 
-        acc_q = await db.execute(select(TradingAccount).where(TradingAccount.id == t.account_id))
-        acc = acc_q.scalar_one_or_none()
+        acc = accounts_by_id.get(t.account_id)
         user_email = None
         account_number = None
         if acc:
             account_number = acc.account_number
-            user_q = await db.execute(select(User).where(User.id == acc.user_id))
-            usr = user_q.scalar_one_or_none()
+            usr = users_by_id.get(acc.user_id)
             if usr:
                 user_email = usr.email
 
