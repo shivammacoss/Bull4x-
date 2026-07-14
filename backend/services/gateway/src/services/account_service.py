@@ -223,6 +223,37 @@ async def list_accounts(user_id: UUID, db: AsyncSession) -> dict:
     )
     accounts = result.scalars().unique().all()
 
+    acct_ids = [a.id for a in accounts]
+
+    # Fetch ALL open positions for the user's accounts in ONE query (instrument
+    # eager-loaded), instead of a separate query per account (N+1).
+    pos_rows = (await db.execute(
+        select(Position)
+        .options(selectinload(Position.instrument))
+        .where(
+            Position.account_id.in_(acct_ids),
+            Position.status == PositionStatus.OPEN,
+        )
+    )).scalars().all() if acct_ids else []
+
+    # Read every needed tick in ONE Redis round-trip (MGET) instead of one GET
+    # per position. With many open positions this per-position Redis loop was
+    # the bulk of /accounts latency — and /accounts runs on every page.
+    tick_map: dict = {}
+    symbols = list({p.instrument.symbol for p in pos_rows if p.instrument})
+    if symbols:
+        vals = await redis_client.mget([PriceChannel.tick_key(s) for s in symbols])
+        for s, v in zip(symbols, vals):
+            if v:
+                try:
+                    tick_map[s] = json.loads(v)
+                except Exception:
+                    pass
+
+    pos_by_acct: dict = {}
+    for p in pos_rows:
+        pos_by_acct.setdefault(p.account_id, []).append(p)
+
     fx_rate_cache = {}
 
     items = []
@@ -233,33 +264,29 @@ async def list_accounts(user_id: UUID, db: AsyncSession) -> dict:
         fx_rate = fx_rate_cache[acct_cur]
 
         unrealized_pnl = Decimal("0")
-        pos_result = await db.execute(
-            select(Position).where(
-                Position.account_id == a.id,
-                Position.status == PositionStatus.OPEN,
-            )
-        )
-        for pos in pos_result.scalars().all():
+        for pos in pos_by_acct.get(a.id, []):
             try:
-                tick_data = await redis_client.get(PriceChannel.tick_key(pos.instrument.symbol))
-                if tick_data:
-                    tick = json.loads(tick_data)
-                    sv = pos.side.value if hasattr(pos.side, 'value') else str(pos.side)
-                    cp = Decimal(str(tick["bid"])) if sv == "buy" else Decimal(str(tick["ask"]))
-                    cs = pos.instrument.contract_size if pos.instrument else Decimal("100000")
-                    if sv == "buy":
-                        raw_pnl = (cp - pos.open_price) * pos.lots * cs
-                    else:
-                        raw_pnl = (pos.open_price - cp) * pos.lots * cs
-                    unrealized_pnl += quote_to_account_pnl(
-                        raw_pnl,
-                        getattr(pos.instrument, "base_currency", None),
-                        getattr(pos.instrument, "quote_currency", None),
-                        cp,
-                        account_currency=acct_cur,
-                        symbol=getattr(pos.instrument, "symbol", None),
-                        usd_inr_rate=fx_rate,
-                    )
+                if not pos.instrument:
+                    continue
+                tick = tick_map.get(pos.instrument.symbol)
+                if not tick:
+                    continue
+                sv = pos.side.value if hasattr(pos.side, 'value') else str(pos.side)
+                cp = Decimal(str(tick["bid"])) if sv == "buy" else Decimal(str(tick["ask"]))
+                cs = pos.instrument.contract_size if pos.instrument else Decimal("100000")
+                if sv == "buy":
+                    raw_pnl = (cp - pos.open_price) * pos.lots * cs
+                else:
+                    raw_pnl = (pos.open_price - cp) * pos.lots * cs
+                unrealized_pnl += quote_to_account_pnl(
+                    raw_pnl,
+                    getattr(pos.instrument, "base_currency", None),
+                    getattr(pos.instrument, "quote_currency", None),
+                    cp,
+                    account_currency=acct_cur,
+                    symbol=getattr(pos.instrument, "symbol", None),
+                    usd_inr_rate=fx_rate,
+                )
             except Exception:
                 pass
 
