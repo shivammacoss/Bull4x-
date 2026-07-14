@@ -292,12 +292,32 @@ export const bull4xDatafeed: IBasicDataFeed = {
         }
       }
 
-      // 2. Non-crypto → synthetic candles from live price
-      //    Wait for a price tick if it hasn't arrived yet (WebSocket may still be connecting)
-      //    Also try fetching all prices to prime the store
+      // 2. Non-crypto → REAL bars from the backend (BarAggregator/TimescaleDB,
+      //    same live feed the platform trades on). Preferred over synthetic so
+      //    the chart shows genuine market history, not a random walk.
+      try {
+        const params = new URLSearchParams({
+          resolution: String(resolution), from: String(from), to: String(to),
+        });
+        const res = await fetch(`/api/v1/instruments/${encodeURIComponent(sym)}/bars?${params}`);
+        if (res.ok) {
+          const data = await res.json();
+          const rawBars = Array.isArray(data?.bars) ? data.bars : [];
+          if (rawBars.length > 0) {
+            const bars: Bar[] = rawBars.map((b: any) => ({
+              time: b.time * 1000, open: b.open, high: b.high,
+              low: b.low, close: b.close, volume: b.volume,
+            }));
+            onResult(bars, { noData: false });
+            return;
+          }
+        }
+      } catch { /* backend unavailable → fall through to synthetic */ }
+
+      // 3. Fallback → synthetic candles from live price (keeps the chart usable
+      //    when the backend has no history yet, e.g. a freshly added symbol).
       let tick = await waitForPrice(sym);
       if (!tick || tick.bid <= 0) {
-        // Force-fetch prices from REST API
         try {
           const resp = await fetch('/api/v1/instruments/prices/all');
           if (resp.ok) {
@@ -319,26 +339,6 @@ export const bull4xDatafeed: IBasicDataFeed = {
           return;
         }
       }
-
-      // 3. Fallback: try backend
-      try {
-        const params = new URLSearchParams({
-          resolution: String(resolution), from: String(from), to: String(to),
-        });
-        const res = await fetch(`/api/v1/instruments/${encodeURIComponent(sym)}/bars?${params}`);
-        if (res.ok) {
-          const data = await res.json();
-          const rawBars = Array.isArray(data?.bars) ? data.bars : [];
-          if (rawBars.length > 0) {
-            const bars: Bar[] = rawBars.map((b: any) => ({
-              time: b.time * 1000, open: b.open, high: b.high,
-              low: b.low, close: b.close, volume: b.volume,
-            }));
-            onResult(bars, { noData: false });
-            return;
-          }
-        }
-      } catch { /* backend unavailable */ }
 
       onResult([], { noData: true });
     } catch (err) {

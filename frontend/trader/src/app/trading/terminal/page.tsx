@@ -22,7 +22,10 @@ import PositionsPanel from '@/components/trading/PositionsPanel';
 import { ActiveAccountBadge } from '@/components/trading/ActiveAccountBadge';
 import TerminalLeftRail, { type TerminalSpaceId } from '@/components/trading/TerminalLeftRail';
 
-const AdvancedChart = dynamic(() => import('@/components/charts/AdvancedChart'), { ssr: false });
+// Terminal chart: self-hosted Bull4x Charting Library (branded "Bull4x", fed by
+// our own price data) instead of the public OANDA embed widget. To revert to the
+// OANDA widget, point this back at '@/components/charts/AdvancedChart'.
+const AdvancedChart = dynamic(() => import('@/components/charts/TVChartContainer'), { ssr: false });
 const TradingViewNewsTimeline = dynamic(() => import('@/components/charts/TradingViewNewsTimeline'), {
   ssr: false,
 });
