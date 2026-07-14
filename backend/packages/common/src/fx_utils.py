@@ -63,6 +63,24 @@ async def _fetch_live_usd_inr() -> Decimal | None:
     return None
 
 
+async def warm_fx_cache() -> bool:
+    """Fetch USD→INR live and (re)write the Redis cache keys. Intended to be
+    called by a background poller so hot request paths (get_usd_to_account_rate,
+    /accounts equity) always hit a warm cache and never block on a live fetch.
+    Returns True if the cache was refreshed."""
+    live = await _fetch_live_usd_inr()
+    if not (live and live > 0):
+        return False
+    try:
+        settings = get_settings()
+        payload = _json.dumps({"raw_rate": str(live)})
+        await redis_client.set(FX_CACHE_KEY, payload, ex=settings.FX_RATE_CACHE_TTL_SECONDS)
+        await redis_client.set(FX_LAST_GOOD_KEY, payload, ex=7 * 24 * 3600)
+        return True
+    except Exception:
+        return False
+
+
 async def get_usd_to_account_rate(account_currency: str) -> Decimal:
     """Return the multiplier to convert USD → account_currency.
 

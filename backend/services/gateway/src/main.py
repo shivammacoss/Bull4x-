@@ -111,6 +111,19 @@ def _audit_oxapay_config() -> None:
         logger.info("OxaPay configured · callback=%s · sandbox=%s", callback, settings.OXAPAY_SANDBOX)
 
 
+async def _fx_cache_warmer():
+    """Keep the USD/INR FX cache warm so hot paths (/accounts equity, P&L,
+    margin) never block on a live provider fetch. Refreshes well inside the
+    300s cache TTL. Runs until cancelled at shutdown."""
+    from packages.common.src.fx_utils import warm_fx_cache
+    while True:
+        try:
+            await warm_fx_cache()
+        except Exception as e:
+            logger.warning("FX cache warm failed: %s", e)
+        await asyncio.sleep(120)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     _audit_oxapay_config()
@@ -118,7 +131,9 @@ async def lifespan(app: FastAPI):
     await sltp_engine.start()
     await copy_engine.start()
     await stats_engine.start()
+    fx_warmer_task = asyncio.create_task(_fx_cache_warmer())
     yield
+    fx_warmer_task.cancel()
     await stats_engine.stop()
     await copy_engine.stop()
     await sltp_engine.stop()
