@@ -1,7 +1,5 @@
 """Account Service — Trading account CRUD, equity calculation, deletion."""
 import json
-import logging
-import time
 from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
@@ -26,8 +24,6 @@ from packages.common.src.models import (
 )
 from packages.common.src.schemas import AccountSummary, MessageResponse, OpenLiveAccountRequest
 from packages.common.src.redis_client import redis_client, PriceChannel
-
-logger = logging.getLogger("account_service")
 
 
 async def list_openable_account_groups(
@@ -215,7 +211,19 @@ async def list_accounts(user_id: UUID, db: AsyncSession) -> dict:
     from .trading_service import quote_to_account_pnl
     from packages.common.src.fx_utils import get_usd_to_account_rate
 
-    _t0 = time.perf_counter()
+    # Short per-user cache. /accounts runs on every page; its equity is refreshed
+    # live client-side from the price WebSocket, so a 2s cache is invisible to
+    # users while collapsing repeated/bursty calls to a single Redis read (and
+    # side-stepping event-loop scheduling spikes on the DB path for heavy,
+    # many-account users).
+    cache_key = f"accounts:list:{user_id}"
+    try:
+        _cached = await redis_client.get(cache_key)
+        if _cached:
+            return json.loads(_cached)
+    except Exception:
+        pass
+
     result = await db.execute(
         select(TradingAccount)
         .options(selectinload(TradingAccount.account_group))
@@ -227,7 +235,6 @@ async def list_accounts(user_id: UUID, db: AsyncSession) -> dict:
         )
     )
     accounts = result.scalars().unique().all()
-    _t1 = time.perf_counter()
 
     acct_ids = [a.id for a in accounts]
 
@@ -241,7 +248,6 @@ async def list_accounts(user_id: UUID, db: AsyncSession) -> dict:
             Position.status == PositionStatus.OPEN,
         )
     )).scalars().all() if acct_ids else []
-    _t2 = time.perf_counter()
 
     # Read every needed tick in ONE Redis round-trip (MGET) instead of one GET
     # per position. With many open positions this per-position Redis loop was
@@ -257,7 +263,6 @@ async def list_accounts(user_id: UUID, db: AsyncSession) -> dict:
                 except Exception:
                     pass
 
-    _t3 = time.perf_counter()
     pos_by_acct: dict = {}
     for p in pos_rows:
         pos_by_acct.setdefault(p.account_id, []).append(p)
@@ -335,18 +340,12 @@ async def list_accounts(user_id: UUID, db: AsyncSession) -> dict:
             "account_group": group_payload,
         })
 
-    _t4 = time.perf_counter()
-    total_ms = (_t4 - _t0) * 1000
-    if total_ms > 120:
-        logger.warning(
-            "list_accounts SLOW total=%.0fms | accts_q=%.0f pos_q=%.0f mget=%.0f compute=%.0f "
-            "| n_acct=%d n_pos=%d n_sym=%d currencies=%s",
-            total_ms, (_t1 - _t0) * 1000, (_t2 - _t1) * 1000,
-            (_t3 - _t2) * 1000, (_t4 - _t3) * 1000,
-            len(accounts), len(pos_rows), len(symbols), list(fx_rate_cache.keys()),
-        )
-
-    return {"items": items}
+    payload = {"items": items}
+    try:
+        await redis_client.set(cache_key, json.dumps(payload), ex=2)
+    except Exception:
+        pass
+    return payload
 
 
 async def get_account(account_id: UUID, user_id: UUID, db: AsyncSession) -> TradingAccount:
