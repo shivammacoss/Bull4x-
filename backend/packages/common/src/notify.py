@@ -108,14 +108,19 @@ async def send_email(
             msg.attach(MIMEText(body_text, "plain"))
         msg.attach(MIMEText(body_html, "html"))
 
+        # Port 465 = implicit TLS; 587 (and everything else) = STARTTLS.
+        # Deriving this from the port matters: treating SMTP_USE_TLS as implicit
+        # TLS on 587 makes the connection hang/fail against Hostinger, Gmail, SES
+        # etc., which expect STARTTLS on that port.
+        implicit_tls = int(settings.SMTP_PORT) == 465
         await aiosmtplib.send(
             msg,
             hostname=settings.SMTP_HOST,
             port=settings.SMTP_PORT,
             username=settings.SMTP_USER or None,
             password=settings.SMTP_PASSWORD or None,
-            use_tls=settings.SMTP_USE_TLS,
-            start_tls=not settings.SMTP_USE_TLS,
+            use_tls=implicit_tls,
+            start_tls=(not implicit_tls) and bool(settings.SMTP_USE_TLS),
         )
         logger.info("Email sent to %s: %s", to, subject)
         return True
