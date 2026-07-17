@@ -16,7 +16,7 @@ def smtp_configured() -> bool:
     return bool(s.SMTP_HOST and str(s.SMTP_HOST).strip())
 
 
-def _send_plain_sync(to_email: str, subject: str, body_text: str) -> None:
+def _send_plain_sync(to_email: str, subject: str, body_text: str, body_html: str | None = None) -> None:
     s = get_settings()
     msg = EmailMessage()
     msg["Subject"] = subject
@@ -25,7 +25,11 @@ def _send_plain_sync(to_email: str, subject: str, body_text: str) -> None:
         raise ValueError("SMTP_FROM or SMTP_USER must be set when SMTP_HOST is set")
     msg["From"] = from_addr
     msg["To"] = to_email
+    # multipart/alternative: text first, HTML second. Clients pick the last part
+    # they can render, so HTML wins where supported and text is the fallback.
     msg.set_content(body_text)
+    if body_html:
+        msg.add_alternative(body_html, subtype="html")
 
     host = str(s.SMTP_HOST).strip()
     port = int(s.SMTP_PORT)
@@ -53,15 +57,12 @@ async def send_password_reset_email(to_email: str, reset_link: str, *, app_name:
     """Send reset email. Returns True if sent, False if SMTP not configured or send failed."""
     if not smtp_configured():
         return False
+    from . import email_templates
+
     subject = f"Reset your {app_name} password"
-    body = (
-        f"You requested a password reset for your {app_name} account.\n\n"
-        f"Open this link to choose a new password (it expires in 15 minutes):\n\n"
-        f"{reset_link}\n\n"
-        f"If you did not request this, you can ignore this email.\n"
-    )
+    html, text = email_templates.password_reset(reset_link)
     try:
-        await asyncio.to_thread(_send_plain_sync, to_email, subject, body)
+        await asyncio.to_thread(_send_plain_sync, to_email, subject, text, html)
         return True
     except Exception:
         logger.exception("Failed to send password reset email to %s", to_email)
@@ -72,15 +73,12 @@ async def send_password_reset_otp(to_email: str, otp: str, *, app_name: str = "B
     """Send a 6-digit password-reset OTP (used by the mobile app). Returns True if sent."""
     if not smtp_configured():
         return False
-    subject = f"Your {app_name} password reset code"
-    body = (
-        f"You requested a password reset for your {app_name} account.\n\n"
-        f"Your verification code is: {otp}\n\n"
-        f"Enter this code in the app to choose a new password. It expires in 15 minutes.\n\n"
-        f"If you did not request this, you can ignore this email.\n"
-    )
+    from . import email_templates
+
+    subject = f"Your {app_name} verification code"
+    html, text = email_templates.password_reset_otp(otp)
     try:
-        await asyncio.to_thread(_send_plain_sync, to_email, subject, body)
+        await asyncio.to_thread(_send_plain_sync, to_email, subject, text, html)
         return True
     except Exception:
         logger.exception("Failed to send password reset OTP to %s", to_email)
