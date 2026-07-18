@@ -99,6 +99,64 @@ async def terminal_login(body: TerminalLoginRequest):
     }
 
 
+class TerminalTransferRequest(BaseModel):
+    to_account_id: str
+    amount: float
+
+
+@router.get("/terminal/wallet")
+async def terminal_wallet(authorization: str = Header(default="", alias="Authorization")):
+    """Main wallet balance + the user's live trading accounts (transfer targets)."""
+    from .algo_auth import bearer
+    from packages.common.src.auth import decode_token
+    payload = decode_token(bearer(authorization))
+    uid = UUID(str(payload.get("sub")))
+    async with AsyncSessionLocal() as db:
+        user = await db.get(User, uid)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        accts = (await db.execute(
+            select(TradingAccount).where(
+                TradingAccount.user_id == uid,
+                TradingAccount.is_active == True,
+                TradingAccount.is_demo == False,
+            ).order_by(TradingAccount.created_at)
+        )).scalars().all()
+    return {
+        "main_wallet_balance": float(user.main_wallet_balance or 0),
+        "currency": "USD",
+        "accounts": [{
+            "account_id": str(a.id), "account_number": a.account_number,
+            "balance": float(a.balance or 0),
+        } for a in accts],
+    }
+
+
+@router.post("/terminal/transfer")
+async def terminal_transfer(
+    body: TerminalTransferRequest,
+    authorization: str = Header(default="", alias="Authorization"),
+):
+    """Fund a live trading account from the user's main wallet."""
+    from .algo_auth import bearer
+    from packages.common.src.auth import decode_token
+    from packages.common.src.schemas import TransferMainToTradingRequest
+    from ..services import wallet_service
+    payload = decode_token(bearer(authorization))
+    uid = UUID(str(payload.get("sub")))
+    try:
+        req = TransferMainToTradingRequest(
+            to_account_id=UUID(body.to_account_id),
+            amount=Decimal(str(body.amount)),
+        )
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=400, detail="Invalid transfer request")
+    async with AsyncSessionLocal() as db:
+        result = await wallet_service.transfer_main_to_trading(req, uid, db)
+        await db.commit()
+    return result
+
+
 @router.post("/trade")
 async def algo_trade(
     body: AlgoTradeRequest,
