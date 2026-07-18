@@ -50,40 +50,43 @@ def _hash_secret(raw: str) -> str:
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
-async def validate_api_credentials(api_key: str, api_secret: str) -> tuple[str, str]:
-    """Validate X-Api-Key + X-Api-Secret against `algo_api_keys`.
-
-    Returns (api_key_id_str, account_number) on success.
-    Raises HTTPException(401) on missing/invalid creds, 403 on inactive account.
-    Updates last_used_at on the key row.
+async def validate_api_credentials(api_key: str, api_secret: str,
+                                   authorization: str = "") -> tuple[str, str]:
+    """Validate market-data access — X-Api-Key/Secret OR Bearer JWT (desktop
+    terminal login). Returns (key_id_or_empty, account_number_or_empty).
+    Raises HTTPException(401/403) on failure.
 
     Shared by the REST handlers below and the WS handler in algo_prices_ws().
     """
-    if not api_key or not api_secret:
-        raise HTTPException(status_code=401, detail="Missing X-Api-Key or X-Api-Secret")
+    from .algo_auth import resolve_user, bearer
 
-    secret_hash = _hash_secret(api_secret)
-
-    async with AsyncSessionLocal() as db:
-        result = await db.execute(
-            select(AlgoApiKey).where(
-                AlgoApiKey.api_key == api_key,
-                AlgoApiKey.is_active == True,
+    if api_key and api_secret:
+        secret_hash = _hash_secret(api_secret)
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(
+                select(AlgoApiKey).where(
+                    AlgoApiKey.api_key == api_key,
+                    AlgoApiKey.is_active == True,
+                )
             )
-        )
-        key_row = result.scalar_one_or_none()
-        if not key_row or key_row.secret_hash != secret_hash:
-            raise HTTPException(status_code=401, detail="Invalid API credentials")
+            key_row = result.scalar_one_or_none()
+            if not key_row or key_row.secret_hash != secret_hash:
+                raise HTTPException(status_code=401, detail="Invalid API credentials")
+            account = await db.get(TradingAccount, key_row.account_id)
+            if not account or not account.is_active:
+                raise HTTPException(status_code=403, detail="Trading account is inactive")
+            key_row.last_used_at = datetime.now(timezone.utc)
+            account_number = account.account_number
+            key_id = str(key_row.id)
+            await db.commit()
+            return key_id, account_number
 
-        account = await db.get(TradingAccount, key_row.account_id)
-        if not account or not account.is_active:
-            raise HTTPException(status_code=403, detail="Trading account is inactive")
+    if bearer(authorization):
+        async with AsyncSessionLocal() as db:
+            await resolve_user("", "", authorization, db)   # raises on bad/expired JWT
+        return "", ""
 
-        key_row.last_used_at = datetime.now(timezone.utc)
-        account_number = account.account_number
-        key_id = str(key_row.id)
-        await db.commit()
-        return key_id, account_number
+    raise HTTPException(status_code=401, detail="Missing X-Api-Key or Authorization")
 
 
 # ---------------------------------------------------------------------------
@@ -95,6 +98,7 @@ async def validate_api_credentials(api_key: str, api_secret: str) -> tuple[str, 
 async def algo_symbols(
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
 ):
     """List every active instrument with its trading spec.
 
@@ -102,7 +106,7 @@ async def algo_symbols(
     authoritative — symbols missing from this list are not tradable and
     won't appear on /price, /prices, /bars, or the WS stream.
     """
-    await validate_api_credentials(x_api_key, x_api_secret)
+    await validate_api_credentials(x_api_key, x_api_secret, authorization)
 
     async with AsyncSessionLocal() as db:
         q = await db.execute(
@@ -136,9 +140,10 @@ async def algo_price(
     symbol: str = Query(..., description="Instrument symbol, e.g. XAUUSD"),
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
 ):
     """Return the current bid/ask snapshot for one symbol."""
-    await validate_api_credentials(x_api_key, x_api_secret)
+    await validate_api_credentials(x_api_key, x_api_secret, authorization)
 
     symbol_upper = symbol.upper()
 
@@ -176,10 +181,11 @@ async def algo_prices(
     ),
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
 ):
     """Return snapshots for multiple symbols in one call. Symbols with no current
     tick are omitted from the response (not an error)."""
-    await validate_api_credentials(x_api_key, x_api_secret)
+    await validate_api_credentials(x_api_key, x_api_secret, authorization)
 
     async with AsyncSessionLocal() as db:
         if symbols:
@@ -244,13 +250,14 @@ async def algo_bars(
     limit: int = Query(default=100, ge=1, le=1000, description="Number of bars to return (max 1000)"),
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
 ):
     """Return historical OHLCV bars (newest first). Max 1000 bars per request.
 
     Bars are sourced from the same aggregator that feeds the charting frontend —
     identical OHLCV values.
     """
-    await validate_api_credentials(x_api_key, x_api_secret)
+    await validate_api_credentials(x_api_key, x_api_secret, authorization)
 
     tf = timeframe.lower()
     if tf not in SUPPORTED_TIMEFRAMES:
@@ -335,6 +342,7 @@ async def algo_klines(
     limit: int = Query(default=500, ge=1, le=1000, description="Number of candles (max 1000)"),
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
 ):
     """OHLCV candles in **Binance-klines format** — array of arrays.
 
@@ -349,7 +357,7 @@ async def algo_klines(
           [1715432400000, 64050.2, 64200.0, 64000.0, 64150.8, 15.2]
         ]
     """
-    await validate_api_credentials(x_api_key, x_api_secret)
+    await validate_api_credentials(x_api_key, x_api_secret, authorization)
 
     tf = interval.lower()
     if tf not in SUPPORTED_TIMEFRAMES:
@@ -460,10 +468,11 @@ async def algo_prices_ws(websocket: WebSocket) -> None:
         msg = json.loads(raw)
         if msg.get("action") != "auth":
             raise ValueError("action must be 'auth'")
-        api_key = msg["api_key"]
-        api_secret = msg["api_secret"]
-        if not isinstance(api_key, str) or not isinstance(api_secret, str):
-            raise ValueError("api_key/api_secret must be strings")
+        api_key = msg.get("api_key", "") or ""
+        api_secret = msg.get("api_secret", "") or ""
+        token = msg.get("token", "") or ""        # desktop-terminal JWT
+        if not ((api_key and api_secret) or token):
+            raise ValueError("provide api_key+api_secret or token")
     except (json.JSONDecodeError, KeyError, TypeError, ValueError):
         try:
             await websocket.send_json({
@@ -480,7 +489,8 @@ async def algo_prices_ws(websocket: WebSocket) -> None:
         return
 
     try:
-        _, account_number = await validate_api_credentials(api_key, api_secret)
+        authz = f"Bearer {token}" if token else ""
+        _, account_number = await validate_api_credentials(api_key, api_secret, authz)
     except HTTPException as exc:
         try:
             await websocket.send_json({"status": "error", "detail": exc.detail})

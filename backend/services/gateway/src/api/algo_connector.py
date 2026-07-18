@@ -20,8 +20,10 @@ from typing import Optional
 from packages.common.src.database import AsyncSessionLocal
 from packages.common.src.models import (
     AlgoApiKey, TradingAccount, Instrument, Position, PositionStatus,
-    Order, OrderStatus, TradeHistory,
+    Order, OrderStatus, TradeHistory, User,
 )
+from packages.common.src.auth import verify_password, create_access_token
+from .algo_auth import resolve_account
 from packages.common.src.redis_client import redis_client, PriceChannel
 from packages.common.src.instrument_pricing import resolve_commission, compute_spread_revenue
 
@@ -52,35 +54,64 @@ class AlgoTradeRequest(BaseModel):
     order_id: Optional[str] = None
 
 
+class TerminalLoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@router.post("/terminal/login")
+async def terminal_login(body: TerminalLoginRequest):
+    """Desktop-terminal login: email + password → JWT + the user's trading
+    accounts. The terminal stores the token and switches accounts by passing
+    Authorization: Bearer <token> + X-Account-Id on later calls."""
+    email = (body.email or "").strip().lower()
+    async with AsyncSessionLocal() as db:
+        user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
+        if not user or not user.password_hash or not verify_password(body.password, user.password_hash):
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+        if (user.status or "active") != "active":
+            raise HTTPException(status_code=403, detail="Account is not active")
+
+        token, _exp = create_access_token(str(user.id), user.role or "user")
+
+        accts = (await db.execute(
+            select(TradingAccount).where(
+                TradingAccount.user_id == user.id,
+                TradingAccount.is_active == True,
+            ).order_by(TradingAccount.created_at)
+        )).scalars().all()
+
+    accounts = [{
+        "account_id": str(a.id),
+        "account_number": a.account_number,
+        "currency": a.currency or "USD",
+        "balance": float(a.balance or 0),
+        "equity": float(a.equity or 0),
+        "leverage": int(a.leverage or 100),
+        "is_demo": bool(a.is_demo),
+    } for a in accts]
+
+    return {
+        "token": token,
+        "user_id": str(user.id),
+        "name": (f"{user.first_name or ''} {user.last_name or ''}").strip() or email,
+        "accounts": accounts,
+    }
+
+
 @router.post("/trade")
 async def algo_trade(
     body: AlgoTradeRequest,
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
+    x_account_id: str = Header(default="", alias="X-Account-Id"),
 ):
-    if not x_api_key or not x_api_secret:
-        raise HTTPException(status_code=401, detail="Missing X-Api-Key or X-Api-Secret")
-
-    secret_hash = _hash_secret(x_api_secret)
-
     async with AsyncSessionLocal() as db:
-        result = await db.execute(
-            select(AlgoApiKey).where(
-                AlgoApiKey.api_key == x_api_key,
-                AlgoApiKey.is_active == True,
-            )
-        )
-        key_row = result.scalar_one_or_none()
-
-        if not key_row or key_row.secret_hash != secret_hash:
-            raise HTTPException(status_code=401, detail="Invalid API credentials")
-
-        account = await db.get(TradingAccount, key_row.account_id)
-        if not account or not account.is_active:
-            raise HTTPException(status_code=403, detail="Trading account is inactive")
-
-        # Update last_used_at
-        key_row.last_used_at = datetime.now(timezone.utc)
+        account, key_row = await resolve_account(
+            x_api_key, x_api_secret, authorization, x_account_id, db)
+        if key_row:
+            key_row.last_used_at = datetime.now(timezone.utc)
 
         symbol = body.symbol.upper()
         action = body.action.upper()
@@ -100,30 +131,15 @@ async def algo_trade(
 async def algo_account(
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
+    x_account_id: str = Header(default="", alias="X-Account-Id"),
 ):
-    """Return balance, equity, margin and leverage for the linked trading account."""
-    if not x_api_key or not x_api_secret:
-        raise HTTPException(status_code=401, detail="Missing X-Api-Key or X-Api-Secret")
-
-    secret_hash = _hash_secret(x_api_secret)
-
+    """Return balance, equity, margin and leverage for the trading account."""
     async with AsyncSessionLocal() as db:
-        key_q = await db.execute(
-            select(AlgoApiKey).where(
-                AlgoApiKey.api_key == x_api_key,
-                AlgoApiKey.is_active == True,
-            )
-        )
-        key_row = key_q.scalar_one_or_none()
-
-        if not key_row or key_row.secret_hash != secret_hash:
-            raise HTTPException(status_code=401, detail="Invalid API credentials")
-
-        account = await db.get(TradingAccount, key_row.account_id)
-        if not account or not account.is_active:
-            raise HTTPException(status_code=403, detail="Trading account is inactive")
-
-        key_row.last_used_at = datetime.now(timezone.utc)
+        account, key_row = await resolve_account(
+            x_api_key, x_api_secret, authorization, x_account_id, db)
+        if key_row:
+            key_row.last_used_at = datetime.now(timezone.utc)
 
         open_q = await db.execute(
             select(func.count(Position.id)).where(
@@ -151,20 +167,12 @@ async def algo_account(
         }
 
 
-async def _resolve_account(x_api_key: str, x_api_secret: str, db):
-    """Validate algo creds → (key_row, account). Shared by the list endpoints."""
-    if not x_api_key or not x_api_secret:
-        raise HTTPException(status_code=401, detail="Missing X-Api-Key or X-Api-Secret")
-    key_q = await db.execute(
-        select(AlgoApiKey).where(AlgoApiKey.api_key == x_api_key, AlgoApiKey.is_active == True)
-    )
-    key_row = key_q.scalar_one_or_none()
-    if not key_row or key_row.secret_hash != _hash_secret(x_api_secret):
-        raise HTTPException(status_code=401, detail="Invalid API credentials")
-    account = await db.get(TradingAccount, key_row.account_id)
-    if not account or not account.is_active:
-        raise HTTPException(status_code=403, detail="Trading account is inactive")
-    key_row.last_used_at = datetime.now(timezone.utc)
+async def _resolve_account(x_api_key: str, x_api_secret: str, authorization: str,
+                           x_account_id: str, db):
+    """Validate creds (API key OR JWT+account) → (key_row, account)."""
+    account, key_row = await resolve_account(x_api_key, x_api_secret, authorization, x_account_id, db)
+    if key_row:
+        key_row.last_used_at = datetime.now(timezone.utc)
     return key_row, account
 
 
@@ -189,10 +197,12 @@ def _live_pnl(pos, tick) -> Decimal:
 async def algo_positions(
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
+    x_account_id: str = Header(default="", alias="X-Account-Id"),
 ):
     """List OPEN positions on the linked account, with live floating P/L."""
     async with AsyncSessionLocal() as db:
-        _key, account = await _resolve_account(x_api_key, x_api_secret, db)
+        _key, account = await _resolve_account(x_api_key, x_api_secret, authorization, x_account_id, db)
         q = await db.execute(
             select(Position).where(
                 Position.account_id == account.id,
@@ -235,10 +245,12 @@ async def algo_positions(
 async def algo_orders(
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
+    x_account_id: str = Header(default="", alias="X-Account-Id"),
 ):
     """List PENDING orders on the linked account."""
     async with AsyncSessionLocal() as db:
-        _key, account = await _resolve_account(x_api_key, x_api_secret, db)
+        _key, account = await _resolve_account(x_api_key, x_api_secret, authorization, x_account_id, db)
         q = await db.execute(
             select(Order).where(
                 Order.account_id == account.id,
@@ -268,10 +280,12 @@ async def algo_history(
     limit: int = Query(default=100, ge=1, le=500),
     x_api_key: str = Header(default="", alias="X-Api-Key"),
     x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+    authorization: str = Header(default="", alias="Authorization"),
+    x_account_id: str = Header(default="", alias="X-Account-Id"),
 ):
     """Closed trade history on the linked account (newest first)."""
     async with AsyncSessionLocal() as db:
-        _key, account = await _resolve_account(x_api_key, x_api_secret, db)
+        _key, account = await _resolve_account(x_api_key, x_api_secret, authorization, x_account_id, db)
         q = await db.execute(
             select(TradeHistory).where(
                 TradeHistory.account_id == account.id,
@@ -364,7 +378,7 @@ async def _open_trade(body: AlgoTradeRequest, symbol: str, account: TradingAccou
         stop_loss=sl,
         take_profit=tp,
         commission=commission,
-        comment=body.comment or f"Algo [{key_row.label or key_row.api_key[:12]}]",
+        comment=body.comment or f"Algo [{(key_row.label or key_row.api_key[:12]) if key_row else 'Terminal'}]",
         magic_number=int(body.trade_id) if body.trade_id is not None else None,
     )
     db.add(order)
@@ -382,7 +396,7 @@ async def _open_trade(body: AlgoTradeRequest, symbol: str, account: TradingAccou
         take_profit=tp,
         commission=commission,
         spread_revenue=spread_rev,
-        comment=body.comment or f"Algo [{key_row.label or key_row.api_key[:12]}]",
+        comment=body.comment or f"Algo [{(key_row.label or key_row.api_key[:12]) if key_row else 'Terminal'}]",
     )
     db.add(position)
     await db.flush()
@@ -394,12 +408,13 @@ async def _open_trade(body: AlgoTradeRequest, symbol: str, account: TradingAccou
         account.balance = (account.balance or Decimal("0")) - commission
         account.equity = (account.balance or Decimal("0")) + (account.credit or Decimal("0"))
     account.free_margin = account.equity - account.margin_used
-    key_row.trades_count = (key_row.trades_count or 0) + 1
+    if key_row:
+        key_row.trades_count = (key_row.trades_count or 0) + 1
 
     logger.info(
         "[ALGO] %s %s %.2f lots @ %s on %s (key=%s)",
         side.upper(), symbol, float(lots), fill_price,
-        account.account_number, key_row.api_key[:12],
+        account.account_number, key_row.api_key[:12] if key_row else "terminal",
     )
     return {
         "status": "filled",
@@ -538,7 +553,8 @@ async def _close_trades(
         closed_count += 1
         total_profit += profit
 
-    key_row.trades_count = (key_row.trades_count or 0) + closed_count
+    if key_row:
+        key_row.trades_count = (key_row.trades_count or 0) + closed_count
 
     logger.info("[ALGO] Closed %d %s positions on %s (P/L: %s)", closed_count, symbol, account.account_number, total_profit)
     return {
