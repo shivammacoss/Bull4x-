@@ -55,7 +55,11 @@ class BarAggregator:
             current_start = self._bar_timestamps.get(symbol, {}).get(tf_name)
 
             if current_start != bar_start:
-                if current_start is not None and key in self._bars.get(symbol, {}):
+                # NOTE: self._bars[symbol] is keyed by tf_name ("5m"), not by
+                # `key` ("SYMBOL:5m"). Checking `key` here was always False, so
+                # completed bars were never persisted to `bars:` — the chart
+                # only ever had the one-time seed. Check tf_name.
+                if current_start is not None and tf_name in self._bars.get(symbol, {}):
                     old_bar = self._bars[symbol].pop(tf_name, None)
                     if old_bar:
                         asyncio.create_task(self._store_bar(symbol, tf_name, old_bar, current_start))
