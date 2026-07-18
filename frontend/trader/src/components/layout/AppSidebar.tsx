@@ -22,6 +22,7 @@ import {
   Receipt,
   Calculator,
   Plug,
+  Monitor,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -36,6 +37,7 @@ const NAV_ITEMS = [
   { label: 'Economic News', href: '/news', icon: Newspaper },
   { label: 'Risk Management', href: '/risk-calculator', icon: Calculator },
   { label: 'Algo Connector', href: '/algo-connector', icon: Plug },
+  { label: 'Desktop Terminal', href: '/desktop-terminal', icon: Monitor },
   { label: 'KYC', href: '/kyc', icon: ShieldCheck },
   { label: 'Settings', href: '/profile', icon: Settings },
 ] as const;

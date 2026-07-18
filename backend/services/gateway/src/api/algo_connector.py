@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import select, update, func
 from typing import Optional
@@ -20,7 +20,7 @@ from typing import Optional
 from packages.common.src.database import AsyncSessionLocal
 from packages.common.src.models import (
     AlgoApiKey, TradingAccount, Instrument, Position, PositionStatus,
-    Order, TradeHistory,
+    Order, OrderStatus, TradeHistory,
 )
 from packages.common.src.redis_client import redis_client, PriceChannel
 from packages.common.src.instrument_pricing import resolve_commission, compute_spread_revenue
@@ -149,6 +149,150 @@ async def algo_account(
             "is_demo": bool(account.is_demo),
             "open_positions": open_count,
         }
+
+
+async def _resolve_account(x_api_key: str, x_api_secret: str, db):
+    """Validate algo creds → (key_row, account). Shared by the list endpoints."""
+    if not x_api_key or not x_api_secret:
+        raise HTTPException(status_code=401, detail="Missing X-Api-Key or X-Api-Secret")
+    key_q = await db.execute(
+        select(AlgoApiKey).where(AlgoApiKey.api_key == x_api_key, AlgoApiKey.is_active == True)
+    )
+    key_row = key_q.scalar_one_or_none()
+    if not key_row or key_row.secret_hash != _hash_secret(x_api_secret):
+        raise HTTPException(status_code=401, detail="Invalid API credentials")
+    account = await db.get(TradingAccount, key_row.account_id)
+    if not account or not account.is_active:
+        raise HTTPException(status_code=403, detail="Trading account is inactive")
+    key_row.last_used_at = datetime.now(timezone.utc)
+    return key_row, account
+
+
+def _live_pnl(pos, tick) -> Decimal:
+    """Floating P/L for an open position at the current tick (account currency)."""
+    inst = pos.instrument
+    sv = pos.side.value if hasattr(pos.side, "value") else str(pos.side)
+    close_price = Decimal(str(tick["bid"])) if sv == "buy" else Decimal(str(tick["ask"]))
+    contract_size = (inst.contract_size if inst else None) or Decimal("100000")
+    if sv == "buy":
+        profit = (close_price - pos.open_price) * pos.lots * contract_size
+    else:
+        profit = (pos.open_price - close_price) * pos.lots * contract_size
+    from packages.common.src.trading_service import quote_to_account_pnl
+    return quote_to_account_pnl(
+        profit, getattr(inst, "base_currency", None), getattr(inst, "quote_currency", None),
+        close_price, symbol=getattr(inst, "symbol", None),
+    )
+
+
+@router.get("/positions")
+async def algo_positions(
+    x_api_key: str = Header(default="", alias="X-Api-Key"),
+    x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+):
+    """List OPEN positions on the linked account, with live floating P/L."""
+    async with AsyncSessionLocal() as db:
+        _key, account = await _resolve_account(x_api_key, x_api_secret, db)
+        q = await db.execute(
+            select(Position).where(
+                Position.account_id == account.id,
+                Position.status == PositionStatus.OPEN,
+            ).order_by(Position.created_at.desc())
+        )
+        positions = q.scalars().all()
+        await db.commit()
+
+    items = []
+    for pos in positions:
+        inst = pos.instrument
+        sym = inst.symbol if inst else ""
+        sv = (pos.side.value if hasattr(pos.side, "value") else str(pos.side)).upper()
+        cur = None
+        pnl = float(pos.profit or 0)
+        tick_raw = await redis_client.get(PriceChannel.tick_key(sym)) if sym else None
+        if tick_raw:
+            try:
+                tick = json.loads(tick_raw)
+                cur = tick["bid"] if sv == "BUY" else tick["ask"]
+                pnl = float(_live_pnl(pos, tick))
+            except Exception:
+                pass
+        items.append({
+            "id": str(pos.id), "symbol": sym, "side": sv,
+            "lots": float(pos.lots), "open_price": float(pos.open_price),
+            "current_price": cur,
+            "sl": float(pos.stop_loss) if pos.stop_loss else None,
+            "tp": float(pos.take_profit) if pos.take_profit else None,
+            "swap": float(pos.swap or 0), "commission": float(pos.commission or 0),
+            "profit": pnl,
+            "opened_at": pos.created_at.isoformat() if pos.created_at else None,
+            "comment": pos.comment or "",
+        })
+    return {"positions": items, "count": len(items)}
+
+
+@router.get("/orders")
+async def algo_orders(
+    x_api_key: str = Header(default="", alias="X-Api-Key"),
+    x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+):
+    """List PENDING orders on the linked account."""
+    async with AsyncSessionLocal() as db:
+        _key, account = await _resolve_account(x_api_key, x_api_secret, db)
+        q = await db.execute(
+            select(Order).where(
+                Order.account_id == account.id,
+                Order.status == OrderStatus.PENDING,
+            ).order_by(Order.created_at.desc())
+        )
+        orders = q.scalars().all()
+        await db.commit()
+
+    items = [{
+        "id": str(o.id),
+        "symbol": o.instrument.symbol if o.instrument else "",
+        "type": (o.order_type.value if hasattr(o.order_type, "value") else str(o.order_type)),
+        "side": (o.side.value if hasattr(o.side, "value") else str(o.side)).upper(),
+        "lots": float(o.lots),
+        "price": float(o.price) if o.price is not None else None,
+        "sl": float(o.stop_loss) if o.stop_loss else None,
+        "tp": float(o.take_profit) if o.take_profit else None,
+        "created_at": o.created_at.isoformat() if o.created_at else None,
+        "comment": o.comment or "",
+    } for o in orders]
+    return {"orders": items, "count": len(items)}
+
+
+@router.get("/history")
+async def algo_history(
+    limit: int = Query(default=100, ge=1, le=500),
+    x_api_key: str = Header(default="", alias="X-Api-Key"),
+    x_api_secret: str = Header(default="", alias="X-Api-Secret"),
+):
+    """Closed trade history on the linked account (newest first)."""
+    async with AsyncSessionLocal() as db:
+        _key, account = await _resolve_account(x_api_key, x_api_secret, db)
+        q = await db.execute(
+            select(TradeHistory).where(
+                TradeHistory.account_id == account.id,
+            ).order_by(TradeHistory.closed_at.desc()).limit(limit)
+        )
+        rows = q.scalars().all()
+        await db.commit()
+
+    items = [{
+        "id": str(h.id),
+        "symbol": h.instrument.symbol if h.instrument else "",
+        "side": (h.side.value if hasattr(h.side, "value") else str(h.side)).upper(),
+        "lots": float(h.lots),
+        "open_price": float(h.open_price), "close_price": float(h.close_price),
+        "profit": float(h.profit), "swap": float(h.swap or 0),
+        "commission": float(h.commission or 0),
+        "opened_at": h.opened_at.isoformat() if h.opened_at else None,
+        "closed_at": h.closed_at.isoformat() if h.closed_at else None,
+        "close_reason": h.close_reason or "",
+    } for h in rows]
+    return {"history": items, "count": len(items)}
 
 
 async def _open_trade(body: AlgoTradeRequest, symbol: str, account: TradingAccount, key_row: AlgoApiKey, db) -> dict:

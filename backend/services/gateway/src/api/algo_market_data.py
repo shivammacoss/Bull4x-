@@ -20,6 +20,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import time as _time
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -296,6 +297,28 @@ async def algo_bars(
             })
         except (KeyError, ValueError, TypeError):
             continue
+
+    # Append the current in-progress bar so the last candle stays live — mirrors
+    # the web charting endpoint (instruments.py), which reads the same `bars:`
+    # list plus `bar:current:`. `bars` here is newest-first.
+    tf_seconds = {"1m": 60, "5m": 300, "15m": 900, "30m": 1800,
+                  "1h": 3600, "4h": 14400, "1d": 86400}.get(tf, 300)
+    now_epoch = int(_time.time())
+    bar_start = (now_epoch // tf_seconds) * tf_seconds
+    cur_iso = datetime.fromtimestamp(bar_start, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    current_raw = await redis_client.get(f"bar:current:{symbol_upper}:{tf}")
+    if current_raw:
+        try:
+            b = json.loads(current_raw)
+            bars = [x for x in bars if x.get("time") != cur_iso]
+            bars.insert(0, {
+                "time": cur_iso,
+                "open": float(b["open"]), "high": float(b["high"]),
+                "low": float(b["low"]), "close": float(b["close"]),
+                "volume": float(b.get("volume", 0.0)),
+            })
+        except (json.JSONDecodeError, KeyError, ValueError, TypeError):
+            pass
 
     return {
         "symbol": symbol_upper,
