@@ -7,7 +7,8 @@ import toast from 'react-hot-toast';
 import DashboardShell from '@/components/layout/DashboardShell';
 import {
   Monitor, Download, Key, Copy, RefreshCw, Trash2, Loader2,
-  AlertTriangle, Check, Zap, ShieldCheck, CandlestickChart, MousePointerClick,
+  AlertTriangle, Check, Zap, ShieldCheck, CandlestickChart,
+  HelpCircle, ListChecks,
 } from 'lucide-react';
 
 interface AccountWithKey {
@@ -224,35 +225,75 @@ export default function DesktopTerminalPage() {
           </div>
         </div>
 
-        {/* ─── Connect steps + endpoints ─── */}
+        {/* ─── Step-by-step Setup Guide ─── */}
         <div className="rounded-2xl border border-border-primary bg-card shadow-sm">
           <div className="px-5 py-4 border-b border-border-primary">
             <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <MousePointerClick size={14} className="text-accent" /> Connect the Terminal
+              <ListChecks size={14} className="text-accent" /> Setup Guide
             </h2>
-            <p className="text-xs text-text-tertiary mt-0.5">Four steps to a live terminal.</p>
+            <p className="text-xs text-text-tertiary mt-0.5">Follow these 4 steps — takes about 2 minutes.</p>
           </div>
-          <div className="p-5 space-y-4">
-            <div className="grid gap-2.5 sm:grid-cols-2">
+          <div className="p-5">
+            <ol className="space-y-5">
               {[
-                { n: 1, icon: Download, t: 'Install', d: 'Download and run the terminal on your PC.' },
-                { n: 2, icon: Key, t: 'Generate a key', d: 'Pick an account above and generate its key + secret.' },
-                { n: 3, icon: ShieldCheck, t: 'Paste credentials', d: 'On first launch, paste the API Key + Secret into the login box.' },
-                { n: 4, icon: Zap, t: 'Trade', d: 'Watchlist, charts and BUY / SELL go live instantly.' },
-              ].map(s => (
-                <div key={s.n} className="rounded-xl border border-border-primary bg-bg-secondary/40 p-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white text-[10px] font-bold">{s.n}</span>
-                    <s.icon size={13} className="text-accent" />
-                    <span className="text-xs font-semibold text-text-primary">{s.t}</span>
+                {
+                  icon: Download, t: 'Download & install',
+                  points: [
+                    'Click the "Download for Windows" button above to get the installer.',
+                    'Open the downloaded file and follow the installer (Windows 10 / 11, 64-bit).',
+                    'If Windows SmartScreen shows a warning, click "More info" → "Run anyway".',
+                  ],
+                },
+                {
+                  icon: Key, t: 'Generate your API key',
+                  points: [
+                    'On this page, choose your trading account in the box above.',
+                    'Click "Generate API Key" — a popup shows your API Key and API Secret.',
+                    'Copy the Secret now — it is shown only once. Lost it? Just click Regenerate.',
+                  ],
+                },
+                {
+                  icon: ShieldCheck, t: 'Open the terminal & connect',
+                  points: [
+                    'Launch the terminal — a Connect box appears on first run.',
+                    'Set "Connection" to Bull4x (the server addresses fill in automatically).',
+                    'Paste your API Key and API Secret, then click Connect.',
+                  ],
+                },
+                {
+                  icon: Zap, t: 'Start trading',
+                  points: [
+                    'Your watchlist, live charts and account balance load instantly.',
+                    'Click any instrument to chart it; set a lot size and hit BUY or SELL.',
+                    'Open positions, pending orders and history show in the Trades panel at the bottom.',
+                  ],
+                },
+              ].map((s, i) => (
+                <li key={i} className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent text-white text-sm font-bold shrink-0">{i + 1}</span>
+                    {i < 3 && <span className="w-px flex-1 bg-border-primary mt-1" />}
                   </div>
-                  <p className="text-[11px] leading-snug text-text-tertiary">{s.d}</p>
-                </div>
+                  <div className="pb-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <s.icon size={15} className="text-accent" />
+                      <h3 className="text-sm font-semibold text-text-primary">{s.t}</h3>
+                    </div>
+                    <ul className="space-y-1">
+                      {s.points.map((p, j) => (
+                        <li key={j} className="text-xs text-text-secondary leading-relaxed flex gap-2">
+                          <span className="text-accent mt-0.5">•</span><span>{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </li>
               ))}
-            </div>
+            </ol>
 
-            <div className="space-y-2 pt-1">
-              <p className="text-xs text-text-tertiary">These are pre-filled in the terminal — leave as default unless connecting to a local server.</p>
+            {/* Server addresses (usually auto-filled) */}
+            <div className="mt-6 pt-4 border-t border-border-primary space-y-2">
+              <p className="text-xs text-text-tertiary">Server addresses (already pre-filled in the terminal — only change for a local server):</p>
               {[
                 { label: 'REST base', value: restBase, id: 'rest-base' },
                 { label: 'WebSocket', value: wsBase, id: 'ws-base' },
@@ -270,6 +311,30 @@ export default function DesktopTerminalPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* ─── FAQ / Troubleshooting ─── */}
+        <div className="rounded-2xl border border-border-primary bg-card shadow-sm">
+          <div className="px-5 py-4 border-b border-border-primary">
+            <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+              <HelpCircle size={14} className="text-accent" /> Help &amp; Troubleshooting
+            </h2>
+          </div>
+          <div className="p-5 grid gap-3 sm:grid-cols-2">
+            {[
+              { q: 'Terminal says "Invalid credentials"', a: 'Copy the full API Key and Secret with no extra spaces, and make sure Connection is set to Bull4x.' },
+              { q: 'I lost my API Secret', a: 'The Secret is shown only once. Come back to this page and click Regenerate — the old key stops working and you get a fresh pair.' },
+              { q: 'The chart looks empty', a: 'Pick a liquid instrument such as EURUSD, XAUUSD or BTCUSD, and check your internet connection.' },
+              { q: 'Is my key safe?', a: 'Your Secret is stored only on your own PC and sent directly to Bull4x over a secure (HTTPS) connection. Never share it with anyone.' },
+              { q: 'Which Windows do I need?', a: 'Windows 10 or 11, 64-bit. The terminal installs in a few seconds.' },
+              { q: 'Can I use more than one account?', a: 'Yes — generate a key per account and switch by pasting the other key in Settings.' },
+            ].map((f, i) => (
+              <div key={i} className="rounded-xl border border-border-primary bg-bg-secondary/40 p-3">
+                <p className="text-xs font-semibold text-text-primary mb-1">{f.q}</p>
+                <p className="text-[11px] leading-snug text-text-tertiary">{f.a}</p>
+              </div>
+            ))}
           </div>
         </div>
 
